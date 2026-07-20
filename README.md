@@ -1,134 +1,296 @@
-# Vora 2.0 Roadmap
+# Vora
 
-Last updated: 20 July 2026
+[![Status](https://img.shields.io/badge/status-private%20alpha-5865F2)](#project-status)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
+[![MongoDB](https://img.shields.io/badge/database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-Vora is a Discord-first teammate formation platform for Mobile Legends. It
-builds compatible five-player squads that queue together against external MLBB
-opponents. Internal community 5v5 matches remain a possible future mode, but
-they are not the primary matchmaking flow.
+**Discord-first teammate formation for competitive Mobile Legends players.**
 
-## Status legend
+Vora forms compatible five-player squads that enter the real Mobile Legends
+queue together. It combines role preferences, Ranked Skill Rating (RSR),
+behavior history, ready-check reliability and private voice channels to help
+players find better teammates without requiring a separate website or app.
 
-- ✅ Complete and covered by automated tests
-- 🚧 In active development
-- ⏳ Planned
-- 🔭 Later exploration
+> Vora was previously developed under the RecallQ codename. The GitHub
+> repository name remains `recall-queue`, while the product and application are
+> now named Vora.
 
-## ✅ Foundation
+## What Vora does
 
-- Vora brand migration with data-safe Discord resource renaming
-- TypeScript, discord.js and MongoDB application foundation
-- Structured command, button, modal and select-menu loaders
-- Central service container and repository boundaries
-- Environment validation, logging and graceful shutdown
-- Multi-guild command deployment
-- Automated database index synchronization and configuration migration
+Vora is not an internal community 5v5 matchmaker. Its primary flow is:
 
-## ✅ Player experience
+```mermaid
+flowchart LR
+    A[Register profile] --> B[Choose role preferences]
+    B --> C[Join queue lobby]
+    C --> D[Form a compatible squad]
+    D --> E[Complete ready check]
+    E --> F[Enter private squad voice]
+    F --> G[Queue together in MLBB]
+    G --> H[Submit result evidence]
+    H --> I[Verify result and update RSR]
+```
 
-- Discord-based player registration with MLBB ID, server ID and IGN
-- Persistent player profiles and DTO mapping
+Because Mobile Legends does not provide the project with a public match-data
+API, Vora uses archived result screenshots, squad confirmation and staff
+moderation instead of pretending that KDA or match results can be retrieved
+automatically.
+
+## Current features
+
+### Player experience
+
+- Discord-based registration with MLBB player ID, server ID and in-game name
 - Primary, secondary and avoided role preferences
-- Profile, preferences and main-menu component views
-- Verified Player role synchronization
-- Registration and role-preference validation
+- Player profiles, verified match history and provisional leaderboards
+- Behavior score, queue reliability and integrity standing
+- Interactive Discord component views instead of a command-heavy interface
 
-## ✅ Matchmaking and squad lifecycle
+### Matchmaking and squad lifecycle
 
-- Persistent queue per Discord server
-- Five-player squad formation for external MLBB matchmaking
-- Deterministic role allocation across EXP, Gold, Mid, Jungle and Roam
-- RSR, behavior and role-fit compatibility scoring
-- Ready checks with expiration handling
-- Captain selection and active squad lifecycle
-- Win/loss reporting with multi-player verification
-- Transactional match-statistics processing
-- Verified match history and provisional leaderboard
+- Persistent five-player teammate queues per Discord server
+- Deterministic role allocation for EXP, Gold, Mid, Jungle and Roam
+- Compatibility scoring using RSR, role fit and behavior
+- Ready checks with automatic expiration and escalating cooldowns
+- Captain selection and complete squad lifecycle management
+- Temporary private voice channels for accepted squads
+- Automatic cleanup after completion, cancellation or timeout
 
-## ✅ Community server operations
+### Results, rating and integrity
 
-- Idempotent `/server-setup` blueprint
-- Managed Vora roles, categories and emoji channel structure
-- Channel permission policies and permission-drift repair
-- Owner-only setup controls
-- Isolated owner-only squad simulator with four automated teammates
-- Production-database protection for all simulation data
-
-## ✅ Voice queue
-
-- Require players to join the managed `queue-lobby` voice channel
-- Automatically remove players who leave that channel while queued
-- Reconcile stale persisted queue entries after every bot restart
-- Keep simulated squad testing compatible with the same voice requirement
-
-## ✅ Private squad voice lifecycle
-
-- Create a temporary private voice channel after all five players accept
-- Grant access only to the squad and Vora staff
-- Move connected squad members automatically where permitted
-- Restore ownership after a bot restart
-- Delete abandoned channels safely after squad closure or timeout
-
-## ✅ Ranked Skill Rating v1
-
-- Production RSR update formula anchored to the external matchmaking pool
-- Expected-result calculation based on squad strength
+- Screenshot evidence archived in a staff-only Discord channel
+- Multi-player result confirmation and dispute creation
+- Transactional statistics and RSR processing
 - Rating confidence and ten placement matches
-- Transactional rating change audit records and idempotent processing
-- Automated coverage for volatility, rating floors and concurrency safety
-- Visible divisions remain separate from internal skill rating
+- Staff dispute inbox with confirm, correct and void decisions
+- Escalating sanctions for misleading evidence and deliberate result fraud
+- Immutable MongoDB moderation audit trail with player filtering
 
-## 🚧 Competitive integrity
+### Server operations
 
-- Ready-check decline and timeout penalties with queue cooldowns
-- Atomic behavior-score deductions with a zero-point floor
-- Ready-check acceptance and reliability statistics
-- Escalating repeat-offense cooldowns with daily discipline decay
-- Behavior-score recovery through verified completed matches
-- Staff-only disputed-result moderation inbox
-- Audited moderation decisions for disputed results (confirm, correct or void)
-- Required screenshot evidence archived in a staff-only channel without a Moonton API
-- Staff-selected evidence sanctions targeting only the result reporter
-- Escalating integrity levels, behavior deductions and matchmaking suspensions
-- Transactional sanction audit records with incident-free monthly decay
-- Persistent cross-feature staff audit trail with a staff history view
-- Audited rating reversals and administrative corrections
+- Idempotent `/server-setup` blueprint for roles, categories and channels
+- Managed permission policies and permission-drift repair
+- Multi-guild command deployment
+- Owner-only isolated squad simulator with four automated teammates
+- Production-database safeguards for all simulated data
 
-## ⏳ Seasons and progression
+See the [project roadmap](docs/ROADMAP.md) for completed work, active
+development and planned releases.
 
-- Seasons, placement state and soft resets
-- Division thresholds and seasonal leaderboards
-- Personal season history
-- Achievements and optional Discord reward roles
+## Project status
 
-## ⏳ Community launch preparation
+Vora is in **private alpha**. The core player, queue, squad, voice, result,
+rating and moderation workflows are implemented and covered by automated
+tests. Seasons, progression, public status messages, operational monitoring
+and launch documentation are still in development.
 
-- Publish onboarding, rules, FAQ and matchmaking documentation
-- Persistent public queue-status and leaderboard messages
-- Ticket/support workflow
-- Rate limiting, abuse protection and structured audit logging
-- CI checks, deployment environment and production monitoring
-- Backup and recovery procedure
+The data model and commands may change before the first stable release.
 
-## 🔭 Later exploration
+## Technology
 
-- Premade duo/trio support with party balancing
-- Internal community 5v5 mode
-- Tournament and scrim tooling
-- Language and playstyle preferences after sufficient player volume
-- Web-based read-only profiles if Discord presentation becomes limiting
+- Node.js and TypeScript with strict type checking
+- discord.js v14
+- MongoDB and Mongoose
+- Winston structured logging
+- Node.js test runner with TSX
 
-## Release gates
+## Architecture
 
-### Private alpha
+Discord is Vora's interface, while matchmaking and business rules remain
+separate from interaction handlers.
 
-Voice lifecycle, stable squad formation, verified results and safe staff tools.
+```text
+Discord commands, buttons, modals and select menus
+                         │
+                         ▼
+                  Application services
+                         │
+                         ▼
+        Matchmaking, rating and integrity domain logic
+                         │
+                         ▼
+               Repositories and MongoDB
+```
 
-### Community beta
+```text
+src/
+├── commands/       Slash-command entry points
+├── buttons/        Button interaction modules
+├── modals/         Modal submission modules
+├── selectMenus/    Select-menu interaction modules
+├── ui/             Discord component views
+├── services/       Application workflows
+├── domain/         Matchmaking, rating and policy logic
+├── repositories/   Persistence boundaries
+├── models/         Mongoose schemas
+├── dto/            Data transfer objects
+├── mappers/        Database-to-DTO mapping
+├── handlers/       Module loaders and interaction routing
+├── database/       Connection, transactions and indexes
+└── config/         Validated environment and bot configuration
+```
 
-RSR v1, placements, penalties, moderation workflows and production monitoring.
+Commands and Discord components contain no matchmaking or rating logic. This
+keeps the important rules independently testable and prevents Discord concerns
+from spreading into the core.
 
-### Version 2.0 launch
+## Getting started
 
-Season progression, polished onboarding, operational documentation and a
-successful multi-week beta without critical data-integrity incidents.
+### Prerequisites
+
+- A current Node.js LTS release
+- A Discord application and bot
+- A MongoDB deployment with transaction support, such as MongoDB Atlas
+- A Discord test server where the bot has Administrator permission
+
+Enable the **Server Members Intent** for the bot in the Discord Developer
+Portal. Add the bot to every server configured in `DISCORD_GUILD_IDS`.
+
+### Installation
+
+```bash
+git clone https://github.com/UnknownAferia/recall-queue.git
+cd recall-queue
+npm install
+```
+
+Create a `.env` file in the repository root:
+
+```env
+DISCORD_TOKEN=your_discord_bot_token
+DISCORD_CLIENT_ID=your_discord_application_id
+DISCORD_GUILD_IDS=first_guild_id,second_guild_id
+
+MONGODB_URI=mongodb+srv://username:password@cluster.example.mongodb.net/
+MONGODB_DATABASE=vora
+
+VORA_TEST_MODE=false
+```
+
+`DISCORD_GUILD_IDS` accepts a comma-separated list. If it is omitted, the
+deployment script registers commands globally instead. Existing installations
+migrated from RecallQ may safely retain their original MongoDB database name.
+
+Never commit `.env`, bot tokens or database credentials. If a secret is exposed
+in a screenshot, terminal log or commit, rotate it immediately.
+
+### Validate and start
+
+```bash
+npm run typecheck
+npm test
+npm run build
+npm run deploy
+npm run dev
+```
+
+For a production-style start after building:
+
+```bash
+npm start
+```
+
+### Configure a Discord server
+
+1. Run `/server-setup` as the Discord server owner.
+2. Review the proposed Vora server blueprint.
+3. Apply the setup to create or repair managed roles, categories, channels and
+   permission overwrites.
+4. Run `/register`, configure role preferences and open `/vora`.
+5. Join the managed `queue-lobby` voice channel before entering matchmaking.
+
+The setup is idempotent: running it again repairs managed resources without
+deleting unrelated community content.
+
+## Isolated squad testing
+
+Vora can simulate four teammates so one developer can test the complete squad
+flow without involving other users.
+
+Use a dedicated database whose name ends in `_development`, `_test` or
+`_sandbox`, then enable test mode:
+
+```env
+MONGODB_DATABASE=vora_development
+VORA_TEST_MODE=true
+```
+
+Redeploy commands and restart the bot:
+
+```bash
+npm run deploy
+npm run dev
+```
+
+The Discord server owner can then join the queue lobby and use:
+
+```text
+/test-squad start
+/test-squad reset
+```
+
+The simulator refuses to run against a database that does not use one of the
+approved development suffixes. Keep `VORA_TEST_MODE=false` in production.
+
+## Staff commands
+
+| Command            | Purpose                                                   |
+| ------------------ | --------------------------------------------------------- |
+| `/disputes`        | Review unresolved result disputes                         |
+| `/resolve-dispute` | Confirm, correct or void a disputed result                |
+| `/audit-log`       | Review immutable moderation history, optionally by player |
+| `/server-setup`    | Preview and apply the managed Discord blueprint           |
+
+Staff commands require the appropriate Discord permissions. Server setup and
+development simulation additionally require the Discord server owner.
+
+## Development workflow
+
+Before committing a change, run:
+
+```bash
+npm run typecheck
+npm test
+npm run build
+```
+
+Useful scripts:
+
+| Script              | Description                                  |
+| ------------------- | -------------------------------------------- |
+| `npm run dev`       | Start Vora with automatic TypeScript reloads |
+| `npm run deploy`    | Register enabled slash commands              |
+| `npm run typecheck` | Validate TypeScript without emitting files   |
+| `npm test`          | Run the complete automated test suite        |
+| `npm run build`     | Compile production JavaScript into `dist/`   |
+| `npm start`         | Run the compiled application                 |
+| `npm run format`    | Format TypeScript source files               |
+
+## Data and security principles
+
+- Player and moderation changes that belong together use MongoDB transactions.
+- Result processing is idempotent to prevent duplicate rating updates.
+- Staff decisions preserve moderator, player, evidence, sanction and timestamp
+  snapshots.
+- Simulation identities and data are isolated from production operation.
+- Discord UI layers receive DTOs instead of mutable Mongoose documents.
+- Secrets belong only in local environment files or deployment secret stores.
+
+## Naming and migration
+
+The product was renamed from RecallQ to Vora. Stable database identifiers and
+Discord component IDs may intentionally retain legacy-compatible values where
+changing them would break existing data or active interactions. The managed
+server blueprint migrates legacy RecallQ resources instead of creating
+duplicates.
+
+## License
+
+The package is licensed under the MIT License.
+
+## Disclaimer
+
+Vora is an independent community project. It is not affiliated with, endorsed
+by or sponsored by Moonton. Mobile Legends: Bang Bang and related marks belong
+to their respective owners.

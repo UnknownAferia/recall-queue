@@ -13,6 +13,7 @@ import { registerVoiceQueueHandler } from "../handlers/registerVoiceQueueHandler
 import { registerSquadVoiceHandler } from "../handlers/registerSquadVoiceHandler.js";
 import { startReadyCheckExpirationJob } from "../jobs/readyCheckExpirationJob.js";
 import { formatError } from "../utils/formatError.js";
+import { ServiceHeartbeatService } from "../services/ServiceHeartbeatService.js";
 
 export async function bootstrap(client: VoraClient): Promise<void> {
   try {
@@ -29,8 +30,17 @@ export async function bootstrap(client: VoraClient): Promise<void> {
     registerSquadVoiceHandler(client);
     startReadyCheckExpirationJob(client);
 
+    const heartbeat = new ServiceHeartbeatService("core");
+
     client.once(Events.ClientReady, (readyClient) => {
-      logger.info(`Logged in as ${readyClient.user.tag}`);
+      void heartbeat
+        .start()
+        .then(() => {
+          logger.info(`Logged in as ${readyClient.user.tag}`);
+        })
+        .catch((error: unknown) => {
+          logger.error(`Core heartbeat failed:\n${formatError(error)}`);
+        });
     });
 
     await client.login(env.discordToken);

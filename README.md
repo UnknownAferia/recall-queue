@@ -75,6 +75,15 @@ automatically.
 - Owner-only isolated squad simulator with four automated teammates
 - Production-database safeguards for all simulated data
 
+### Community automation
+
+- Separate Vora Community bot process with an independent Discord identity
+- Persistent global leaderboard and live matchmaking-status panels
+- Core-service heartbeat instead of inferred availability
+- Automated help panel and private support-ticket creation
+- One open ticket per member and server
+- Requester/staff closure permissions and read-only closed-ticket retention
+
 See the [project roadmap](docs/ROADMAP.md) for completed work, active
 development and planned releases.
 
@@ -82,8 +91,8 @@ development and planned releases.
 
 Vora is in **private alpha**. The core player, queue, squad, voice, result,
 rating and moderation workflows are implemented and covered by automated
-tests. Seasons, progression, public status messages, operational monitoring
-and launch documentation are still in development.
+tests. Seasons, progression, operational monitoring and launch documentation
+are still in development.
 
 The data model and commands may change before the first stable release.
 
@@ -98,19 +107,20 @@ The data model and commands may change before the first stable release.
 ## Architecture
 
 Discord is Vora's interface, while matchmaking and business rules remain
-separate from interaction handlers.
+separate from interaction handlers. Vora Core and Vora Community run as
+independent Discord clients but share MongoDB as their source of truth.
 
 ```text
-Discord commands, buttons, modals and select menus
-                         │
-                         ▼
-                  Application services
-                         │
-                         ▼
-        Matchmaking, rating and integrity domain logic
-                         │
-                         ▼
-               Repositories and MongoDB
+Vora Core                    Vora Community
+Matchmaking interactions    Public panels and tickets
+             \              /
+              Shared MongoDB
+                    │
+                    ▼
+             Application services
+                    │
+                    ▼
+      Matchmaking, rating and integrity domain logic
 ```
 
 ```text
@@ -140,12 +150,13 @@ from spreading into the core.
 ### Prerequisites
 
 - A current Node.js LTS release
-- A Discord application and bot
+- Two Discord applications: Vora Core and Vora Community
 - A MongoDB deployment with transaction support, such as MongoDB Atlas
 - A Discord test server where the bot has Administrator permission
 
-Enable the **Server Members Intent** for the bot in the Discord Developer
-Portal. Add the bot to every server configured in `DISCORD_GUILD_IDS`.
+Enable the **Server Members Intent** for Vora Core in the Discord Developer
+Portal. Vora Community currently requires only the Guilds intent. Add both bots
+to every server configured in `DISCORD_GUILD_IDS`.
 
 ### Installation
 
@@ -161,6 +172,9 @@ Create a `.env` file in the repository root:
 DISCORD_TOKEN=your_discord_bot_token
 DISCORD_CLIENT_ID=your_discord_application_id
 DISCORD_GUILD_IDS=first_guild_id,second_guild_id
+
+VORA_COMMUNITY_DISCORD_TOKEN=your_community_bot_token
+VORA_COMMUNITY_DISCORD_CLIENT_ID=your_community_application_id
 
 MONGODB_URI=mongodb+srv://username:password@cluster.example.mongodb.net/
 MONGODB_DATABASE=vora
@@ -184,6 +198,16 @@ npm run build
 npm run deploy
 npm run dev
 ```
+
+Start Vora Community in a second terminal:
+
+```bash
+npm run dev:community
+```
+
+The Community bot does not register slash commands. Its persistent buttons and
+modals are published automatically in the managed `help` and `open-a-ticket`
+channels.
 
 For a production-style start after building:
 
@@ -257,15 +281,17 @@ npm run build
 
 Useful scripts:
 
-| Script              | Description                                  |
-| ------------------- | -------------------------------------------- |
-| `npm run dev`       | Start Vora with automatic TypeScript reloads |
-| `npm run deploy`    | Register enabled slash commands              |
-| `npm run typecheck` | Validate TypeScript without emitting files   |
-| `npm test`          | Run the complete automated test suite        |
-| `npm run build`     | Compile production JavaScript into `dist/`   |
-| `npm start`         | Run the compiled application                 |
-| `npm run format`    | Format TypeScript source files               |
+| Script                    | Description                                  |
+| ------------------------- | -------------------------------------------- |
+| `npm run dev`             | Start Vora with automatic TypeScript reloads |
+| `npm run dev:community`   | Start the public-panel and support bot       |
+| `npm run deploy`          | Register enabled slash commands              |
+| `npm run typecheck`       | Validate TypeScript without emitting files   |
+| `npm test`                | Run the complete automated test suite        |
+| `npm run build`           | Compile production JavaScript into `dist/`   |
+| `npm start`               | Run the compiled application                 |
+| `npm run start:community` | Run the compiled Community bot               |
+| `npm run format`          | Format TypeScript source files               |
 
 ## Data and security principles
 

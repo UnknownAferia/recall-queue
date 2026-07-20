@@ -78,6 +78,17 @@ they are not the primary matchmaking flow.
 - Automated coverage for volatility, rating floors and concurrency safety
 - Visible divisions remain separate from internal skill rating
 
+## ✅ Community automation bot
+
+- Independent Vora Community Discord application and runtime
+- Shared MongoDB source of truth instead of bot-to-bot data requests
+- Core and Community service heartbeats
+- Persistent global leaderboard with automatic refresh
+- Live per-guild matchmaking status with queue and squad activity
+- Automated help and private ticket-launcher panels
+- One open private support ticket per member and server
+- Requester/staff ticket closure with retained read-only channels
+
 ## 🚧 Competitive integrity
 
 - Ready-check decline and timeout penalties with queue cooldowns
@@ -104,8 +115,7 @@ they are not the primary matchmaking flow.
 ## ⏳ Community launch preparation
 
 - Publish onboarding, rules, FAQ and matchmaking documentation
-- Persistent public queue-status and leaderboard messages
-- Ticket/support workflow
+- Ticket transcript/export and retention policy
 - Rate limiting, abuse protection and structured audit logging
 - CI checks, deployment environment and production monitoring
 - Backup and recovery procedure

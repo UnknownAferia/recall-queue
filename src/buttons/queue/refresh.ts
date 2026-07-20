@@ -1,7 +1,6 @@
 import { CustomIds } from "../../constants/customIds.js";
 import type { Button } from "../../interfaces/Button.js";
-import { createQueueComponents } from "../../ui/createQueueComponents.js";
-import { createQueueEmbed } from "../../ui/createQueueEmbed.js";
+import { createQueueView } from "../../ui/createQueueView.js";
 
 const button: Button = {
   customId: CustomIds.buttons.queue.refresh,
@@ -11,18 +10,13 @@ const button: Button = {
       return;
     }
 
-    const queue = await client.services.queue.getQueue(
-      interaction.guildId,
+    const queue = await client.services.queue.getQueue(interaction.guildId);
+    const bannedUntil = await client.services.queue.getActiveSuspension(
+      interaction.user.id,
     );
 
     await interaction.update({
-      embeds: [
-        createQueueEmbed(queue, interaction.user.id),
-      ],
-      components: createQueueComponents(
-        queue,
-        interaction.user.id,
-      ),
+      components: [createQueueView(queue, interaction.user.id, bannedUntil)],
     });
   },
 };

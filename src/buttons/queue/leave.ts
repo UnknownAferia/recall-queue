@@ -3,9 +3,8 @@ import { MessageFlags } from "discord.js";
 import { CustomIds } from "../../constants/customIds.js";
 import type { Button } from "../../interfaces/Button.js";
 import { PlayerNotInQueueError } from "../../services/errors/PlayerNotInQueueError.js";
-import { createQueueComponents } from "../../ui/createQueueComponents.js";
-import { createQueueEmbed } from "../../ui/createQueueEmbed.js";
-import { EmbedFactory } from "../../ui/EmbedFactory.js";
+import { createAlertView } from "../../ui/createAlertView.js";
+import { createQueueView } from "../../ui/createQueueView.js";
 
 const button: Button = {
   customId: CustomIds.buttons.queue.leave,
@@ -20,26 +19,20 @@ const button: Button = {
         interaction.guildId,
         interaction.user.id,
       );
+      const bannedUntil = await client.services.queue.getActiveSuspension(
+        interaction.user.id,
+      );
 
       await interaction.update({
-        embeds: [
-          createQueueEmbed(queue, interaction.user.id),
-        ],
-        components: createQueueComponents(
-          queue,
-          interaction.user.id,
-        ),
+        components: [createQueueView(queue, interaction.user.id, bannedUntil)],
       });
     } catch (error: unknown) {
       if (error instanceof PlayerNotInQueueError) {
         await interaction.reply({
-          embeds: [
-            EmbedFactory.warning(
-              "Unable to Leave Queue",
-              error.message,
-            ),
+          components: [
+            createAlertView("warning", "Unable to Leave Queue", error.message),
           ],
-          flags: MessageFlags.Ephemeral,
+          flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
         });
 
         return;

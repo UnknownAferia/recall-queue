@@ -5,13 +5,12 @@ import {
 } from "discord.js";
 
 import type { Command } from "../interfaces/Command.js";
-import { createMainMenuComponents } from "../ui/createMainMenuComponents.js";
-import { createMainMenuEmbed } from "../ui/createMainMenuEmbed.js";
+import { createMainMenuView } from "../ui/createMainMenuView.js";
 
 const command: Command = {
   data: new SlashCommandBuilder()
-    .setName("recall")
-    .setDescription("Open the RecallQ main menu")
+    .setName("vora")
+    .setDescription("Open the Vora main menu")
     .setContexts(InteractionContextType.Guild),
 
   async execute(client, interaction): Promise<void> {
@@ -20,10 +19,17 @@ const command: Command = {
         interaction.user.id,
       );
 
+    if (player && interaction.inCachedGuild()) {
+      await client.services.guildAccess.ensureVerifiedPlayerRole(
+        interaction.member,
+      );
+    }
+
     await interaction.reply({
-      embeds: [createMainMenuEmbed(player)],
-      components: player ? createMainMenuComponents() : [],
-      flags: MessageFlags.Ephemeral,
+      components: [createMainMenuView(player)],
+      flags:
+        MessageFlags.Ephemeral |
+        MessageFlags.IsComponentsV2,
     });
   },
 };

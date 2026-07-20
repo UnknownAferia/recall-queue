@@ -5,9 +5,8 @@ import type { Modal } from "../interfaces/Modal.js";
 import { GameAccountAlreadyRegisteredError } from "../services/errors/GameAccountAlreadyRegisteredError.js";
 import { InvalidRegistrationDataError } from "../services/errors/InvalidRegistrationDataError.js";
 import { PlayerAlreadyRegisteredError } from "../services/errors/PlayerAlreadyRegisteredError.js";
-import { createBackToMainMenuButton } from "../ui/createBackToMainMenuButton.js";
-import { createPlayerProfileEmbed } from "../ui/createPlayerProfileEmbed.js";
-import { EmbedFactory } from "../ui/EmbedFactory.js";
+import { createAlertView } from "../ui/createAlertView.js";
+import { createPlayerProfileView } from "../ui/createPlayerProfileView.js";
 
 const modal: Modal = {
   customId: CustomIds.modals.registerPlayer,
@@ -34,12 +33,17 @@ const modal: Modal = {
         serverId,
       });
 
+      if (interaction.inCachedGuild()) {
+        await client.services.guildAccess.ensureVerifiedPlayerRole(
+          interaction.member,
+        );
+      }
+
       await interaction.reply({
-        content:
-          "Your Mobile Legends account has been successfully connected to RecallQ.",
-        embeds: [createPlayerProfileEmbed(player)],
-        components: [createBackToMainMenuButton()],
-        flags: MessageFlags.Ephemeral,
+        components: [createPlayerProfileView(player)],
+        flags:
+          MessageFlags.Ephemeral |
+          MessageFlags.IsComponentsV2,
       });
     } catch (error: unknown) {
       if (
@@ -48,13 +52,16 @@ const modal: Modal = {
         error instanceof InvalidRegistrationDataError
       ) {
         await interaction.reply({
-          embeds: [
-            EmbedFactory.error(
+          components: [
+            createAlertView(
+              "error",
               "Registration Failed",
               error.message,
             ),
           ],
-          flags: MessageFlags.Ephemeral,
+          flags:
+            MessageFlags.Ephemeral |
+            MessageFlags.IsComponentsV2,
         });
 
         return;

@@ -2,9 +2,8 @@ import { MessageFlags } from "discord.js";
 
 import { CustomIds } from "../../constants/customIds.js";
 import type { Button } from "../../interfaces/Button.js";
-import { createBackToMainMenuButton } from "../../ui/createBackToMainMenuButton.js";
-import { createPlayerProfileEmbed } from "../../ui/createPlayerProfileEmbed.js";
-import { EmbedFactory } from "../../ui/EmbedFactory.js";
+import { createAlertView } from "../../ui/createAlertView.js";
+import { createPlayerProfileView } from "../../ui/createPlayerProfileView.js";
 
 const button: Button = {
   customId: CustomIds.buttons.mainMenu.profile,
@@ -17,21 +16,23 @@ const button: Button = {
 
     if (!player) {
       await interaction.reply({
-        embeds: [
-          EmbedFactory.warning(
+        components: [
+          createAlertView(
+            "warning",
             "Player Profile Not Found",
-            "Use `/register` to create your RecallQ player profile.",
+            "Use `/register` to create your Vora player profile.",
           ),
         ],
-        flags: MessageFlags.Ephemeral,
+        flags:
+          MessageFlags.Ephemeral |
+          MessageFlags.IsComponentsV2,
       });
 
       return;
     }
 
     await interaction.update({
-      embeds: [createPlayerProfileEmbed(player)],
-      components: [createBackToMainMenuButton()],
+      components: [createPlayerProfileView(player)],
     });
   },
 };

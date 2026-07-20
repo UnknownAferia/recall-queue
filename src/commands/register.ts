@@ -10,6 +10,7 @@ import {
 
 import { CustomIds } from "../constants/customIds.js";
 import type { Command } from "../interfaces/Command.js";
+import { createAlertView } from "../ui/createAlertView.js";
 
 const command: Command = {
   data: new SlashCommandBuilder()
@@ -22,10 +23,23 @@ const command: Command = {
       await client.services.player.isRegistered(interaction.user.id);
 
     if (isRegistered) {
+      if (interaction.inCachedGuild()) {
+        await client.services.guildAccess.ensureVerifiedPlayerRole(
+          interaction.member,
+        );
+      }
+
       await interaction.reply({
-        content:
-          "Your Discord account is already connected to a RecallQ player profile.",
-        flags: MessageFlags.Ephemeral,
+        components: [
+          createAlertView(
+            "information",
+            "Profile Already Connected",
+            "Your Discord account is already connected to a Vora player profile. Server access has been synchronized.",
+          ),
+        ],
+        flags:
+          MessageFlags.Ephemeral |
+          MessageFlags.IsComponentsV2,
       });
 
       return;
@@ -60,7 +74,7 @@ const command: Command = {
 
     const modal = new ModalBuilder()
       .setCustomId(CustomIds.modals.registerPlayer)
-      .setTitle("RecallQ Registration")
+      .setTitle("Vora Registration")
       .addComponents(
         new ActionRowBuilder<TextInputBuilder>().addComponents(
           ignInput,

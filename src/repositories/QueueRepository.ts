@@ -1,12 +1,7 @@
-import {
-  QueueModel,
-  type QueueDocument,
-} from "../models/QueueModel.js";
+import { QueueModel, type QueueDocument } from "../models/QueueModel.js";
 
 export class QueueRepository {
-  public async getOrCreate(
-    guildId: string,
-  ): Promise<QueueDocument> {
+  public async getOrCreate(guildId: string): Promise<QueueDocument> {
     const queue = await QueueModel.findOneAndUpdate(
       {
         guildId,
@@ -86,6 +81,30 @@ export class QueueRepository {
       },
       {
         returnDocument: "after",
+      },
+    ).exec();
+  }
+
+  public async removePlayers(
+    guildId: string,
+    discordIds: readonly string[],
+  ): Promise<void> {
+    if (discordIds.length === 0) {
+      return;
+    }
+
+    await QueueModel.updateOne(
+      {
+        guildId,
+      },
+      {
+        $pull: {
+          entries: {
+            discordId: {
+              $in: [...discordIds],
+            },
+          },
+        },
       },
     ).exec();
   }

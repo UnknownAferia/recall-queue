@@ -25,12 +25,16 @@ export interface PlayerStatisticsDto {
 export interface PlayerBehaviorDto {
   readonly score: number;
   readonly penalties: number;
+  readonly integrityLevel: number;
+  readonly lastIntegritySanctionAt: Date | null;
 }
 
 export interface PlayerQueueDto {
   readonly acceptedMatches: number;
   readonly declinedMatches: number;
   readonly bannedUntil: Date | null;
+  readonly disciplineLevel: number;
+  readonly lastPenaltyAt: Date | null;
 }
 
 export interface PlayerRolePreferencesDto {

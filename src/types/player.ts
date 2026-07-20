@@ -25,12 +25,16 @@ export interface PlayerStatistics {
 export interface PlayerBehavior {
   score: number;
   penalties: number;
+  integrityLevel: number;
+  lastIntegritySanctionAt: Date | null;
 }
 
 export interface PlayerQueueData {
   acceptedMatches: number;
   declinedMatches: number;
   bannedUntil: Date | null;
+  disciplineLevel: number;
+  lastPenaltyAt: Date | null;
 }
 
 export interface PlayerRolePreferences {
@@ -66,3 +70,5 @@ export interface CreatePlayerInput {
   playerId: string;
   serverId: string;
 }
+
+export type RolePreferenceSlot = "primary" | "secondary" | "avoided";

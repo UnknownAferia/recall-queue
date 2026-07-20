@@ -6,7 +6,8 @@ export const PlayerRoles = [
   "roam",
 ] as const;
 
-export type PlayerRole = (typeof PlayerRoles)[number];
+export type PlayerRole =
+  (typeof PlayerRoles)[number];
 
 export const PlayerRoleLabels: Readonly<
   Record<PlayerRole, string>
@@ -18,6 +19,17 @@ export const PlayerRoleLabels: Readonly<
   roam: "Roam",
 });
 
-export function isPlayerRole(value: string): value is PlayerRole {
-  return PlayerRoles.includes(value as PlayerRole);
+export function isPlayerRole(
+  value: unknown,
+): value is PlayerRole {
+  return (
+    typeof value === "string" &&
+    PlayerRoles.includes(value as PlayerRole)
+  );
+}
+
+export function normalizePlayerRole(
+  value: unknown,
+): PlayerRole | null {
+  return isPlayerRole(value) ? value : null;
 }

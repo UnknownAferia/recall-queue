@@ -1,3 +1,5 @@
 export const QueueConfig = Object.freeze({
-  maximumPlayers: 10,
+  teamSize: 5,
+  maximumPlayers: 50,
+  visiblePlayerLimit: 15,
 });

@@ -3,7 +3,7 @@ import { extname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import type { Command } from "../interfaces/Command.js";
-import type { RecallClient } from "../client/RecallClient.js";
+import type { VoraClient } from "../client/VoraClient.js";
 import { logger } from "../config/logger.js";
 
 interface CommandModule {
@@ -58,7 +58,7 @@ async function findCommandFiles(directory: string): Promise<string[]> {
   return files;
 }
 
-export async function loadCommands(client: RecallClient): Promise<void> {
+export async function loadCommands(client: VoraClient): Promise<void> {
   client.commands.clear();
 
   const commandsDirectory = fileURLToPath(
@@ -78,10 +78,13 @@ export async function loadCommands(client: RecallClient): Promise<void> {
       );
     }
 
+    if (command.enabled === false) {
+      logger.info(`Skipped disabled command: /${command.data.name}`);
+      continue;
+    }
+
     if (client.commands.has(command.data.name)) {
-      throw new Error(
-        `Duplicate command name detected: ${command.data.name}`,
-      );
+      throw new Error(`Duplicate command name detected: ${command.data.name}`);
     }
 
     client.commands.set(command.data.name, command);

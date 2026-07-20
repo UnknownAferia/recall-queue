@@ -1,12 +1,13 @@
 import type { ModalSubmitInteraction } from "discord.js";
 
-import type { RecallClient } from "../client/RecallClient.js";
+import type { VoraClient } from "../client/VoraClient.js";
 
 export interface Modal {
   customId: string;
+  matches?(customId: string): boolean;
 
   execute(
-    client: RecallClient,
+    client: VoraClient,
     interaction: ModalSubmitInteraction,
   ): Promise<void>;
 }

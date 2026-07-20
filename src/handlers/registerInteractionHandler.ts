@@ -1,53 +1,54 @@
-import {
-  Events,
-  MessageFlags,
-  type Interaction,
-} from "discord.js";
+import { Events, MessageFlags, type Interaction } from "discord.js";
 
-import type { RecallClient } from "../client/RecallClient.js";
+import type { VoraClient } from "../client/VoraClient.js";
 import { logger } from "../config/logger.js";
+import { createAlertView } from "../ui/createAlertView.js";
 import { formatError } from "../utils/formatError.js";
 
-const genericErrorResponse = {
-  content:
-    "An unexpected error occurred while processing this interaction.",
-  flags: MessageFlags.Ephemeral,
-} as const;
+function createErrorResponse(title: string, description: string) {
+  return {
+    components: [createAlertView("error", title, description)],
+    flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+  } as const;
+}
 
-async function respondWithError(
-  interaction: Interaction,
-): Promise<void> {
+async function respondWithError(interaction: Interaction): Promise<void> {
   if (!interaction.isRepliable()) {
     return;
   }
 
   if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(genericErrorResponse);
+    await interaction.followUp(
+      createErrorResponse(
+        "Interaction Failed",
+        "An unexpected error occurred while processing this interaction.",
+      ),
+    );
     return;
   }
 
-  await interaction.reply(genericErrorResponse);
+  await interaction.reply(
+    createErrorResponse(
+      "Interaction Failed",
+      "An unexpected error occurred while processing this interaction.",
+    ),
+  );
 }
 
-export function registerInteractionHandler(
-  client: RecallClient,
-): void {
+export function registerInteractionHandler(client: VoraClient): void {
   client.on(Events.InteractionCreate, async (interaction) => {
     try {
       if (interaction.isChatInputCommand()) {
-        const command = client.commands.get(
-          interaction.commandName,
-        );
+        const command = client.commands.get(interaction.commandName);
 
         if (!command) {
-          logger.warn(
-            `Received unknown command: /${interaction.commandName}`,
-          );
+          logger.warn(`Received unknown command: /${interaction.commandName}`);
 
           await interaction.reply({
-            content:
+            ...createErrorResponse(
+              "Command Unavailable",
               "This command is currently unavailable. Please try again later.",
-            flags: MessageFlags.Ephemeral,
+            ),
           });
 
           return;
@@ -58,17 +59,20 @@ export function registerInteractionHandler(
       }
 
       if (interaction.isButton()) {
-        const button = client.buttons.get(interaction.customId);
-
-        if (!button) {
-          logger.warn(
-            `Received unknown button: ${interaction.customId}`,
+        const button =
+          client.buttons.get(interaction.customId) ??
+          client.buttons.find((candidate) =>
+            candidate.matches?.(interaction.customId),
           );
 
+        if (!button) {
+          logger.warn(`Received unknown button: ${interaction.customId}`);
+
           await interaction.reply({
-            content:
+            ...createErrorResponse(
+              "Button Expired",
               "This button is no longer available. Please open the menu again.",
-            flags: MessageFlags.Ephemeral,
+            ),
           });
 
           return;
@@ -78,18 +82,43 @@ export function registerInteractionHandler(
         return;
       }
 
-      if (interaction.isModalSubmit()) {
-        const modal = client.modals.get(interaction.customId);
+      if (interaction.isStringSelectMenu()) {
+        const selectMenu = client.stringSelectMenus.get(interaction.customId);
 
-        if (!modal) {
+        if (!selectMenu) {
           logger.warn(
-            `Received unknown modal: ${interaction.customId}`,
+            `Received unknown string select menu: ${interaction.customId}`,
           );
 
           await interaction.reply({
-            content:
+            ...createErrorResponse(
+              "Menu Expired",
+              "This selection menu is no longer available. Please open the settings again.",
+            ),
+          });
+
+          return;
+        }
+
+        await selectMenu.execute(client, interaction);
+        return;
+      }
+
+      if (interaction.isModalSubmit()) {
+        const modal =
+          client.modals.get(interaction.customId) ??
+          client.modals.find((candidate) =>
+            candidate.matches?.(interaction.customId),
+          );
+
+        if (!modal) {
+          logger.warn(`Received unknown modal: ${interaction.customId}`);
+
+          await interaction.reply({
+            ...createErrorResponse(
+              "Form Expired",
               "This form is no longer available. Please open it again.",
-            flags: MessageFlags.Ephemeral,
+            ),
           });
 
           return;

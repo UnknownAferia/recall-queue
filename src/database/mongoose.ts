@@ -33,6 +33,7 @@ export async function connectToMongoDB(): Promise<void> {
 
   if (!connectionPromise) {
     connectionPromise = mongoose.connect(env.mongodbUri, {
+      dbName: env.mongodbDatabase,
       serverSelectionTimeoutMS: 10_000,
       connectTimeoutMS: 10_000,
       socketTimeoutMS: 45_000,

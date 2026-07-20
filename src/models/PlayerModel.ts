@@ -120,6 +120,19 @@ const behaviorSchema = new Schema<Player["behavior"]>(
       default: 0,
       min: 0,
     },
+
+    integrityLevel: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 3,
+    },
+
+    lastIntegritySanctionAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     _id: false,
@@ -143,6 +156,19 @@ const queueSchema = new Schema<Player["queue"]>(
     },
 
     bannedUntil: {
+      type: Date,
+      default: null,
+    },
+
+    disciplineLevel: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 3,
+    },
+
+    lastPenaltyAt: {
       type: Date,
       default: null,
     },
@@ -270,5 +296,4 @@ playerSchema.index(
 );
 
 export const PlayerModel: mongoose.Model<Player> =
-  mongoose.models.Player ??
-  mongoose.model<Player>("Player", playerSchema);
+  mongoose.models.Player ?? mongoose.model<Player>("Player", playerSchema);

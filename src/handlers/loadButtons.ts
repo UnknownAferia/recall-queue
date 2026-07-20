@@ -2,7 +2,7 @@ import { readdir } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import type { RecallClient } from "../client/RecallClient.js";
+import type { VoraClient } from "../client/VoraClient.js";
 import { logger } from "../config/logger.js";
 import type { Button } from "../interfaces/Button.js";
 
@@ -61,7 +61,7 @@ async function findButtonFiles(
 }
 
 export async function loadButtons(
-  client: RecallClient,
+  client: VoraClient,
 ): Promise<void> {
   client.buttons.clear();
 

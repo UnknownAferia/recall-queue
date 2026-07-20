@@ -1,7 +1,6 @@
 import { CustomIds } from "../../constants/customIds.js";
 import type { Button } from "../../interfaces/Button.js";
-import { createMainMenuComponents } from "../../ui/createMainMenuComponents.js";
-import { createMainMenuEmbed } from "../../ui/createMainMenuEmbed.js";
+import { createMainMenuView } from "../../ui/createMainMenuView.js";
 
 const button: Button = {
   customId: CustomIds.buttons.navigation.mainMenu,
@@ -13,8 +12,7 @@ const button: Button = {
       );
 
     await interaction.update({
-      embeds: [createMainMenuEmbed(player)],
-      components: player ? createMainMenuComponents() : [],
+      components: [createMainMenuView(player)],
     });
   },
 };

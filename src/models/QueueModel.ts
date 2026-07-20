@@ -1,15 +1,11 @@
 import mongoose from "mongoose";
 
 import { QueueConfig } from "../constants/queue.js";
-import type {
-  MatchmakingQueue,
-  QueueEntry,
-} from "../types/queue.js";
+import type { MatchmakingQueue, QueueEntry } from "../types/queue.js";
 
 const { Schema } = mongoose;
 
-export type QueueDocument =
-  mongoose.HydratedDocument<MatchmakingQueue>;
+export type QueueDocument = mongoose.HydratedDocument<MatchmakingQueue>;
 
 const queueEntrySchema = new Schema<QueueEntry>(
   {
@@ -36,7 +32,6 @@ const queueSchema = new Schema<MatchmakingQueue>(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
 
     status: {
@@ -50,7 +45,7 @@ const queueSchema = new Schema<MatchmakingQueue>(
       type: Number,
       required: true,
       default: QueueConfig.maximumPlayers,
-      min: 2,
+      min: QueueConfig.teamSize,
     },
 
     entries: {
@@ -78,7 +73,4 @@ queueSchema.index(
 
 export const QueueModel: mongoose.Model<MatchmakingQueue> =
   mongoose.models.MatchmakingQueue ??
-  mongoose.model<MatchmakingQueue>(
-    "MatchmakingQueue",
-    queueSchema,
-  );
+  mongoose.model<MatchmakingQueue>("MatchmakingQueue", queueSchema);

@@ -6,14 +6,14 @@ import {
   type RESTPostAPIApplicationCommandsJSONBody,
 } from "discord.js";
 
-import { RecallClient } from "../client/RecallClient.js";
+import { VoraClient } from "../client/VoraClient.js";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import { loadCommands } from "../handlers/loadCommands.js";
 import { formatError } from "../utils/formatError.js";
 
 async function deployCommands(): Promise<void> {
-  const client = new RecallClient();
+  const client = new VoraClient();
 
   await loadCommands(client);
 
@@ -24,27 +24,27 @@ async function deployCommands(): Promise<void> {
     version: "10",
   }).setToken(env.discordToken);
 
-  if (env.discordGuildId) {
-    logger.info(
-      `Deploying ${commandData.length} guild command(s) to ${env.discordGuildId}...`,
-    );
+  if (env.discordGuildIds.length > 0) {
+    for (const guildId of env.discordGuildIds) {
+      logger.info(
+        `Deploying ${commandData.length} guild command(s) to ${guildId}...`,
+      );
 
-    await rest.put(
-      Routes.applicationGuildCommands(
-        env.discordClientId,
-        env.discordGuildId,
-      ),
-      {
-        body: commandData,
-      },
-    );
+      await rest.put(
+        Routes.applicationGuildCommands(env.discordClientId, guildId),
+        {
+          body: commandData,
+        },
+      );
 
-    logger.info("Guild commands deployed successfully.");
+      logger.info(`Guild commands deployed successfully to ${guildId}.`);
+    }
+
     return;
   }
 
   logger.warn(
-    "DISCORD_GUILD_ID is missing. Commands will be deployed globally.",
+    "DISCORD_GUILD_IDS is missing. Commands will be deployed globally.",
   );
 
   await rest.put(

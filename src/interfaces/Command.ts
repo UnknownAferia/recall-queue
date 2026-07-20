@@ -1,15 +1,21 @@
 import type {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
 
-import type { RecallClient } from "../client/RecallClient.js";
+import type { VoraClient } from "../client/VoraClient.js";
 
 export interface Command {
-  data: SlashCommandBuilder;
+  data:
+    | SlashCommandBuilder
+    | SlashCommandOptionsOnlyBuilder
+    | SlashCommandSubcommandsOnlyBuilder;
+  enabled?: boolean;
 
   execute(
-    client: RecallClient,
+    client: VoraClient,
     interaction: ChatInputCommandInteraction,
   ): Promise<void>;
 }

@@ -88,6 +88,8 @@ they are not the primary matchmaking flow.
 - Automated help and private ticket-launcher panels
 - One open private support ticket per member and server
 - Requester/staff ticket closure with retained read-only channels
+- Administrator-controlled publication of welcome, rules, announcements,
+  platform guidance, command help and support panels
 
 ## 🚧 Competitive integrity
 
@@ -114,7 +116,6 @@ they are not the primary matchmaking flow.
 
 ## ⏳ Community launch preparation
 
-- Publish onboarding, rules, FAQ and matchmaking documentation
 - Ticket transcript/export and retention policy
 - Rate limiting, abuse protection and structured audit logging
 - CI checks, deployment environment and production monitoring

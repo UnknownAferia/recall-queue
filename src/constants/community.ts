@@ -1,4 +1,9 @@
 export const CommunityPanelKinds = [
+  "welcome",
+  "rules",
+  "announcements",
+  "how_vora_works",
+  "vora_commands",
   "leaderboard",
   "matchmaking_status",
   "help",

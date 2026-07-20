@@ -1,3 +1,5 @@
+import { BrandColors } from "./brand.js";
+
 interface BotConfiguration {
   name: string;
   version: string;
@@ -8,6 +10,6 @@ interface BotConfiguration {
 export const BotConfig: Readonly<BotConfiguration> = Object.freeze({
   name: "Vora",
   version: "2.0.0",
-  embedColor: 0x5865f2,
+  embedColor: BrandColors.voraCyan,
   footer: "Vora Competitive Matchmaking",
 });

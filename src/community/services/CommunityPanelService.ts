@@ -1,14 +1,68 @@
-import type { Guild } from "discord.js";
+import { existsSync } from "node:fs";
 
-import { CommunityConfig } from "../../constants/community.js";
+import type { ContainerBuilder, Guild } from "discord.js";
+
+import { BrandAssets, type BrandAsset } from "../../config/brand.js";
+import {
+  CommunityConfig,
+  type CommunityPanelKind,
+} from "../../constants/community.js";
 import { PlayerMapper } from "../../mappers/PlayerMapper.js";
 import type { CommunityDataRepository } from "../../repositories/CommunityDataRepository.js";
+import { createAnnouncementsView } from "../ui/createAnnouncementsView.js";
 import { createHelpView } from "../ui/createHelpView.js";
+import { createHowVoraWorksView } from "../ui/createHowVoraWorksView.js";
 import { createMatchmakingStatusView } from "../ui/createMatchmakingStatusView.js";
 import { createPublicLeaderboardView } from "../ui/createPublicLeaderboardView.js";
+import { createRulesView } from "../ui/createRulesView.js";
 import { createTicketLauncherView } from "../ui/createTicketLauncherView.js";
+import { createVoraCommandsView } from "../ui/createVoraCommandsView.js";
+import { createWelcomeView } from "../ui/createWelcomeView.js";
 import type { CommunityPanelPublisher } from "./CommunityPanelPublisher.js";
 import type { ManagedCommunityChannelResolver } from "./ManagedCommunityChannelResolver.js";
+
+interface StaticPanelDefinition {
+  readonly channelKey: string;
+  readonly kind: CommunityPanelKind;
+  readonly createView: (attachmentName?: string) => ContainerBuilder;
+  readonly asset?: BrandAsset;
+}
+
+export interface StaticPanelSynchronizationResult {
+  readonly published: readonly CommunityPanelKind[];
+  readonly missingChannelKeys: readonly string[];
+}
+
+const StaticPanelDefinitions: readonly StaticPanelDefinition[] = [
+  {
+    channelKey: "welcome",
+    kind: "welcome",
+    createView: createWelcomeView,
+    asset: BrandAssets.banner,
+  },
+  { channelKey: "rules", kind: "rules", createView: createRulesView },
+  {
+    channelKey: "announcements",
+    kind: "announcements",
+    createView: createAnnouncementsView,
+  },
+  {
+    channelKey: "howVoraWorks",
+    kind: "how_vora_works",
+    createView: createHowVoraWorksView,
+  },
+  {
+    channelKey: "voraCommands",
+    kind: "vora_commands",
+    createView: createVoraCommandsView,
+  },
+  { channelKey: "help", kind: "help", createView: createHelpView },
+  {
+    channelKey: "openTicket",
+    kind: "ticket_launcher",
+    createView: createTicketLauncherView,
+  },
+];
 
 export class CommunityPanelService {
   public constructor(
@@ -17,24 +71,43 @@ export class CommunityPanelService {
     private readonly channels: ManagedCommunityChannelResolver,
   ) {}
 
-  public async synchronizeStaticPanels(guild: Guild): Promise<void> {
-    const [help, ticketLauncher] = await Promise.all([
-      this.channels.resolveTextChannel(guild, "help"),
-      this.channels.resolveTextChannel(guild, "openTicket"),
-    ]);
+  public async synchronizeStaticPanels(
+    guild: Guild,
+  ): Promise<StaticPanelSynchronizationResult> {
+    const results = await Promise.all(
+      StaticPanelDefinitions.map(async (definition) => {
+        const channel = await this.channels.resolveTextChannel(
+          guild,
+          definition.channelKey,
+        );
 
-    await Promise.all([
-      help
-        ? this.publisher.publish(help, "help", createHelpView())
-        : Promise.resolve(),
-      ticketLauncher
-        ? this.publisher.publish(
-            ticketLauncher,
-            "ticket_launcher",
-            createTicketLauncherView(),
-          )
-        : Promise.resolve(),
-    ]);
+        if (!channel) {
+          return { definition, published: false } as const;
+        }
+
+        const asset =
+          definition.asset && existsSync(definition.asset.filePath)
+            ? definition.asset
+            : undefined;
+
+        await this.publisher.publish(
+          channel,
+          definition.kind,
+          definition.createView(asset?.attachmentName),
+          asset,
+        );
+        return { definition, published: true } as const;
+      }),
+    );
+
+    return {
+      published: results
+        .filter((result) => result.published)
+        .map((result) => result.definition.kind),
+      missingChannelKeys: results
+        .filter((result) => !result.published)
+        .map((result) => result.definition.channelKey),
+    };
   }
 
   public async synchronizeLeaderboard(guild: Guild): Promise<void> {

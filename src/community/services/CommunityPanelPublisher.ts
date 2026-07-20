@@ -1,10 +1,12 @@
 import {
+  AttachmentBuilder,
   MessageFlags,
   type ContainerBuilder,
   type TextChannel,
 } from "discord.js";
 
 import type { CommunityPanelKind } from "../../constants/community.js";
+import type { BrandAsset } from "../../config/brand.js";
 import type { CommunityPanelRepository } from "../../repositories/CommunityPanelRepository.js";
 
 export class CommunityPanelPublisher {
@@ -14,6 +16,7 @@ export class CommunityPanelPublisher {
     channel: TextChannel,
     kind: CommunityPanelKind,
     view: ContainerBuilder,
+    asset?: BrandAsset,
   ): Promise<string> {
     const stored = await this.repository.find(channel.guild.id, kind);
     const existingMessage =
@@ -22,12 +25,35 @@ export class CommunityPanelPublisher {
         : null;
 
     if (existingMessage) {
-      await existingMessage.edit({ components: [view] });
+      const assetAlreadyAttached =
+        !asset ||
+        existingMessage.attachments.some(
+          (attachment) => attachment.name === asset.attachmentName,
+        );
+
+      await existingMessage.edit({
+        components: [view],
+        files:
+          asset && !assetAlreadyAttached
+            ? [
+                new AttachmentBuilder(asset.filePath, {
+                  name: asset.attachmentName,
+                }),
+              ]
+            : [],
+      });
       return existingMessage.id;
     }
 
     const message = await channel.send({
       components: [view],
+      files: asset
+        ? [
+            new AttachmentBuilder(asset.filePath, {
+              name: asset.attachmentName,
+            }),
+          ]
+        : [],
       flags: MessageFlags.IsComponentsV2,
     });
 

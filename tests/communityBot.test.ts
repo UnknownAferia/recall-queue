@@ -3,14 +3,21 @@ import { describe, it } from "node:test";
 
 import {
   MessageFlags,
+  PermissionFlagsBits,
+  type ChatInputCommandInteraction,
   type Guild,
   type GuildMember,
   type TextChannel,
 } from "discord.js";
 
 import type { CommunityClient } from "../src/community/CommunityClient.js";
+import {
+  executePublishCommunityCommand,
+  publishCommunityCommandData,
+} from "../src/community/commands/publishCommunity.js";
 import { registerCommunityInteractionHandler } from "../src/community/registerCommunityInteractionHandler.js";
 import { CommunityCustomIds } from "../src/constants/community.js";
+import { BrandAssets } from "../src/config/brand.js";
 import type { PlayerDto } from "../src/dto/PlayerDto.js";
 import { CommunityPanelModel } from "../src/models/CommunityPanelModel.js";
 import { ServiceHeartbeatModel } from "../src/models/ServiceHeartbeatModel.js";
@@ -24,13 +31,21 @@ import type { SupportTicketRepository } from "../src/repositories/SupportTicketR
 import { ServiceHeartbeatService } from "../src/services/ServiceHeartbeatService.js";
 import { TicketOperationError } from "../src/community/errors/TicketOperationError.js";
 import { CommunityPanelPublisher } from "../src/community/services/CommunityPanelPublisher.js";
+import { CommunityPanelService } from "../src/community/services/CommunityPanelService.js";
 import type { ManagedCommunityChannelResolver } from "../src/community/services/ManagedCommunityChannelResolver.js";
 import { TicketService } from "../src/community/services/TicketService.js";
+import { createAnnouncementsView } from "../src/community/ui/createAnnouncementsView.js";
 import { createHelpView } from "../src/community/ui/createHelpView.js";
+import { createHowVoraWorksView } from "../src/community/ui/createHowVoraWorksView.js";
 import { createMatchmakingStatusView } from "../src/community/ui/createMatchmakingStatusView.js";
 import { createPublicLeaderboardView } from "../src/community/ui/createPublicLeaderboardView.js";
+import { createRulesView } from "../src/community/ui/createRulesView.js";
 import { createTicketLauncherView } from "../src/community/ui/createTicketLauncherView.js";
 import { createTicketModal } from "../src/community/ui/createTicketModal.js";
+import { createVoraCommandsView } from "../src/community/ui/createVoraCommandsView.js";
+import { createWelcomeView } from "../src/community/ui/createWelcomeView.js";
+import type { CommunityPanelKind } from "../src/constants/community.js";
+import type { CommunityDataRepository } from "../src/repositories/CommunityDataRepository.js";
 
 function createPlayer(): PlayerDto {
   const now = new Date("2026-07-20T12:00:00.000Z");
@@ -74,7 +89,7 @@ function hasIndex(
 }
 
 describe("Vora Community bot", () => {
-  it("serializes leaderboard, status, help and ticket panels", () => {
+  it("serializes public automation and onboarding panels", () => {
     const now = new Date("2026-07-20T12:00:00.000Z");
     const leaderboard = JSON.stringify(
       createPublicLeaderboardView([createPlayer()], now).toJSON(),
@@ -95,6 +110,15 @@ describe("Vora Community bot", () => {
     );
     const help = JSON.stringify(createHelpView().toJSON());
     const ticket = JSON.stringify(createTicketLauncherView().toJSON());
+    const onboarding = [
+      createWelcomeView(BrandAssets.banner.attachmentName),
+      createRulesView(),
+      createAnnouncementsView(),
+      createHowVoraWorksView(),
+      createVoraCommandsView(),
+    ]
+      .map((view) => JSON.stringify(view.toJSON()))
+      .join("\n");
 
     assert.match(leaderboard, /Global Leaderboard/);
     assert.match(leaderboard, /1,250 RSR/);
@@ -103,6 +127,82 @@ describe("Vora Community bot", () => {
     assert.match(help, /Help Center/);
     assert.match(help, new RegExp(CommunityCustomIds.ticket.open));
     assert.match(ticket, /Open a Ticket/);
+    assert.match(onboarding, /Find Better Teammates/);
+    assert.match(onboarding, /Vora Rules/);
+    assert.match(onboarding, /Vora Announcements/);
+    assert.match(onboarding, /How Vora Works/);
+    assert.match(onboarding, /Competitive Hub/);
+    assert.match(onboarding, /attachment:\/\/Vora_Banner\.png/);
+  });
+
+  it("publishes every managed static panel and reports missing channels", async () => {
+    const published: CommunityPanelKind[] = [];
+    const publisher = {
+      publish: async (_channel: TextChannel, kind: CommunityPanelKind) => {
+        published.push(kind);
+        return "message-id";
+      },
+    } as unknown as CommunityPanelPublisher;
+    const channels = {
+      resolveTextChannel: async (_guild: Guild, channelKey: string) =>
+        channelKey === "announcements"
+          ? null
+          : ({ id: channelKey } as TextChannel),
+    } as ManagedCommunityChannelResolver;
+    const service = new CommunityPanelService(
+      {} as CommunityDataRepository,
+      publisher,
+      channels,
+    );
+
+    const result = await service.synchronizeStaticPanels({} as Guild);
+
+    assert.equal(result.published.length, 6);
+    assert.deepEqual(result.missingChannelKeys, ["announcements"]);
+    assert.equal(published.includes("welcome"), true);
+    assert.equal(published.includes("ticket_launcher"), true);
+  });
+
+  it("publishes community content through an administrator-only command", async () => {
+    const replies: unknown[] = [];
+    const edits: unknown[] = [];
+    let synchronizations = 0;
+    const client = {
+      panels: {
+        synchronizeStaticPanels: async () => {
+          synchronizations += 1;
+          return {
+            published: ["welcome", "rules"],
+            missingChannelKeys: [],
+          };
+        },
+      },
+    } as unknown as CommunityClient;
+    const interaction = {
+      inCachedGuild: () => true,
+      guild: {},
+      memberPermissions: {
+        has: (permission: bigint) =>
+          permission === PermissionFlagsBits.Administrator,
+      },
+      reply: async (options: unknown) => {
+        replies.push(options);
+      },
+      editReply: async (options: unknown) => {
+        edits.push(options);
+      },
+    } as unknown as ChatInputCommandInteraction;
+
+    await executePublishCommunityCommand(client, interaction);
+
+    assert.equal(publishCommunityCommandData.name, "publish-community");
+    assert.equal(synchronizations, 1);
+    assert.equal(replies.length, 1);
+    assert.equal(edits.length, 1);
+    assert.ok(
+      (replies[0] as { flags: number }).flags & MessageFlags.IsComponentsV2,
+    );
+    assert.match(JSON.stringify(edits[0]), /Community Content Published/);
   });
 
   it("shows an unavailable state when the Core heartbeat is stale", () => {
@@ -191,6 +291,38 @@ describe("Vora Community bot", () => {
     assert.equal(messageId, "message-id");
     assert.equal(editCount, 1);
     assert.equal(sendCount, 0);
+  });
+
+  it("uploads a missing panel asset and reuses an existing attachment", async () => {
+    const editedFiles: unknown[][] = [];
+    let assetPresent = false;
+    const repository = {
+      find: async () => ({ channelId: "channel-id", messageId: "message-id" }),
+    } as unknown as CommunityPanelRepository;
+    const channel = {
+      id: "channel-id",
+      guild: { id: "guild-id" },
+      messages: {
+        fetch: async () => ({
+          id: "message-id",
+          attachments: {
+            some: () => assetPresent,
+          },
+          edit: async (options: { files?: unknown[] }) => {
+            editedFiles.push(options.files ?? []);
+          },
+        }),
+      },
+    } as unknown as TextChannel;
+    const publisher = new CommunityPanelPublisher(repository);
+    const view = createWelcomeView(BrandAssets.banner.attachmentName);
+
+    await publisher.publish(channel, "welcome", view, BrandAssets.banner);
+    assetPresent = true;
+    await publisher.publish(channel, "welcome", view, BrandAssets.banner);
+
+    assert.equal(editedFiles[0]?.length, 1);
+    assert.equal(editedFiles[1]?.length, 0);
   });
 
   it("updates and stops the independent service heartbeat", async () => {
@@ -290,6 +422,7 @@ describe("Vora Community bot", () => {
       get replied() {
         return replied;
       },
+      isChatInputCommand: () => false,
       isButton: () => false,
       isModalSubmit: () => true,
       isRepliable: () => true,

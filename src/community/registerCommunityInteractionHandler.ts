@@ -10,6 +10,10 @@ import { logger } from "../config/logger.js";
 import { createAlertView } from "../ui/createAlertView.js";
 import { formatError } from "../utils/formatError.js";
 import type { CommunityClient } from "./CommunityClient.js";
+import {
+  executePublishCommunityCommand,
+  PublishCommunityCommandName,
+} from "./commands/publishCommunity.js";
 import { TicketAlreadyOpenError } from "./errors/TicketAlreadyOpenError.js";
 import { TicketOperationError } from "./errors/TicketOperationError.js";
 import { createClosedTicketView } from "./ui/createClosedTicketView.js";
@@ -33,9 +37,14 @@ async function respondWithError(
 
   const response = createErrorResponse(title, description);
 
+  const replacesLoadingResponse =
+    (interaction.isModalSubmit() &&
+      interaction.customId === CommunityCustomIds.ticket.create) ||
+    (interaction.isChatInputCommand() &&
+      interaction.commandName === PublishCommunityCommandName);
+
   if (
-    interaction.isModalSubmit() &&
-    interaction.customId === CommunityCustomIds.ticket.create &&
+    replacesLoadingResponse &&
     (interaction.replied || interaction.deferred)
   ) {
     await interaction.editReply({
@@ -56,6 +65,14 @@ export function registerCommunityInteractionHandler(
 ): void {
   client.on(Events.InteractionCreate, async (interaction) => {
     try {
+      if (
+        interaction.isChatInputCommand() &&
+        interaction.commandName === PublishCommunityCommandName
+      ) {
+        await executePublishCommunityCommand(client, interaction);
+        return;
+      }
+
       if (
         interaction.isButton() &&
         interaction.customId === CommunityCustomIds.ticket.open

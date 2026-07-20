@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "dev:community": "tsx watch src/community/index.ts",
     "deploy": "tsx src/scripts/deployCommands.ts",
+    "deploy:community": "tsx src/community/scripts/deployCommunityCommands.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "start:community": "node dist/community/index.js",

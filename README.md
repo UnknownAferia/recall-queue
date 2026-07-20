@@ -1,5 +1,9 @@
 # Vora
 
+<p align="center">
+  <img src="./assets/Vora_Banner.png" alt="Vora — Built for Better Teams" width="100%" />
+</p>
+
 [![Status](https://img.shields.io/badge/status-private%20alpha-5865F2)](#project-status)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)

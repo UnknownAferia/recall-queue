@@ -1,8 +1,8 @@
-# RecallQ 2.0 Roadmap
+# Vora 2.0 Roadmap
 
 Last updated: 20 July 2026
 
-RecallQ is a Discord-first teammate formation platform for Mobile Legends. It
+Vora is a Discord-first teammate formation platform for Mobile Legends. It
 builds compatible five-player squads that queue together against external MLBB
 opponents. Internal community 5v5 matches remain a possible future mode, but
 they are not the primary matchmaking flow.
@@ -16,6 +16,7 @@ they are not the primary matchmaking flow.
 
 ## ✅ Foundation
 
+- Vora brand migration with data-safe Discord resource renaming
 - TypeScript, discord.js and MongoDB application foundation
 - Structured command, button, modal and select-menu loaders
 - Central service container and repository boundaries
@@ -47,7 +48,7 @@ they are not the primary matchmaking flow.
 ## ✅ Community server operations
 
 - Idempotent `/server-setup` blueprint
-- Managed RecallQ roles, categories and emoji channel structure
+- Managed Vora roles, categories and emoji channel structure
 - Channel permission policies and permission-drift repair
 - Owner-only setup controls
 - Isolated owner-only squad simulator with four automated teammates
@@ -60,30 +61,38 @@ they are not the primary matchmaking flow.
 - Reconcile stale persisted queue entries after every bot restart
 - Keep simulated squad testing compatible with the same voice requirement
 
-## ⏳ Private squad voice lifecycle
+## ✅ Private squad voice lifecycle
 
 - Create a temporary private voice channel after all five players accept
-- Grant access only to the squad and RecallQ staff
+- Grant access only to the squad and Vora staff
 - Move connected squad members automatically where permitted
 - Restore ownership after a bot restart
 - Delete abandoned channels safely after squad closure or timeout
 
-## ⏳ Recall Skill Rating v1
+## ✅ Ranked Skill Rating v1
 
-- Define the first production RSR update formula
+- Production RSR update formula anchored to the external matchmaking pool
 - Expected-result calculation based on squad strength
-- Rating confidence and placement matches
-- Rating change audit records and idempotent processing
-- Simulation tests for convergence, volatility and edge cases
-- Visible divisions kept separate from internal skill rating
+- Rating confidence and ten placement matches
+- Transactional rating change audit records and idempotent processing
+- Automated coverage for volatility, rating floors and concurrency safety
+- Visible divisions remain separate from internal skill rating
 
-## ⏳ Competitive integrity
+## 🚧 Competitive integrity
 
-- Queue dodge, decline and AFK penalties
-- Behavior-score update rules and recovery
-- Disputed-result moderation queue
-- Screenshot evidence workflow without depending on a Moonton API
-- Staff audit log and reversible administrative actions
+- Ready-check decline and timeout penalties with queue cooldowns
+- Atomic behavior-score deductions with a zero-point floor
+- Ready-check acceptance and reliability statistics
+- Escalating repeat-offense cooldowns with daily discipline decay
+- Behavior-score recovery through verified completed matches
+- Staff-only disputed-result moderation inbox
+- Audited moderation decisions for disputed results (confirm, correct or void)
+- Required screenshot evidence archived in a staff-only channel without a Moonton API
+- Staff-selected evidence sanctions targeting only the result reporter
+- Escalating integrity levels, behavior deductions and matchmaking suspensions
+- Transactional sanction audit records with incident-free monthly decay
+- Persistent cross-feature staff audit trail with a staff history view
+- Audited rating reversals and administrative corrections
 
 ## ⏳ Seasons and progression
 

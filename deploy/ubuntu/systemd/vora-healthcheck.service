@@ -1,0 +1,10 @@
+[Unit]
+Description=Vora Core and Community health verification
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vora/repository/deploy/ubuntu/healthcheck.sh
+Nice=5

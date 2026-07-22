@@ -31,6 +31,9 @@ are retained for 365 days, then removed by MongoDB TTL cleanup.
 
 ## Deployment
 
+The supported Ubuntu VPS installation, first deployment, automated backup
+timers and update procedure are documented in `docs/VPS_DEPLOYMENT.md`.
+
 Verify every release before it reaches the server:
 
 ```bash
@@ -38,7 +41,8 @@ npm ci
 npm run check
 ```
 
-The example Compose file runs both applications from the same immutable image:
+The production Compose file runs both applications from the same immutable
+image. For local inspection only:
 
 ```bash
 docker compose -f compose.production.example.yml up -d --build

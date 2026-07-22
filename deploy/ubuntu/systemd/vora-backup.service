@@ -1,0 +1,12 @@
+[Unit]
+Description=Create, verify and rotate the Vora MongoDB backup
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/vora/repository/deploy/ubuntu/backup.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

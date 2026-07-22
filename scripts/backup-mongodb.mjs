@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { runMongoTool } from "./mongodb-tool-process.mjs";
 
 const uri = process.env.MONGODB_URI?.trim();
 const database = process.env.MONGODB_DATABASE?.trim();
@@ -21,10 +21,10 @@ const archivePath = resolve(
   backupDirectory,
   `vora-${database}-${timestamp}.archive.gz`,
 );
-const result = spawnSync(
+const result = runMongoTool(
   "mongodump",
   [`--uri=${uri}`, `--db=${database}`, `--archive=${archivePath}`, "--gzip"],
-  { stdio: "inherit", windowsHide: true },
+  uri,
 );
 
 if (result.error) {

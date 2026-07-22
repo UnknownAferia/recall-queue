@@ -15,6 +15,7 @@ describe("Production deployment", () => {
     assert.match(dockerfile, /RUN npm run check/);
     assert.match(dockerfile, /mongodump/);
     assert.match(dockerfile, /mongorestore/);
+    assert.match(dockerfile, /ca-certificates/);
     assert.match(dockerfile, /USER node/);
   });
 

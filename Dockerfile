@@ -26,7 +26,7 @@ FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 RUN apt-get update \
-    && apt-get install --yes --no-install-recommends libgssapi-krb5-2 \
+    && apt-get install --yes --no-install-recommends ca-certificates libgssapi-krb5-2 \
     && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 COPY --from=production-dependencies /app/node_modules ./node_modules

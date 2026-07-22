@@ -2,8 +2,8 @@ import "dotenv/config";
 
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
-import { spawnSync } from "node:child_process";
 import mongoose from "mongoose";
+import { runMongoTool } from "./mongodb-tool-process.mjs";
 
 const archiveArgument = process.argv[2];
 const uri = process.env.MONGODB_URI?.trim();
@@ -27,7 +27,7 @@ if (!existsSync(archivePath) || !statSync(archivePath).isFile()) {
   throw new Error(`Backup archive does not exist: ${archivePath}`);
 }
 
-const restored = spawnSync(
+const restored = runMongoTool(
   "mongorestore",
   [
     `--uri=${uri}`,
@@ -37,7 +37,7 @@ const restored = spawnSync(
     `--nsFrom=${productionDatabase}.*`,
     `--nsTo=${drillDatabase}.*`,
   ],
-  { stdio: "inherit", windowsHide: true },
+  uri,
 );
 
 if (restored.error) {

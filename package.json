@@ -19,7 +19,7 @@
     "restore:drill": "node scripts/restore-drill.mjs",
     "start": "node dist/index.js",
     "start:community": "node dist/community/index.js",
-    "test:deployment": "node --import tsx --test tests/productionDeployment.test.ts",
+    "test:deployment": "node --import tsx --test tests/productionDeployment.test.ts tests/mongodbToolSecurity.test.ts",
     "test": "node --import tsx --test tests/operationalControl.test.ts tests/playerAdministration.test.ts tests/playerVerification.test.ts tests/communityModeration.test.ts tests/divisionResolver.test.ts tests/divisionRoles.test.ts tests/teamBalancer.test.ts tests/teamFormationEngine.test.ts tests/matchmakingCandidateMapper.test.ts tests/squadModel.test.ts tests/squadLifecycle.test.ts tests/squadResultVerification.test.ts tests/verifiedResultProcessor.test.ts tests/readyCheckUi.test.ts tests/readyCheckExpiration.test.ts tests/resultLifecycleExpiration.test.ts tests/matchHistoryUi.test.ts tests/guildSetup.test.ts tests/guildAccess.test.ts tests/permissionPolicy.test.ts tests/developmentSimulation.test.ts tests/queueModelIndexes.test.ts tests/voiceQueue.test.ts tests/squadVoice.test.ts tests/ratingCalculator.test.ts tests/queueDiscipline.test.ts tests/disputeInbox.test.ts tests/disputeResolution.test.ts tests/resultEvidence.test.ts tests/integritySanctions.test.ts tests/moderationAudit.test.ts tests/communityBot.test.ts tests/communityLaunch.test.ts tests/seasonFoundation.test.ts tests/seasonControlUi.test.ts tests/seasonProgression.test.ts tests/seasonProgressionUi.test.ts tests/seasonRewardRoles.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",

@@ -56,7 +56,7 @@ export const GuildBlueprint = Object.freeze({
   roles: [
     {
       key: "administrator",
-      name: "Vora Admin",
+      name: "Core",
       legacyNames: ["RecallQ Admin"],
       color: 0xed4245,
       permissions: [PermissionFlagsBits.Administrator],
@@ -64,7 +64,7 @@ export const GuildBlueprint = Object.freeze({
     },
     {
       key: "moderator",
-      name: "Moderator",
+      name: "Operations",
       color: 0x5865f2,
       permissions: [
         PermissionFlagsBits.ViewAuditLog,
@@ -73,13 +73,6 @@ export const GuildBlueprint = Object.freeze({
         PermissionFlagsBits.ManageMessages,
         PermissionFlagsBits.MoveMembers,
       ],
-      hoist: true,
-    },
-    {
-      key: "support",
-      name: "Support",
-      color: 0x57f287,
-      permissions: [PermissionFlagsBits.ManageMessages],
       hoist: true,
     },
     {
@@ -94,7 +87,7 @@ export const GuildBlueprint = Object.freeze({
       name: "Verified Player",
       color: 0xf1c40f,
       permissions: [],
-      hoist: false,
+      hoist: true,
     },
     {
       key: "announcementNotifications",
@@ -159,6 +152,14 @@ export const GuildBlueprint = Object.freeze({
       type: ChannelType.GuildText,
       access: "publicReadOnly",
       topic: "Registration, role preferences, queueing and squad formation.",
+    },
+    {
+      key: "register",
+      categoryKey: "information",
+      name: "📝｜register",
+      type: ChannelType.GuildText,
+      access: "publicChat",
+      topic: "Complete your Registration.",
     },
     {
       key: "voraCommands",

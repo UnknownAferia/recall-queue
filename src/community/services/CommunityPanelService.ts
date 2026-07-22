@@ -20,6 +20,7 @@ import { createVoraCommandsView } from "../ui/createVoraCommandsView.js";
 import { createWelcomeView } from "../ui/createWelcomeView.js";
 import type { CommunityPanelPublisher } from "./CommunityPanelPublisher.js";
 import type { ManagedCommunityChannelResolver } from "./ManagedCommunityChannelResolver.js";
+import { createRegisterView } from "../ui/createRegisterView.js";
 
 interface StaticPanelDefinition {
   readonly channelKey: string;
@@ -50,6 +51,11 @@ const StaticPanelDefinitions: readonly StaticPanelDefinition[] = [
     channelKey: "howVoraWorks",
     kind: "how_vora_works",
     createView: createHowVoraWorksView,
+  },
+  {
+    channelKey: "register",
+    kind: "register",
+    createView: createRegisterView,
   },
   {
     channelKey: "voraCommands",

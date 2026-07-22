@@ -37,6 +37,7 @@ import { TicketService } from "../src/community/services/TicketService.js";
 import { createAnnouncementsView } from "../src/community/ui/createAnnouncementsView.js";
 import { createHelpView } from "../src/community/ui/createHelpView.js";
 import { createHowVoraWorksView } from "../src/community/ui/createHowVoraWorksView.js";
+import { createRegisterView } from "../src/community/ui/createRegisterView.js";
 import { createMatchmakingStatusView } from "../src/community/ui/createMatchmakingStatusView.js";
 import { createPublicLeaderboardView } from "../src/community/ui/createPublicLeaderboardView.js";
 import { createRulesView } from "../src/community/ui/createRulesView.js";
@@ -115,6 +116,7 @@ describe("Vora Community bot", () => {
       createRulesView(),
       createAnnouncementsView(),
       createHowVoraWorksView(),
+      createRegisterView(),
       createVoraCommandsView(),
     ]
       .map((view) => JSON.stringify(view.toJSON()))
@@ -157,7 +159,7 @@ describe("Vora Community bot", () => {
 
     const result = await service.synchronizeStaticPanels({} as Guild);
 
-    assert.equal(result.published.length, 6);
+    assert.equal(result.published.length, 7);
     assert.deepEqual(result.missingChannelKeys, ["announcements"]);
     assert.equal(published.includes("welcome"), true);
     assert.equal(published.includes("ticket_launcher"), true);

@@ -8,6 +8,7 @@ export const CommunityPanelKinds = [
   "matchmaking_status",
   "help",
   "ticket_launcher",
+  "register",
 ] as const;
 
 export type CommunityPanelKind = (typeof CommunityPanelKinds)[number];

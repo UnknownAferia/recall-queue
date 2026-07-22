@@ -3,19 +3,20 @@ import { ChannelType, PermissionFlagsBits } from "discord.js";
 export type GuildRoleKey =
   | "administrator"
   | "moderator"
-  | "support"
   | "developer"
   | "verifiedPlayer"
   | "announcementNotifications"
-  | "updateNotifications";
+  | "updateNotifications"
+  | "divisionBronze"
+  | "divisionSilver"
+  | "divisionGold"
+  | "divisionPlatinum"
+  | "divisionDiamond"
+  | "divisionMaster"
+  | "divisionApex";
 
 export type GuildCategoryKey =
-  | "information"
-  | "vora"
-  | "community"
-  | "support"
-  | "squadVoice"
-  | "staff";
+  "information" | "vora" | "community" | "support" | "squadVoice" | "staff";
 
 export type GuildChannelAccess =
   | "publicReadOnly"
@@ -51,13 +52,13 @@ export interface GuildChannelBlueprint {
 }
 
 export const GuildBlueprint = Object.freeze({
-  version: 2,
+  version: 3,
 
   roles: [
     {
       key: "administrator",
       name: "Core",
-      legacyNames: ["RecallQ Admin"],
+      legacyNames: ["RecallQ Admin", "Vora Admin"],
       color: 0xed4245,
       permissions: [PermissionFlagsBits.Administrator],
       hoist: true,
@@ -65,6 +66,7 @@ export const GuildBlueprint = Object.freeze({
     {
       key: "moderator",
       name: "Operations",
+      legacyNames: ["Moderator"],
       color: 0x5865f2,
       permissions: [
         PermissionFlagsBits.ViewAuditLog,
@@ -100,6 +102,55 @@ export const GuildBlueprint = Object.freeze({
       key: "updateNotifications",
       name: "Update Notifications",
       color: 0x1abc9c,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionBronze",
+      name: "Vora Bronze",
+      color: 0xcd7f32,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionSilver",
+      name: "Vora Silver",
+      color: 0xc0c0c0,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionGold",
+      name: "Vora Gold",
+      color: 0xffd700,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionPlatinum",
+      name: "Vora Platinum",
+      color: 0x4fd1c5,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionDiamond",
+      name: "Vora Diamond",
+      color: 0x45b6fe,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionMaster",
+      name: "Vora Master",
+      color: 0x8b5cf6,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "divisionApex",
+      name: "Vora Apex",
+      color: 0x1fc8ff,
       permissions: [],
       hoist: false,
     },

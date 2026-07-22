@@ -65,6 +65,13 @@ const button: Button = {
       });
 
       if (squad.status !== "result_pending") {
+        if ((squad.result?.ratingChanges.length ?? 0) > 0) {
+          await client.services.divisionRoles.synchronizeGuildMembers(
+            interaction.guild,
+            squad.participants.map((participant) => participant.discordId),
+          );
+        }
+
         await client.services.squadVoice.cleanupVoiceChannel(
           interaction.guild,
           squad,

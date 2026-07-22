@@ -1,5 +1,6 @@
 import type {
   ReadyCheckStatus,
+  SquadLifecycleIncidentReason,
   SquadModerationDecision,
   SquadResult,
   SquadStatus,
@@ -82,6 +83,12 @@ export interface SquadRatingChange {
   placementMatch: boolean;
 }
 
+export interface SquadLifecycleIncident {
+  reason: SquadLifecycleIncidentReason;
+  responsibleDiscordIds: string[];
+  occurredAt: Date;
+}
+
 export interface SquadSession {
   guildId: string;
   sourceQueueKey: string;
@@ -93,6 +100,9 @@ export interface SquadSession {
   result: SquadResultReport | null;
   readyCheckExpiresAt: Date;
   activatedAt: Date | null;
+  resultReportExpiresAt?: Date | null;
+  resultConfirmationExpiresAt?: Date | null;
+  lifecycleIncident?: SquadLifecycleIncident | null;
   closedAt: Date | null;
   closedByDiscordId: string | null;
   createdAt: Date;

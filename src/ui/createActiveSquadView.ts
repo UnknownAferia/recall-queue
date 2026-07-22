@@ -37,6 +37,9 @@ export function createActiveSquadView(squad: SquadDto): ContainerBuilder {
       ViewFactory.text(
         [
           `**Captain:** <@${squad.captainDiscordId}>`,
+          squad.resultReportExpiresAt
+            ? `**Result deadline:** <t:${Math.floor(squad.resultReportExpiresAt.getTime() / 1_000)}:R>`
+            : null,
           `**Private voice:** ${
             squad.voiceChannelId
               ? `<#${squad.voiceChannelId}>`
@@ -46,7 +49,9 @@ export function createActiveSquadView(squad: SquadDto): ContainerBuilder {
           "### Squad compatibility",
           `**${squad.metrics.compatibilityScore.toFixed(1)}/100**  •  ${squad.metrics.rsrSpread.toFixed(0)} RSR spread`,
           `-# Average rating: ${squad.metrics.averageRsr.toFixed(0)} RSR  •  Average behavior: ${squad.metrics.averageBehaviorScore.toFixed(1)}/100`,
-        ].join("\n"),
+        ]
+          .filter((line): line is string => line !== null)
+          .join("\n"),
       ),
     )
     .addSeparatorComponents(ViewFactory.separator())
@@ -60,7 +65,7 @@ export function createActiveSquadView(squad: SquadDto): ContainerBuilder {
       ViewFactory.text(
         [
           "### Session controls",
-          "-# The captain reports the external MLBB result. Any member can leave and disband an unusable squad.",
+          "-# The captain must report the external MLBB result with screenshot evidence before the deadline. Any member can leave and disband an unusable squad.",
         ].join("\n"),
       ),
     )

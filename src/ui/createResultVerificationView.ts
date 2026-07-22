@@ -58,6 +58,9 @@ export function createResultVerificationView(
           `**Reported by:** <@${squad.result.reportedByDiscordId}>`,
           `**Confirmations:** ${squad.result.confirmedByDiscordIds.length}/${SquadConfig.resultConfirmationsRequired} required`,
           `**Reported:** <t:${Math.floor(squad.result.reportedAt.getTime() / 1_000)}:R>`,
+          squad.resultConfirmationExpiresAt
+            ? `**Response deadline:** <t:${Math.floor(squad.resultConfirmationExpiresAt.getTime() / 1_000)}:R>`
+            : null,
           squad.result.evidence
             ? "**Evidence:** Screenshot archived for staff review"
             : "**Evidence:** Legacy report without screenshot",
@@ -89,7 +92,7 @@ export function createResultVerificationView(
     )
     .addTextDisplayComponents(
       ViewFactory.footer(
-        "A dispute closes the session without changing any rating.",
+        "A dispute sends the result to staff. Players who do not respond before the deadline receive a proportional cooldown.",
       ),
     );
 }

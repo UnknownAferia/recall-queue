@@ -21,6 +21,8 @@ import { ReadyCheckExpirationService } from "./ReadyCheckExpirationService.js";
 import { DisputeModerationService } from "./DisputeModerationService.js";
 import { ResultEvidenceService } from "./ResultEvidenceService.js";
 import { ModerationAuditService } from "./ModerationAuditService.js";
+import { DivisionRoleService } from "./DivisionRoleService.js";
+import { ResultLifecycleExpirationService } from "./ResultLifecycleExpirationService.js";
 
 export class ServiceContainer {
   public readonly player: PlayerService;
@@ -35,6 +37,8 @@ export class ServiceContainer {
   public readonly disputeModeration: DisputeModerationService;
   public readonly resultEvidence: ResultEvidenceService;
   public readonly moderationAudit: ModerationAuditService;
+  public readonly divisionRoles: DivisionRoleService;
+  public readonly resultLifecycleExpiration: ResultLifecycleExpirationService;
 
   public constructor() {
     const playerRepository = new PlayerRepository();
@@ -42,9 +46,14 @@ export class ServiceContainer {
     const squadRepository = new SquadRepository();
     const moderationAuditRepository = new ModerationAuditRepository();
     const queueDiscipline = new QueueDisciplineService(playerRepository);
+    this.resultLifecycleExpiration = new ResultLifecycleExpirationService(
+      squadRepository,
+      queueDiscipline,
+    );
 
     this.guildSetup = new GuildSetupService();
     this.guildAccess = new GuildAccessService();
+    this.divisionRoles = new DivisionRoleService(playerRepository);
     this.resultEvidence = new ResultEvidenceService();
     this.moderationAudit = new ModerationAuditService(
       moderationAuditRepository,

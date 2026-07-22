@@ -32,7 +32,6 @@ const SetupReason = "Vora server blueprint synchronization";
 const StaffRoleKeys: readonly GuildRoleKey[] = [
   "administrator",
   "moderator",
-  "support",
   "developer",
 ];
 
@@ -133,9 +132,7 @@ export class GuildSetupService {
         });
       }
 
-      logger.info(
-        `Created Vora channel ${channel.name} in guild ${guild.id}.`,
-      );
+      logger.info(`Created Vora channel ${channel.name} in guild ${guild.id}.`);
     }
 
     await this.repairManagedResources(guild);
@@ -167,10 +164,7 @@ export class GuildSetupService {
     };
   }
 
-  private findRepairs(
-    guild: Guild,
-    plan: GuildSetupPlan,
-  ): GuildSetupRepair[] {
+  private findRepairs(guild: Guild, plan: GuildSetupPlan): GuildSetupRepair[] {
     const repairs: GuildSetupRepair[] = [];
 
     for (const roleBlueprint of GuildBlueprint.roles) {
@@ -354,9 +348,7 @@ export class GuildSetupService {
       );
     }
 
-    for (const rename of renames.filter(
-      (entry) => entry.kind === "category",
-    )) {
+    for (const rename of renames.filter((entry) => entry.kind === "category")) {
       const category = this.resolveCategory(guild, rename.currentName);
 
       if (!category) {

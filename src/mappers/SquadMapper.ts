@@ -70,7 +70,8 @@ export class SquadMapper {
                           squad.result.moderation.sanction.integrityLevelBefore,
                         integrityLevelAfter:
                           squad.result.moderation.sanction.integrityLevelAfter,
-                        bannedUntil: squad.result.moderation.sanction.bannedUntil
+                        bannedUntil: squad.result.moderation.sanction
+                          .bannedUntil
                           ? new Date(
                               squad.result.moderation.sanction.bannedUntil,
                             )
@@ -97,6 +98,21 @@ export class SquadMapper {
         : null,
       readyCheckExpiresAt: new Date(squad.readyCheckExpiresAt),
       activatedAt: squad.activatedAt ? new Date(squad.activatedAt) : null,
+      resultReportExpiresAt: squad.resultReportExpiresAt
+        ? new Date(squad.resultReportExpiresAt)
+        : null,
+      resultConfirmationExpiresAt: squad.resultConfirmationExpiresAt
+        ? new Date(squad.resultConfirmationExpiresAt)
+        : null,
+      lifecycleIncident: squad.lifecycleIncident
+        ? {
+            reason: squad.lifecycleIncident.reason,
+            responsibleDiscordIds: [
+              ...squad.lifecycleIncident.responsibleDiscordIds,
+            ],
+            occurredAt: new Date(squad.lifecycleIncident.occurredAt),
+          }
+        : null,
       closedAt: squad.closedAt ? new Date(squad.closedAt) : null,
       closedByDiscordId: squad.closedByDiscordId ?? null,
       createdAt: new Date(squad.createdAt),

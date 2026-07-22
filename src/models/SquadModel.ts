@@ -4,6 +4,7 @@ import { IntegritySanctionActions } from "../constants/integrity.js";
 import { PlayerRoles } from "../constants/playerRoles.js";
 import {
   ReadyCheckStatuses,
+  SquadLifecycleIncidentReasons,
   SquadModerationDecisions,
   SquadResults,
   SquadStatuses,
@@ -12,6 +13,7 @@ import { MatchmakingConfig } from "../domain/matchmaking/MatchmakingConfig.js";
 import type {
   SquadMetrics,
   SquadIntegritySanction,
+  SquadLifecycleIncident,
   SquadModerationReview,
   SquadParticipant,
   SquadRatingChange,
@@ -253,6 +255,31 @@ const resultSchema = new Schema<SquadResultReport>(
   },
 );
 
+const lifecycleIncidentSchema = new Schema<SquadLifecycleIncident>(
+  {
+    reason: {
+      type: String,
+      required: true,
+      enum: SquadLifecycleIncidentReasons,
+    },
+    responsibleDiscordIds: {
+      type: [String],
+      required: true,
+      validate: {
+        validator: (discordIds: string[]) =>
+          discordIds.length > 0 &&
+          new Set(discordIds).size === discordIds.length,
+        message: "A lifecycle incident requires unique responsible players.",
+      },
+    },
+    occurredAt: {
+      type: Date,
+      required: true,
+    },
+  },
+  { _id: false },
+);
+
 const squadSchema = new Schema<SquadSession>(
   {
     guildId: {
@@ -319,6 +346,18 @@ const squadSchema = new Schema<SquadSession>(
       type: Date,
       default: null,
     },
+    resultReportExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    resultConfirmationExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    lifecycleIncident: {
+      type: lifecycleIncidentSchema,
+      default: null,
+    },
     closedAt: {
       type: Date,
       default: null,
@@ -348,13 +387,25 @@ squadSchema.pre("validate", function validateCaptain() {
     );
   }
 
-  if (!this.result) {
-    return;
-  }
-
   const participantIds = new Set(
     this.participants.map((participant) => participant.discordId),
   );
+
+  const incidentIds = this.lifecycleIncident?.responsibleDiscordIds ?? [];
+
+  if (
+    incidentIds.some((discordId) => !participantIds.has(discordId)) ||
+    new Set(incidentIds).size !== incidentIds.length
+  ) {
+    this.invalidate(
+      "lifecycleIncident",
+      "Lifecycle incidents may reference only unique squad participants.",
+    );
+  }
+
+  if (!this.result) {
+    return;
+  }
 
   const responseIds = [
     ...this.result.confirmedByDiscordIds,
@@ -401,6 +452,26 @@ squadSchema.index(
   {
     name: "unique_squad_source_queue",
     unique: true,
+  },
+);
+
+squadSchema.index(
+  {
+    status: 1,
+    resultReportExpiresAt: 1,
+  },
+  {
+    name: "squad_result_report_expiration",
+  },
+);
+
+squadSchema.index(
+  {
+    status: 1,
+    resultConfirmationExpiresAt: 1,
+  },
+  {
+    name: "squad_result_confirmation_expiration",
   },
 );
 

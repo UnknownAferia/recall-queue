@@ -1,4 +1,5 @@
 import { logger } from "../config/logger.js";
+import { SquadConfig } from "../constants/squad.js";
 import { SquadModel } from "../models/SquadModel.js";
 
 export async function synchronizeSquadConfiguration(): Promise<void> {
@@ -61,10 +62,58 @@ export async function synchronizeSquadConfiguration(): Promise<void> {
     },
   ).exec();
 
+  const reportDeadlineResult = await SquadModel.updateMany(
+    {
+      status: "active",
+      $or: [
+        { resultReportExpiresAt: null },
+        { resultReportExpiresAt: { $exists: false } },
+      ],
+    },
+    [
+      {
+        $set: {
+          resultReportExpiresAt: {
+            $add: [
+              { $ifNull: ["$activatedAt", "$updatedAt"] },
+              SquadConfig.resultReportDurationMs,
+            ],
+          },
+        },
+      },
+    ],
+    { updatePipeline: true },
+  ).exec();
+
+  const confirmationDeadlineResult = await SquadModel.updateMany(
+    {
+      status: "result_pending",
+      $or: [
+        { resultConfirmationExpiresAt: null },
+        { resultConfirmationExpiresAt: { $exists: false } },
+      ],
+    },
+    [
+      {
+        $set: {
+          resultConfirmationExpiresAt: {
+            $add: [
+              { $ifNull: ["$result.reportedAt", "$updatedAt"] },
+              SquadConfig.resultConfirmationDurationMs,
+            ],
+          },
+        },
+      },
+    ],
+    { updatePipeline: true },
+  ).exec();
+
   const modifiedCount =
     captainResult.modifiedCount +
     activationResult.modifiedCount +
-    closureResult.modifiedCount;
+    closureResult.modifiedCount +
+    reportDeadlineResult.modifiedCount +
+    confirmationDeadlineResult.modifiedCount;
 
   if (modifiedCount > 0) {
     logger.info(`Updated ${modifiedCount} squad lifecycle field(s).`);

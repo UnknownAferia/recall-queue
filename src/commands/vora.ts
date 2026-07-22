@@ -14,22 +14,23 @@ const command: Command = {
     .setContexts(InteractionContextType.Guild),
 
   async execute(client, interaction): Promise<void> {
-    const player =
-      await client.services.player.getByDiscordId(
-        interaction.user.id,
-      );
+    const player = await client.services.player.getByDiscordId(
+      interaction.user.id,
+    );
 
     if (player && interaction.inCachedGuild()) {
       await client.services.guildAccess.ensureVerifiedPlayerRole(
         interaction.member,
       );
+      await client.services.divisionRoles.synchronizeMember(
+        interaction.member,
+        player,
+      );
     }
 
     await interaction.reply({
       components: [createMainMenuView(player)],
-      flags:
-        MessageFlags.Ephemeral |
-        MessageFlags.IsComponentsV2,
+      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
   },
 };

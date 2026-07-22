@@ -63,6 +63,26 @@ function createHeading(squad: SquadDto): {
   description: string;
   color: number;
 } {
+  if (squad.lifecycleIncident?.reason === "result_report_timeout") {
+    return {
+      eyebrow: "Result Report Expired",
+      title: "Squad Session Cancelled",
+      description:
+        "The captain did not submit screenshot evidence before the deadline. The incident was logged and a matchmaking cooldown was applied.",
+      color: 0xda373c,
+    };
+  }
+
+  if (squad.lifecycleIncident?.reason === "result_confirmation_timeout") {
+    return {
+      eyebrow: "Confirmation Deadline Expired",
+      title: "Staff Review Required",
+      description:
+        "Not every squad member responded to the reported result. Non-responsive players received a proportional cooldown and the case was sent to staff.",
+      color: 0xf0b232,
+    };
+  }
+
   if (squad.result?.moderation?.decision === "voided") {
     return {
       eyebrow: "Staff Review Completed",
@@ -170,6 +190,11 @@ export function createClosedSquadView(squad: SquadDto): ContainerBuilder {
             : null,
           squad.closedAt
             ? `**Closed:** <t:${Math.floor(squad.closedAt.getTime() / 1_000)}:R>`
+            : null,
+          squad.lifecycleIncident
+            ? `**Responsible:** ${squad.lifecycleIncident.responsibleDiscordIds
+                .map((discordId) => `<@${discordId}>`)
+                .join(", ")}`
             : null,
           moderationSummary ? "" : null,
           moderationSummary,

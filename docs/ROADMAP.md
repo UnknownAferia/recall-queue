@@ -1,6 +1,6 @@
 # Vora 2.0 Roadmap
 
-Last updated: 20 July 2026
+Last updated: 22 July 2026
 
 Vora is a Discord-first teammate formation platform for Mobile Legends. It
 builds compatible five-player squads that queue together against external MLBB
@@ -76,7 +76,8 @@ they are not the primary matchmaking flow.
 - Rating confidence and ten placement matches
 - Transactional rating change audit records and idempotent processing
 - Automated coverage for volatility, rating floors and concurrency safety
-- Visible divisions remain separate from internal skill rating
+- Visible Bronze-to-Apex divisions remain separate from internal skill rating
+- Cosmetic Discord division roles synchronized after verified rating changes
 
 ## ✅ Community automation bot
 
@@ -91,7 +92,7 @@ they are not the primary matchmaking flow.
 - Administrator-controlled publication of welcome, rules, announcements,
   platform guidance, command help and support panels
 
-## 🚧 Competitive integrity
+## ✅ Competitive integrity
 
 - Ready-check decline and timeout penalties with queue cooldowns
 - Atomic behavior-score deductions with a zero-point floor
@@ -106,11 +107,17 @@ they are not the primary matchmaking flow.
 - Transactional sanction audit records with incident-free monthly decay
 - Persistent cross-feature staff audit trail with a staff history view
 - Audited rating reversals and administrative corrections
+- Two-hour result-reporting deadline with captain escalation when no evidence is submitted
+- Thirty-minute result-confirmation deadline for abandoned `result_pending` squads
+- Automatic staff notification and persistent lifecycle incident records
+- Proportional penalties applied only to responsible non-reporting or non-responsive players
+- Automatic private voice cleanup after expired result cases
 
 ## ⏳ Seasons and progression
 
-- Seasons, placement state and soft resets
-- Division thresholds and seasonal leaderboards
+- Persistent season lifecycle and membership records
+- Configurable soft resets between seasons
+- Seasonal leaderboards alongside lifetime statistics
 - Personal season history
 - Achievements and optional Discord reward roles
 

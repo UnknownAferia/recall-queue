@@ -75,6 +75,27 @@ describe("Queue discipline", () => {
     assert.ok(timeout.bannedUntil > decline.bannedUntil);
   });
 
+  it("uses proportional penalties for abandoned result workflows", () => {
+    const policy = new QueueDisciplinePolicy();
+    const now = new Date("2026-07-22T12:00:00.000Z");
+    const state = { level: 0, lastPenaltyAt: null };
+    const missingReport = policy.createPenalty(
+      "result_report_timeout",
+      state,
+      now,
+    );
+    const missingConfirmation = policy.createPenalty(
+      "result_confirmation_timeout",
+      state,
+      now,
+    );
+
+    assert.equal(missingReport.behaviorScoreLoss, 8);
+    assert.equal(missingReport.cooldownMs, 30 * 60_000);
+    assert.equal(missingConfirmation.behaviorScoreLoss, 4);
+    assert.equal(missingConfirmation.cooldownMs, 10 * 60_000);
+  });
+
   it("escalates repeated incidents and decays levels over time", () => {
     const policy = new QueueDisciplinePolicy();
     const firstIncidentAt = new Date("2026-07-20T12:00:00.000Z");
@@ -104,7 +125,7 @@ describe("Queue discipline", () => {
         repositoryCalled = true;
         return true;
       },
-      applyReadyCheckPenalty: async () => {
+      applyDisciplinePenalty: async () => {
         repositoryCalled = true;
         return true;
       },
@@ -127,7 +148,7 @@ describe("Queue discipline", () => {
       findByDiscordId: async () => ({
         queue: { disciplineLevel: 0, lastPenaltyAt: null },
       }),
-      applyReadyCheckPenalty: async (discordId: string) => {
+      applyDisciplinePenalty: async (discordId: string) => {
         penalizedIds.push(discordId);
         return true;
       },

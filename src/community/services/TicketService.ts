@@ -26,7 +26,6 @@ export interface OpenTicketResult {
 const StaffRoleKeys = new Set<GuildRoleKey>([
   "administrator",
   "moderator",
-  "support",
   "developer",
 ]);
 

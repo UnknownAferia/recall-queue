@@ -1,4 +1,5 @@
 import { isSimulationDiscordId } from "../constants/developmentSimulation.js";
+import { logger } from "../config/logger.js";
 import {
   QueueDisciplinePolicy,
   type QueueDisciplineReason,
@@ -35,7 +36,7 @@ export class QueueDisciplineService {
       return false;
     }
 
-    return this.playerRepository.applyReadyCheckPenalty(
+    return this.playerRepository.applyDisciplinePenalty(
       discordId,
       this.policy.createPenalty(
         reason,
@@ -48,6 +49,29 @@ export class QueueDisciplineService {
         now,
       ),
     );
+  }
+
+  public async applyPenalties(
+    discordIds: readonly string[],
+    reason: QueueDisciplineReason,
+  ): Promise<number> {
+    const results = await Promise.allSettled(
+      [...new Set(discordIds)].map((discordId) =>
+        this.applyPenalty(discordId, reason),
+      ),
+    );
+
+    for (const result of results) {
+      if (result.status === "rejected") {
+        logger.error(
+          `Unable to apply ${reason} discipline: ${String(result.reason)}`,
+        );
+      }
+    }
+
+    return results.filter(
+      (result) => result.status === "fulfilled" && result.value,
+    ).length;
   }
 
   public async applyTimeoutPenalties(squad: SquadDto): Promise<number> {

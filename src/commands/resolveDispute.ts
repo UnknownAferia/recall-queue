@@ -88,6 +88,13 @@ const command: Command = {
         ) as IntegritySanctionAction,
       );
 
+      if ((squad.result?.ratingChanges.length ?? 0) > 0) {
+        await client.services.divisionRoles.synchronizeGuildMembers(
+          interaction.guild,
+          squad.participants.map((participant) => participant.discordId),
+        );
+      }
+
       await interaction.editReply({
         components: [createDisputeResolutionView(squad)],
       });

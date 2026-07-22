@@ -22,17 +22,23 @@ export class PlayerRepository {
     return result.modifiedCount === 1;
   }
 
-  public async applyReadyCheckPenalty(
+  public async applyDisciplinePenalty(
     discordId: string,
     penalty: QueueDisciplinePenalty,
   ): Promise<boolean> {
+    const declinedMatchIncrement =
+      penalty.reason === "decline" || penalty.reason === "timeout" ? 1 : 0;
+
     const result = await PlayerModel.updateOne(
       { "discord.id": discordId },
       [
         {
           $set: {
             "queue.declinedMatches": {
-              $add: [{ $ifNull: ["$queue.declinedMatches", 0] }, 1],
+              $add: [
+                { $ifNull: ["$queue.declinedMatches", 0] },
+                declinedMatchIncrement,
+              ],
             },
             "queue.bannedUntil": {
               $max: [

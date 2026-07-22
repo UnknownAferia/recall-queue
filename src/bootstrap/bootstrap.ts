@@ -12,6 +12,7 @@ import { registerInteractionHandler } from "../handlers/registerInteractionHandl
 import { registerVoiceQueueHandler } from "../handlers/registerVoiceQueueHandler.js";
 import { registerSquadVoiceHandler } from "../handlers/registerSquadVoiceHandler.js";
 import { startReadyCheckExpirationJob } from "../jobs/readyCheckExpirationJob.js";
+import { startResultLifecycleExpirationJob } from "../jobs/resultLifecycleExpirationJob.js";
 import { formatError } from "../utils/formatError.js";
 import { ServiceHeartbeatService } from "../services/ServiceHeartbeatService.js";
 
@@ -29,6 +30,7 @@ export async function bootstrap(client: VoraClient): Promise<void> {
     registerVoiceQueueHandler(client);
     registerSquadVoiceHandler(client);
     startReadyCheckExpirationJob(client);
+    startResultLifecycleExpirationJob(client);
 
     const heartbeat = new ServiceHeartbeatService("core");
 

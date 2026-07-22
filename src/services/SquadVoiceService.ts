@@ -21,12 +21,7 @@ import { SquadVoiceUnavailableError } from "./errors/SquadVoiceUnavailableError.
 
 const SquadVoiceChannelPrefix = "🔒｜squad-";
 const OpenSquadStatuses = new Set(["active", "result_pending"]);
-const StaffRoleKeys = new Set([
-  "administrator",
-  "moderator",
-  "support",
-  "developer",
-]);
+const StaffRoleKeys = new Set(["administrator", "moderator", "developer"]);
 
 export interface SquadVoiceReconciliationResult {
   readonly categoryAvailable: boolean;

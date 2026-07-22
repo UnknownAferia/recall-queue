@@ -294,6 +294,8 @@ export class SquadRepository {
   public async activateReadySquad(
     squadId: string,
   ): Promise<SquadDocument | null> {
+    const activatedAt = new Date();
+
     return SquadModel.findOneAndUpdate(
       {
         _id: squadId,
@@ -315,7 +317,12 @@ export class SquadRepository {
       {
         $set: {
           status: "active",
-          activatedAt: new Date(),
+          activatedAt,
+          resultReportExpiresAt: new Date(
+            activatedAt.getTime() + SquadConfig.resultReportDurationMs,
+          ),
+          resultConfirmationExpiresAt: null,
+          lifecycleIncident: null,
         },
       },
       {
@@ -406,6 +413,8 @@ export class SquadRepository {
           status,
           closedAt: new Date(),
           closedByDiscordId,
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: null,
         },
       },
       {
@@ -429,12 +438,17 @@ export class SquadRepository {
         _id: squadId,
         guildId,
         status: "active",
+        resultReportExpiresAt: { $gt: reportedAt },
         captainDiscordId,
         "participants.discordId": captainDiscordId,
       },
       {
         $set: {
           status: "result_pending",
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: new Date(
+            reportedAt.getTime() + SquadConfig.resultConfirmationDurationMs,
+          ),
           result: {
             outcome,
             reportedByDiscordId: captainDiscordId,
@@ -472,6 +486,7 @@ export class SquadRepository {
         _id: squadId,
         guildId,
         status: "result_pending",
+        resultConfirmationExpiresAt: { $gt: new Date() },
         "participants.discordId": discordId,
         "result.confirmedByDiscordIds": {
           $ne: discordId,
@@ -517,6 +532,8 @@ export class SquadRepository {
           "result.statisticsProcessedAt": verifiedAt,
           closedAt: verifiedAt,
           closedByDiscordId: null,
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: null,
         },
       },
       {
@@ -569,6 +586,8 @@ export class SquadRepository {
           },
           closedAt: moderatedAt,
           closedByDiscordId: moderatorDiscordId,
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: null,
         },
       },
       {
@@ -616,6 +635,8 @@ export class SquadRepository {
           },
           closedAt: moderatedAt,
           closedByDiscordId: moderatorDiscordId,
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: null,
         },
       },
       {
@@ -666,6 +687,8 @@ export class SquadRepository {
           status: "disputed",
           closedAt: new Date(),
           closedByDiscordId: disputedByDiscordId,
+          resultReportExpiresAt: null,
+          resultConfirmationExpiresAt: null,
         },
       },
       {
@@ -673,6 +696,125 @@ export class SquadRepository {
         runValidators: true,
       },
     ).exec();
+  }
+
+  public async expireOverdueResultReports(
+    now = new Date(),
+  ): Promise<SquadDocument[]> {
+    const overdueSquads = await SquadModel.find(
+      {
+        status: "active",
+        resultReportExpiresAt: { $ne: null, $lte: now },
+      },
+      { _id: 1, captainDiscordId: 1 },
+    )
+      .sort({ resultReportExpiresAt: 1 })
+      .limit(SquadConfig.expirationBatchSize)
+      .exec();
+
+    const expiredSquads = await Promise.all(
+      overdueSquads.map((squad) =>
+        SquadModel.findOneAndUpdate(
+          {
+            _id: squad.id,
+            status: "active",
+            resultReportExpiresAt: { $ne: null, $lte: now },
+          },
+          {
+            $set: {
+              status: "cancelled",
+              closedAt: now,
+              closedByDiscordId: null,
+              resultReportExpiresAt: null,
+              resultConfirmationExpiresAt: null,
+              lifecycleIncident: {
+                reason: "result_report_timeout",
+                responsibleDiscordIds: [squad.captainDiscordId],
+                occurredAt: now,
+              },
+            },
+          },
+          {
+            returnDocument: "after",
+            runValidators: true,
+          },
+        ).exec(),
+      ),
+    );
+
+    return expiredSquads.filter(
+      (squad): squad is SquadDocument => squad !== null,
+    );
+  }
+
+  public async expireOverdueResultConfirmations(
+    now = new Date(),
+  ): Promise<SquadDocument[]> {
+    const overdueSquads = await SquadModel.find({
+      status: "result_pending",
+      resultConfirmationExpiresAt: { $ne: null, $lte: now },
+      result: { $ne: null },
+    })
+      .sort({ resultConfirmationExpiresAt: 1 })
+      .limit(SquadConfig.expirationBatchSize)
+      .exec();
+
+    const expiredSquads = await Promise.all(
+      overdueSquads.map((squad) => {
+        if (!squad.result) {
+          return null;
+        }
+
+        const confirmedIds = [...squad.result.confirmedByDiscordIds];
+        const disputedIds = [...squad.result.disputedByDiscordIds];
+        const respondedIds = new Set([...confirmedIds, ...disputedIds]);
+        const responsibleDiscordIds = squad.participants
+          .map((participant) => participant.discordId)
+          .filter((discordId) => !respondedIds.has(discordId));
+
+        if (responsibleDiscordIds.length === 0) {
+          return null;
+        }
+
+        return SquadModel.findOneAndUpdate(
+          {
+            _id: squad.id,
+            status: "result_pending",
+            resultConfirmationExpiresAt: { $ne: null, $lte: now },
+            "result.confirmedByDiscordIds": {
+              $size: confirmedIds.length,
+              $all: confirmedIds,
+            },
+            "result.disputedByDiscordIds": {
+              $size: disputedIds.length,
+              $all: disputedIds,
+            },
+          },
+          {
+            $set: {
+              status: "disputed",
+              closedAt: now,
+              closedByDiscordId: null,
+              resultReportExpiresAt: null,
+              resultConfirmationExpiresAt: null,
+              lifecycleIncident: {
+                reason: "result_confirmation_timeout",
+                responsibleDiscordIds,
+                occurredAt: now,
+              },
+            },
+          },
+          {
+            returnDocument: "after",
+            runValidators: true,
+          },
+        ).exec();
+      }),
+    );
+
+    return expiredSquads.filter(
+      (squad): squad is SquadDocument => squad !== null,
+    );
   }
 
   private createSourceQueueKey(

@@ -15,10 +15,9 @@ const command: Command = {
     .setContexts(InteractionContextType.Guild),
 
   async execute(client, interaction): Promise<void> {
-    const player =
-      await client.services.player.getByDiscordId(
-        interaction.user.id,
-      );
+    const player = await client.services.player.getByDiscordId(
+      interaction.user.id,
+    );
 
     if (!player) {
       await interaction.reply({
@@ -29,19 +28,22 @@ const command: Command = {
             "You must register your Mobile Legends account before viewing your profile. Use `/register` to get started.",
           ),
         ],
-        flags:
-          MessageFlags.Ephemeral |
-          MessageFlags.IsComponentsV2,
+        flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
       });
 
       return;
     }
 
+    if (interaction.inCachedGuild()) {
+      await client.services.divisionRoles.synchronizeMember(
+        interaction.member,
+        player,
+      );
+    }
+
     await interaction.reply({
       components: [createPlayerProfileView(player)],
-      flags:
-        MessageFlags.Ephemeral |
-        MessageFlags.IsComponentsV2,
+      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
   },
 };

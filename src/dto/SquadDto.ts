@@ -1,5 +1,6 @@
 import type {
   ReadyCheckStatus,
+  SquadLifecycleIncidentReason,
   SquadModerationDecision,
   SquadResult,
   SquadStatus,
@@ -82,6 +83,12 @@ export interface SquadRatingChangeDto {
   readonly placementMatch: boolean;
 }
 
+export interface SquadLifecycleIncidentDto {
+  readonly reason: SquadLifecycleIncidentReason;
+  readonly responsibleDiscordIds: readonly string[];
+  readonly occurredAt: Date;
+}
+
 export interface SquadDto {
   readonly id: string;
   readonly guildId: string;
@@ -93,6 +100,9 @@ export interface SquadDto {
   readonly result: SquadResultReportDto | null;
   readonly readyCheckExpiresAt: Date;
   readonly activatedAt: Date | null;
+  readonly resultReportExpiresAt?: Date | null;
+  readonly resultConfirmationExpiresAt?: Date | null;
+  readonly lifecycleIncident?: SquadLifecycleIncidentDto | null;
   readonly closedAt: Date | null;
   readonly closedByDiscordId: string | null;
   readonly createdAt: Date;

@@ -20,10 +20,7 @@ function createEmptyInventory(): GuildSetupInventory {
 
 function createCompleteInventory(): GuildSetupInventory {
   const categoryNames = new Map(
-    GuildBlueprint.categories.map((category) => [
-      category.key,
-      category.name,
-    ]),
+    GuildBlueprint.categories.map((category) => [category.key, category.name]),
   );
 
   return {
@@ -49,9 +46,7 @@ function createLegacyInventory(): GuildSetupInventory {
 
   return {
     roleNames: new Set(
-      GuildBlueprint.roles.map(
-        (role) => role.legacyNames?.[0] ?? role.name,
-      ),
+      GuildBlueprint.roles.map((role) => role.legacyNames?.[0] ?? role.name),
     ),
     categories: new Set(categoryNames.values()),
     channels: GuildBlueprint.channels.map((channel) => ({
@@ -117,12 +112,13 @@ describe("Guild setup", () => {
     assert.equal(plan.rolesToCreate.length, 0);
     assert.equal(plan.categoriesToCreate.length, 0);
     assert.equal(plan.channelsToCreate.length, 0);
-    assert.equal(plan.renamesRequired.length, 5);
+    assert.equal(plan.renamesRequired.length, 6);
     assert.equal(plan.isComplete, false);
     assert.deepEqual(
       plan.renamesRequired.map((rename) => rename.name),
       [
-        "Vora Admin",
+        GuildBlueprint.roles.find((role) => role.key === "administrator")!.name,
+        GuildBlueprint.roles.find((role) => role.key === "moderator")!.name,
         GuildBlueprint.categories.find((category) => category.key === "vora")!
           .name,
         GuildBlueprint.channels.find(

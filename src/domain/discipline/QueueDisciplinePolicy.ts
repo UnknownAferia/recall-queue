@@ -1,4 +1,8 @@
-export type QueueDisciplineReason = "decline" | "timeout";
+export type QueueDisciplineReason =
+  | "decline"
+  | "timeout"
+  | "result_report_timeout"
+  | "result_confirmation_timeout";
 
 export interface QueueDisciplinePenalty {
   readonly reason: QueueDisciplineReason;
@@ -17,6 +21,14 @@ export interface QueueDisciplineState {
 const PenaltyRules = Object.freeze({
   decline: { behaviorScoreLoss: 3, cooldownMs: 2 * 60_000 },
   timeout: { behaviorScoreLoss: 5, cooldownMs: 5 * 60_000 },
+  result_report_timeout: {
+    behaviorScoreLoss: 8,
+    cooldownMs: 30 * 60_000,
+  },
+  result_confirmation_timeout: {
+    behaviorScoreLoss: 4,
+    cooldownMs: 10 * 60_000,
+  },
 });
 
 const DisciplineConfig = Object.freeze({

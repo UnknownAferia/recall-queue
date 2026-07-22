@@ -223,7 +223,10 @@ export class TeamFormationService {
     if (
       !currentSquad ||
       currentSquad.guildId !== guildId ||
-      currentSquad.status !== "active"
+      currentSquad.status !== "active" ||
+      (currentSquad.resultReportExpiresAt !== null &&
+        currentSquad.resultReportExpiresAt !== undefined &&
+        currentSquad.resultReportExpiresAt.getTime() <= Date.now())
     ) {
       throw new ActiveSquadUnavailableError();
     }
@@ -292,7 +295,10 @@ export class TeamFormationService {
     if (
       !currentSquad ||
       currentSquad.guildId !== guildId ||
-      currentSquad.status !== "active"
+      currentSquad.status !== "active" ||
+      (currentSquad.resultReportExpiresAt !== null &&
+        currentSquad.resultReportExpiresAt !== undefined &&
+        currentSquad.resultReportExpiresAt.getTime() <= Date.now())
     ) {
       throw new SquadResultUnavailableError();
     }
@@ -352,7 +358,10 @@ export class TeamFormationService {
       !currentSquad ||
       currentSquad.guildId !== guildId ||
       currentSquad.status !== "result_pending" ||
-      !currentSquad.result
+      !currentSquad.result ||
+      (currentSquad.resultConfirmationExpiresAt !== null &&
+        currentSquad.resultConfirmationExpiresAt !== undefined &&
+        currentSquad.resultConfirmationExpiresAt.getTime() <= Date.now())
     ) {
       throw new SquadResultUnavailableError();
     }

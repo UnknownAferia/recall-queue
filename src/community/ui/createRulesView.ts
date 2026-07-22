@@ -2,15 +2,21 @@ import type { ContainerBuilder } from "discord.js";
 
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createRulesView(): ContainerBuilder {
-  return ViewFactory.createContainer(0xed4245)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Community Standards",
-        "Vora Rules",
-        "Joining and using Vora means accepting these community and competitive-integrity rules.",
-      ),
-    )
+export function createRulesView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
+  const view = ViewFactory.createContainer(0xed4245);
+
+  ViewFactory.addHeading(
+    view,
+    "Community Standards",
+    "Vora Rules",
+    "Joining and using Vora means accepting these community and competitive-integrity rules.",
+    iconAttachmentName,
+    "Vora community rules",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

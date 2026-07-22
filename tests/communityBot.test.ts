@@ -116,6 +116,11 @@ describe("Vora Community bot", () => {
     );
     const help = JSON.stringify(createHelpView().toJSON());
     const ticket = JSON.stringify(createTicketLauncherView().toJSON());
+    const illustratedRegister = JSON.stringify(
+      createRegisterView(
+        BrandAssets.panelIcons.register.attachmentName,
+      ).toJSON(),
+    );
     const onboarding = [
       createWelcomeView(BrandAssets.banner.attachmentName),
       createRulesView(),
@@ -139,6 +144,8 @@ describe("Vora Community bot", () => {
     assert.match(help, /Help Center/);
     assert.match(help, new RegExp(CommunityCustomIds.ticket.open));
     assert.match(ticket, /Open a Ticket/);
+    assert.match(illustratedRegister, /attachment:\/\/vora-verify\.png/);
+    assert.match(illustratedRegister, /Vora account verification/);
     assert.match(onboarding, /Find Better Teammates/);
     assert.match(onboarding, /Vora Rules/);
     assert.match(onboarding, /retained for up to 7 days/);
@@ -146,6 +153,10 @@ describe("Vora Community bot", () => {
     assert.match(onboarding, /competitive match record/);
     assert.match(onboarding, /Vora Announcements/);
     assert.match(onboarding, /How Vora Works/);
+    assert.match(onboarding, /Register & Verify/);
+    assert.match(onboarding, /Registration alone does not unlock matchmaking/);
+    assert.match(onboarding, /\/verify-account/);
+    assert.match(onboarding, /Matchmaking remains locked/);
     assert.match(onboarding, /Competitive Hub/);
     assert.match(onboarding, /attachment:\/\/Vora_Banner\.png/);
     assert.match(alphaAnnouncement, /Vora Is Ready for Its First Players/);

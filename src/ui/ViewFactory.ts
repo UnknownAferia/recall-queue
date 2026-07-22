@@ -1,8 +1,10 @@
 import {
   ContainerBuilder,
+  SectionBuilder,
   SeparatorBuilder,
   SeparatorSpacingSize,
   TextDisplayBuilder,
+  ThumbnailBuilder,
 } from "discord.js";
 
 import { BotConfig } from "../config/bot.js";
@@ -27,6 +29,31 @@ export class ViewFactory {
       ]
         .filter((line): line is string => Boolean(line))
         .join("\n"),
+    );
+  }
+
+  public static addHeading(
+    container: ContainerBuilder,
+    eyebrow: string,
+    title: string,
+    description?: string,
+    thumbnailAttachmentName?: string,
+    thumbnailDescription?: string,
+  ): ContainerBuilder {
+    const heading = this.heading(eyebrow, title, description);
+
+    if (!thumbnailAttachmentName) {
+      return container.addTextDisplayComponents(heading);
+    }
+
+    return container.addSectionComponents(
+      new SectionBuilder()
+        .addTextDisplayComponents(heading)
+        .setThumbnailAccessory(
+          new ThumbnailBuilder()
+            .setURL(`attachment://${thumbnailAttachmentName}`)
+            .setDescription(thumbnailDescription ?? `${title} icon`),
+        ),
     );
   }
 

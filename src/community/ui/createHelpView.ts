@@ -18,15 +18,21 @@ function createTicketButton(): ActionRowBuilder<ButtonBuilder> {
   );
 }
 
-export function createHelpView(): ContainerBuilder {
-  return ViewFactory.createContainer(0x5865f2)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Vora Support",
-        "Help Center",
-        "Everything needed to enter competitive teammate matchmaking.",
-      ),
-    )
+export function createHelpView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
+  const view = ViewFactory.createContainer(0x5865f2);
+
+  ViewFactory.addHeading(
+    view,
+    "Vora Support",
+    "Help Center",
+    "Everything needed to enter competitive teammate matchmaking.",
+    iconAttachmentName,
+    "Vora support",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

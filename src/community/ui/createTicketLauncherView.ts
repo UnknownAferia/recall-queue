@@ -8,7 +8,9 @@ import {
 import { CommunityCustomIds } from "../../constants/community.js";
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createTicketLauncherView(): ContainerBuilder {
+export function createTicketLauncherView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
   const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(CommunityCustomIds.ticket.open)
@@ -17,14 +19,18 @@ export function createTicketLauncherView(): ContainerBuilder {
       .setStyle(ButtonStyle.Success),
   );
 
-  return ViewFactory.createContainer(0x57f287)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Private Support",
-        "Open a Ticket",
-        "Create a private channel shared only with you and the Vora staff team.",
-      ),
-    )
+  const view = ViewFactory.createContainer(0x57f287);
+
+  ViewFactory.addHeading(
+    view,
+    "Private Support",
+    "Open a Ticket",
+    "Create a private channel shared only with you and the Vora staff team.",
+    iconAttachmentName,
+    "Private Vora support ticket",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

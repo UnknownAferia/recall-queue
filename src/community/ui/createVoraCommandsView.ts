@@ -2,15 +2,21 @@ import type { ContainerBuilder } from "discord.js";
 
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createVoraCommandsView(): ContainerBuilder {
-  return ViewFactory.createContainer(0x57f287)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Vora Core",
-        "Competitive Hub",
-        "Use this channel for Vora commands and private interaction menus.",
-      ),
-    )
+export function createVoraCommandsView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
+  const view = ViewFactory.createContainer(0x57f287);
+
+  ViewFactory.addHeading(
+    view,
+    "Vora Core",
+    "Competitive Hub",
+    "Use this channel for Vora commands and private interaction menus.",
+    iconAttachmentName,
+    "Vora commands",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

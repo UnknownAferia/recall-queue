@@ -2,15 +2,21 @@ import type { ContainerBuilder } from "discord.js";
 
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createAnnouncementsView(): ContainerBuilder {
-  return ViewFactory.createContainer(0x3498db)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Official Updates",
-        "Vora Announcements",
-        "Platform news, matchmaking changes, maintenance notices and season updates are published here.",
-      ),
-    )
+export function createAnnouncementsView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
+  const view = ViewFactory.createContainer(0x3498db);
+
+  ViewFactory.addHeading(
+    view,
+    "Official Updates",
+    "Vora Announcements",
+    "Platform news, matchmaking changes, maintenance notices and season updates are published here.",
+    iconAttachmentName,
+    "Vora announcements",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

@@ -2,15 +2,21 @@ import type { ContainerBuilder } from "discord.js";
 
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createHowVoraWorksView(): ContainerBuilder {
-  return ViewFactory.createContainer(0x9b59b6)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Platform Guide",
-        "How Vora Works",
-        "Vora finds four compatible teammates for one complete five-player Mobile Legends squad.",
-      ),
-    )
+export function createHowVoraWorksView(
+  iconAttachmentName?: string,
+): ContainerBuilder {
+  const view = ViewFactory.createContainer(0x9b59b6);
+
+  ViewFactory.addHeading(
+    view,
+    "Platform Guide",
+    "How Vora Works",
+    "Vora finds four compatible teammates for one complete five-player Mobile Legends squad.",
+    iconAttachmentName,
+    "Vora matchmaking",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

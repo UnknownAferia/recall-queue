@@ -12,6 +12,23 @@ function asset(fileName: string): BrandAsset {
   });
 }
 
+function iconAsset(
+  attachmentName: string,
+  category: string,
+  fileName: string,
+): BrandAsset {
+  return Object.freeze({
+    attachmentName,
+    filePath: resolve(
+      process.cwd(),
+      "assets",
+      "icons",
+      category,
+      fileName,
+    ),
+  });
+}
+
 export const BrandColors = Object.freeze({
   midnight: 0x081220,
   slate: 0x182232,
@@ -31,4 +48,47 @@ export const BrandAssets = Object.freeze({
   iconOverview: asset("Vora_Icons.png"),
   individualIconOverview: asset("Vora_Single_Icons.png"),
   designConcept: asset("Vora_Design_Concept.png"),
+  panelIcons: Object.freeze({
+    rules: iconAsset("vora-rules.png", "02-server-channels", "rules.png"),
+    announcements: iconAsset(
+      "vora-announcements.png",
+      "02-server-channels",
+      "announcements.png",
+    ),
+    howVoraWorks: iconAsset(
+      "vora-matchmaking.png",
+      "03-gaming-match",
+      "matchmaking.png",
+    ),
+    register: iconAsset(
+      "vora-verify.png",
+      "02-server-channels",
+      "verify.png",
+    ),
+    commands: iconAsset(
+      "vora-commands.png",
+      "02-server-channels",
+      "commands.png",
+    ),
+    help: iconAsset(
+      "vora-support.png",
+      "02-server-channels",
+      "support.png",
+    ),
+    tickets: iconAsset(
+      "vora-tickets.png",
+      "02-server-channels",
+      "tickets.png",
+    ),
+    leaderboard: iconAsset(
+      "vora-victory.png",
+      "03-gaming-match",
+      "victory.png",
+    ),
+    matchmakingStatus: iconAsset(
+      "vora-live-matchmaking.png",
+      "03-gaming-match",
+      "matchmaking.png",
+    ),
+  }),
 });

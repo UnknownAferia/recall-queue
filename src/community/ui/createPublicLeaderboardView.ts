@@ -52,15 +52,20 @@ export function createPublicLeaderboardView(
   players: readonly PlayerDto[],
   updatedAt: Date,
   seasonal: SeasonLeaderboardDto | null = null,
+  iconAttachmentName?: string,
 ): ContainerBuilder {
-  return ViewFactory.createContainer(0xf1c40f)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Vora Rankings",
-        "Competitive Leaderboards",
-        "Season performance and long-term Vora matchmaking rating.",
-      ),
-    )
+  const view = ViewFactory.createContainer(0xf1c40f);
+
+  ViewFactory.addHeading(
+    view,
+    "Vora Rankings",
+    "Competitive Leaderboards",
+    "Season performance and long-term Vora matchmaking rating.",
+    iconAttachmentName,
+    "Vora competitive victory",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(ViewFactory.text(seasonalSection(seasonal)))
     .addSeparatorComponents(ViewFactory.separator())

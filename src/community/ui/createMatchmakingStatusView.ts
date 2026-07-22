@@ -5,6 +5,7 @@ import { ViewFactory } from "../../ui/ViewFactory.js";
 
 export function createMatchmakingStatusView(
   status: MatchmakingStatusSnapshot,
+  iconAttachmentName?: string,
 ): ContainerBuilder {
   const operational = status.coreOnline && status.queueStatus === "open";
   const headline = operational
@@ -16,14 +17,20 @@ export function createMatchmakingStatusView(
     ? `<t:${Math.floor(status.coreHeartbeatAt.getTime() / 1_000)}:R>`
     : "No heartbeat recorded";
 
-  return ViewFactory.createContainer(operational ? 0x23a55a : 0xed4245)
-    .addTextDisplayComponents(
-      ViewFactory.heading(
-        "Live Service Information",
-        "Matchmaking Status",
-        "Current Vora Core health and teammate-pool activity.",
-      ),
-    )
+  const view = ViewFactory.createContainer(
+    operational ? 0x23a55a : 0xed4245,
+  );
+
+  ViewFactory.addHeading(
+    view,
+    "Live Service Information",
+    "Matchmaking Status",
+    "Current Vora Core health and teammate-pool activity.",
+    iconAttachmentName,
+    "Live Vora matchmaking status",
+  );
+
+  return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

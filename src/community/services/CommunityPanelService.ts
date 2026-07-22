@@ -48,32 +48,47 @@ const StaticPanelDefinitions: readonly StaticPanelDefinition[] = [
     createView: createWelcomeView,
     asset: BrandAssets.banner,
   },
-  { channelKey: "rules", kind: "rules", createView: createRulesView },
+  {
+    channelKey: "rules",
+    kind: "rules",
+    createView: createRulesView,
+    asset: BrandAssets.panelIcons.rules,
+  },
   {
     channelKey: "announcements",
     kind: "announcements",
     createView: createAnnouncementsView,
+    asset: BrandAssets.panelIcons.announcements,
   },
   {
     channelKey: "howVoraWorks",
     kind: "how_vora_works",
     createView: createHowVoraWorksView,
+    asset: BrandAssets.panelIcons.howVoraWorks,
   },
   {
     channelKey: "register",
     kind: "register",
     createView: createRegisterView,
+    asset: BrandAssets.panelIcons.register,
   },
   {
     channelKey: "voraCommands",
     kind: "vora_commands",
     createView: createVoraCommandsView,
+    asset: BrandAssets.panelIcons.commands,
   },
-  { channelKey: "help", kind: "help", createView: createHelpView },
+  {
+    channelKey: "help",
+    kind: "help",
+    createView: createHelpView,
+    asset: BrandAssets.panelIcons.help,
+  },
   {
     channelKey: "openTicket",
     kind: "ticket_launcher",
     createView: createTicketLauncherView,
+    asset: BrandAssets.panelIcons.tickets,
   },
 ];
 
@@ -142,6 +157,10 @@ export class CommunityPanelService {
       this.seasons?.getLeaderboard(CommunityConfig.leaderboardLimit) ?? null,
     ]);
 
+    const asset = existsSync(BrandAssets.panelIcons.leaderboard.filePath)
+      ? BrandAssets.panelIcons.leaderboard
+      : undefined;
+
     await this.publisher.publish(
       channel,
       "leaderboard",
@@ -149,7 +168,9 @@ export class CommunityPanelService {
         players.map((player) => PlayerMapper.toDto(player)),
         new Date(),
         seasonal,
+        asset?.attachmentName,
       ),
+      asset,
     );
   }
 
@@ -190,10 +211,17 @@ export class CommunityPanelService {
 
     const status = await this.data.getMatchmakingStatus(guild.id);
 
+    const asset = existsSync(
+      BrandAssets.panelIcons.matchmakingStatus.filePath,
+    )
+      ? BrandAssets.panelIcons.matchmakingStatus
+      : undefined;
+
     await this.publisher.publish(
       channel,
       "matchmaking_status",
-      createMatchmakingStatusView(status),
+      createMatchmakingStatusView(status, asset?.attachmentName),
+      asset,
     );
   }
 }

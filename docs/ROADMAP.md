@@ -91,6 +91,7 @@ they are not the primary matchmaking flow.
 - Requester/staff ticket closure with retained read-only channels
 - Administrator-controlled publication of welcome, rules, announcements,
   platform guidance, command help and support panels
+- Idempotent administrator publication of branded release announcements
 
 ## ✅ Competitive integrity
 

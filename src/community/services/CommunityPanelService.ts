@@ -10,6 +10,7 @@ import {
 import { PlayerMapper } from "../../mappers/PlayerMapper.js";
 import type { CommunityDataRepository } from "../../repositories/CommunityDataRepository.js";
 import { createAnnouncementsView } from "../ui/createAnnouncementsView.js";
+import { createAlphaLaunchAnnouncementView } from "../ui/createAlphaLaunchAnnouncementView.js";
 import { createHelpView } from "../ui/createHelpView.js";
 import { createHowVoraWorksView } from "../ui/createHowVoraWorksView.js";
 import { createMatchmakingStatusView } from "../ui/createMatchmakingStatusView.js";
@@ -33,6 +34,11 @@ interface StaticPanelDefinition {
 export interface StaticPanelSynchronizationResult {
   readonly published: readonly CommunityPanelKind[];
   readonly missingChannelKeys: readonly string[];
+}
+
+export interface AnnouncementPublicationResult {
+  readonly channelId: string;
+  readonly messageId: string;
 }
 
 const StaticPanelDefinitions: readonly StaticPanelDefinition[] = [
@@ -145,6 +151,31 @@ export class CommunityPanelService {
         seasonal,
       ),
     );
+  }
+
+  public async publishAlphaLaunchAnnouncement(
+    guild: Guild,
+  ): Promise<AnnouncementPublicationResult | null> {
+    const channel = await this.channels.resolveTextChannel(
+      guild,
+      "announcements",
+    );
+
+    if (!channel) {
+      return null;
+    }
+
+    const asset = existsSync(BrandAssets.alphaBanner.filePath)
+      ? BrandAssets.alphaBanner
+      : undefined;
+    const messageId = await this.publisher.publish(
+      channel,
+      "alpha_launch_announcement",
+      createAlphaLaunchAnnouncementView(asset?.attachmentName),
+      asset,
+    );
+
+    return { channelId: channel.id, messageId };
   }
 
   public async synchronizeMatchmakingStatus(guild: Guild): Promise<void> {

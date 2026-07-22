@@ -12,6 +12,10 @@ import {
 
 import type { CommunityClient } from "../src/community/CommunityClient.js";
 import {
+  executePublishAnnouncementCommand,
+  publishAnnouncementCommandData,
+} from "../src/community/commands/publishAnnouncement.js";
+import {
   executePublishCommunityCommand,
   publishCommunityCommandData,
 } from "../src/community/commands/publishCommunity.js";
@@ -35,6 +39,7 @@ import { CommunityPanelService } from "../src/community/services/CommunityPanelS
 import type { ManagedCommunityChannelResolver } from "../src/community/services/ManagedCommunityChannelResolver.js";
 import { TicketService } from "../src/community/services/TicketService.js";
 import { createAnnouncementsView } from "../src/community/ui/createAnnouncementsView.js";
+import { createAlphaLaunchAnnouncementView } from "../src/community/ui/createAlphaLaunchAnnouncementView.js";
 import { createHelpView } from "../src/community/ui/createHelpView.js";
 import { createHowVoraWorksView } from "../src/community/ui/createHowVoraWorksView.js";
 import { createRegisterView } from "../src/community/ui/createRegisterView.js";
@@ -121,6 +126,11 @@ describe("Vora Community bot", () => {
     ]
       .map((view) => JSON.stringify(view.toJSON()))
       .join("\n");
+    const alphaAnnouncement = JSON.stringify(
+      createAlphaLaunchAnnouncementView(
+        BrandAssets.alphaBanner.attachmentName,
+      ).toJSON(),
+    );
 
     assert.match(leaderboard, /Competitive Leaderboards/);
     assert.match(leaderboard, /1,250 RSR/);
@@ -138,6 +148,87 @@ describe("Vora Community bot", () => {
     assert.match(onboarding, /How Vora Works/);
     assert.match(onboarding, /Competitive Hub/);
     assert.match(onboarding, /attachment:\/\/Vora_Banner\.png/);
+    assert.match(alphaAnnouncement, /Vora Is Ready for Its First Players/);
+    assert.match(alphaAnnouncement, /Five-player teammate matchmaking/);
+    assert.match(alphaAnnouncement, /Competitive integrity/);
+    assert.match(alphaAnnouncement, /Rating and progression/);
+    assert.match(
+      alphaAnnouncement,
+      /attachment:\/\/Vora_Alpha_Banner\.png/,
+    );
+  });
+
+  it("publishes the alpha announcement as one managed message", async () => {
+    let publishedKind: CommunityPanelKind | null = null;
+    let publishedAssetName: string | null = null;
+    const publisher = {
+      publish: async (
+        _channel: TextChannel,
+        kind: CommunityPanelKind,
+        _view: unknown,
+        asset?: { attachmentName: string },
+      ) => {
+        publishedKind = kind;
+        publishedAssetName = asset?.attachmentName ?? null;
+        return "announcement-message-id";
+      },
+    } as unknown as CommunityPanelPublisher;
+    const channel = {
+      id: "announcements-channel-id",
+    } as TextChannel;
+    const channels = {
+      resolveTextChannel: async (_guild: Guild, channelKey: string) =>
+        channelKey === "announcements" ? channel : null,
+    } as ManagedCommunityChannelResolver;
+    const service = new CommunityPanelService(
+      {} as CommunityDataRepository,
+      publisher,
+      channels,
+    );
+
+    const result = await service.publishAlphaLaunchAnnouncement({} as Guild);
+
+    assert.deepEqual(result, {
+      channelId: channel.id,
+      messageId: "announcement-message-id",
+    });
+    assert.equal(publishedKind, "alpha_launch_announcement");
+    assert.equal(publishedAssetName, BrandAssets.alphaBanner.attachmentName);
+  });
+
+  it("publishes the milestone through an administrator-only command", async () => {
+    const replies: unknown[] = [];
+    const edits: unknown[] = [];
+    let publications = 0;
+    const client = {
+      panels: {
+        publishAlphaLaunchAnnouncement: async () => {
+          publications += 1;
+          return {
+            channelId: "announcements-channel-id",
+            messageId: "announcement-message-id",
+          };
+        },
+      },
+    } as unknown as CommunityClient;
+    const interaction = {
+      inCachedGuild: () => true,
+      guild: {},
+      memberPermissions: {
+        has: (permission: bigint) =>
+          permission === PermissionFlagsBits.Administrator,
+      },
+      reply: async (options: unknown) => replies.push(options),
+      editReply: async (options: unknown) => edits.push(options),
+    } as unknown as ChatInputCommandInteraction;
+
+    await executePublishAnnouncementCommand(client, interaction);
+
+    assert.equal(publishAnnouncementCommandData.name, "publish-announcement");
+    assert.equal(publications, 1);
+    assert.equal(replies.length, 1);
+    assert.equal(edits.length, 1);
+    assert.match(JSON.stringify(edits[0]), /Announcement Published/);
   });
 
   it("publishes every managed static panel and reports missing channels", async () => {

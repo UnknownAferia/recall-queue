@@ -11,6 +11,10 @@ import { createAlertView } from "../ui/createAlertView.js";
 import { formatError } from "../utils/formatError.js";
 import type { CommunityClient } from "./CommunityClient.js";
 import {
+  executePublishAnnouncementCommand,
+  PublishAnnouncementCommandName,
+} from "./commands/publishAnnouncement.js";
+import {
   executePublishCommunityCommand,
   PublishCommunityCommandName,
 } from "./commands/publishCommunity.js";
@@ -41,7 +45,8 @@ async function respondWithError(
     (interaction.isModalSubmit() &&
       interaction.customId === CommunityCustomIds.ticket.create) ||
     (interaction.isChatInputCommand() &&
-      interaction.commandName === PublishCommunityCommandName);
+      (interaction.commandName === PublishCommunityCommandName ||
+        interaction.commandName === PublishAnnouncementCommandName));
 
   try {
     if (
@@ -71,6 +76,14 @@ export function registerCommunityInteractionHandler(
 ): void {
   client.on(Events.InteractionCreate, async (interaction) => {
     try {
+      if (
+        interaction.isChatInputCommand() &&
+        interaction.commandName === PublishAnnouncementCommandName
+      ) {
+        await executePublishAnnouncementCommand(client, interaction);
+        return;
+      }
+
       if (
         interaction.isChatInputCommand() &&
         interaction.commandName === PublishCommunityCommandName

@@ -5,10 +5,14 @@ import { REST, Routes } from "discord.js";
 import { logger } from "../../config/logger.js";
 import { formatError } from "../../utils/formatError.js";
 import { publishCommunityCommandData } from "../commands/publishCommunity.js";
+import { publishAnnouncementCommandData } from "../commands/publishAnnouncement.js";
 import { communityEnv } from "../config/communityEnv.js";
 
 async function deployCommunityCommands(): Promise<void> {
-  const commandData = [publishCommunityCommandData.toJSON()];
+  const commandData = [
+    publishCommunityCommandData.toJSON(),
+    publishAnnouncementCommandData.toJSON(),
+  ];
   const rest = new REST({ version: "10" }).setToken(communityEnv.discordToken);
 
   if (communityEnv.discordGuildIds.length > 0) {

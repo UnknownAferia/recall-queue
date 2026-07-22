@@ -50,6 +50,20 @@ export class SeasonRepository {
     return query.exec();
   }
 
+  public async findScheduled(limit: number): Promise<SeasonDocument[]> {
+    return SeasonModel.find({ status: "scheduled" })
+      .sort({ startsAt: 1, sequence: 1 })
+      .limit(limit)
+      .exec();
+  }
+
+  public async findRecentlyCompleted(limit: number): Promise<SeasonDocument[]> {
+    return SeasonModel.find({ status: "completed" })
+      .sort({ completedAt: -1, sequence: -1 })
+      .limit(limit)
+      .exec();
+  }
+
   public async activateScheduled(
     seasonId: string,
     actorDiscordId: string,

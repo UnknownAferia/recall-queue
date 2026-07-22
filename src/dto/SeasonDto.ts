@@ -23,3 +23,9 @@ export interface SeasonDto {
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
+
+export interface SeasonControlStateDto {
+  readonly active: SeasonDto | null;
+  readonly scheduled: readonly SeasonDto[];
+  readonly recentlyCompleted: readonly SeasonDto[];
+}

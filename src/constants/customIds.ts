@@ -2,6 +2,7 @@ const SquadReadyCheckRoute = "squad:ready-check";
 const SquadLifecycleRoute = "squad:lifecycle";
 const SquadResultRoute = "squad:result";
 const SquadResultEvidenceRoute = "squad:result-evidence";
+const SeasonLifecycleRoute = "season-admin:lifecycle";
 
 export type ReadyCheckAction = "accept" | "decline";
 
@@ -30,6 +31,15 @@ export interface ParsedSquadResultEvidenceCustomId {
   readonly squadId: string;
 }
 
+export type SeasonLifecycleAction = "activate" | "complete";
+export type SeasonLifecycleStage = "review" | "execute";
+
+export interface ParsedSeasonLifecycleCustomId {
+  readonly stage: SeasonLifecycleStage;
+  readonly action: SeasonLifecycleAction;
+  readonly seasonId: string;
+}
+
 export const CustomIds = Object.freeze({
   buttons: {
     mainMenu: {
@@ -49,6 +59,19 @@ export const CustomIds = Object.freeze({
     serverSetup: {
       refresh: "server-setup:refresh",
       apply: "server-setup:apply",
+    },
+
+    seasonAdmin: {
+      create: "season-admin:create",
+      refresh: "season-admin:refresh",
+      cancel: "season-admin:cancel",
+      lifecycle: {
+        route: SeasonLifecycleRoute,
+        review: (action: SeasonLifecycleAction, seasonId: string) =>
+          `${SeasonLifecycleRoute}:review:${action}:${seasonId}`,
+        execute: (action: SeasonLifecycleAction, seasonId: string) =>
+          `${SeasonLifecycleRoute}:execute:${action}:${seasonId}`,
+      },
     },
 
     squad: {
@@ -92,6 +115,7 @@ export const CustomIds = Object.freeze({
 
   modals: {
     registerPlayer: "player:register",
+    createSeason: "season-admin:create",
     squadResultEvidence: {
       route: SquadResultEvidenceRoute,
       submit: (squadId: string, outcome: "win" | "loss") =>
@@ -107,6 +131,13 @@ export const CustomIds = Object.freeze({
     },
     squadResultEvidence: {
       screenshot: "squad:result-evidence:screenshot",
+    },
+    createSeason: {
+      sequence: "season-admin:create:sequence",
+      name: "season-admin:create:name",
+      slug: "season-admin:create:slug",
+      startsAt: "season-admin:create:starts-at",
+      endsAt: "season-admin:create:ends-at",
     },
   },
 });
@@ -176,5 +207,23 @@ export function parseSquadResultEvidenceCustomId(
   return {
     outcome: match[1]!.toLowerCase() as "win" | "loss",
     squadId: match[2]!.toLowerCase(),
+  };
+}
+
+export function parseSeasonLifecycleCustomId(
+  customId: string,
+): ParsedSeasonLifecycleCustomId | null {
+  const match = customId.match(
+    /^season-admin:lifecycle:(review|execute):(activate|complete):([a-f\d]{24})$/i,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    stage: match[1]!.toLowerCase() as SeasonLifecycleStage,
+    action: match[2]!.toLowerCase() as SeasonLifecycleAction,
+    seasonId: match[3]!.toLowerCase(),
   };
 }

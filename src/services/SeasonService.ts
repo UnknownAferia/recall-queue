@@ -1,6 +1,6 @@
 import { SeasonConfig } from "../constants/season.js";
 import type { TransactionRunner } from "../database/MongoTransactionRunner.js";
-import type { SeasonDto } from "../dto/SeasonDto.js";
+import type { SeasonControlStateDto, SeasonDto } from "../dto/SeasonDto.js";
 import { SeasonMapper } from "../mappers/SeasonMapper.js";
 import type { SeasonRepository } from "../repositories/SeasonRepository.js";
 import type { CreateSeasonInput, SeasonRules } from "../types/season.js";
@@ -15,15 +15,47 @@ export class SeasonService {
 
   public async createScheduled(input: CreateSeasonInput): Promise<SeasonDto> {
     const normalized = this.normalizeCreateInput(input);
-    const season = await this.seasonRepository.createScheduled(normalized);
 
-    return SeasonMapper.toDto(season);
+    try {
+      const season = await this.seasonRepository.createScheduled(normalized);
+
+      return SeasonMapper.toDto(season);
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === 11000
+      ) {
+        throw new SeasonLifecycleError(
+          "A season with this sequence or slug already exists.",
+        );
+      }
+
+      throw error;
+    }
   }
 
   public async getActive(): Promise<SeasonDto | null> {
     const season = await this.seasonRepository.findActive();
 
     return season ? SeasonMapper.toDto(season) : null;
+  }
+
+  public async getControlState(): Promise<SeasonControlStateDto> {
+    const [active, scheduled, recentlyCompleted] = await Promise.all([
+      this.seasonRepository.findActive(),
+      this.seasonRepository.findScheduled(5),
+      this.seasonRepository.findRecentlyCompleted(3),
+    ]);
+
+    return {
+      active: active ? SeasonMapper.toDto(active) : null,
+      scheduled: scheduled.map((season) => SeasonMapper.toDto(season)),
+      recentlyCompleted: recentlyCompleted.map((season) =>
+        SeasonMapper.toDto(season),
+      ),
+    };
   }
 
   public async activate(

@@ -118,6 +118,8 @@ they are not the primary matchmaking flow.
 - Persistent scheduled, active and completed season lifecycle
 - Transactional season memberships updated alongside lifetime results
 - Immutable per-season rating and reset configuration snapshots
+- Owner-only Discord control center for scheduling and lifecycle operations
+- Explicit confirmation gates for global activation and season completion
 - Configurable soft resets between seasons
 - Seasonal leaderboards alongside lifetime statistics
 - Personal season history

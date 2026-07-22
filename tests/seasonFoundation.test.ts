@@ -113,6 +113,27 @@ describe("Season foundation", () => {
     assert.equal(season.status, "scheduled");
   });
 
+  it("reports duplicate season sequences and slugs as lifecycle conflicts", async () => {
+    const repository = {
+      createScheduled: async () => {
+        throw { code: 11000 };
+      },
+    } as unknown as SeasonRepository;
+    const service = new SeasonService(repository, transactionRunner);
+
+    await assert.rejects(
+      service.createScheduled({
+        sequence: 1,
+        name: "Alpha Season",
+        slug: "alpha-season",
+        startsAt: new Date("2026-07-01T00:00:00.000Z"),
+        endsAt: new Date("2026-08-01T00:00:00.000Z"),
+        createdByDiscordId: "owner-id",
+      }),
+      /sequence or slug already exists/,
+    );
+  });
+
   it("completes a season and freezes every member rating transactionally", async () => {
     const active = createSeason("active");
     let finalizedSeasonId = "";

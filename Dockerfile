@@ -19,7 +19,7 @@ FROM dependencies AS production-dependencies
 
 RUN npm prune --omit=dev && npm cache clean --force
 
-FROM mongo:8.0-bookworm AS mongodb-tools
+FROM mongo:8.0.26-noble AS mongodb-tools
 
 FROM node:24-bookworm-slim AS runtime
 

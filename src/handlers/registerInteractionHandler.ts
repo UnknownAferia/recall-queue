@@ -12,27 +12,35 @@ function createErrorResponse(title: string, description: string) {
   } as const;
 }
 
-async function respondWithError(interaction: Interaction): Promise<void> {
+export async function respondWithError(
+  interaction: Interaction,
+): Promise<void> {
   if (!interaction.isRepliable()) {
     return;
   }
 
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(
+  try {
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(
+        createErrorResponse(
+          "Interaction Failed",
+          "An unexpected error occurred while processing this interaction.",
+        ),
+      );
+      return;
+    }
+
+    await interaction.reply(
       createErrorResponse(
         "Interaction Failed",
         "An unexpected error occurred while processing this interaction.",
       ),
     );
-    return;
+  } catch (error: unknown) {
+    logger.warn(
+      `Unable to deliver Core error response for interaction ${interaction.id}:\n${formatError(error)}`,
+    );
   }
-
-  await interaction.reply(
-    createErrorResponse(
-      "Interaction Failed",
-      "An unexpected error occurred while processing this interaction.",
-    ),
-  );
 }
 
 export function registerInteractionHandler(client: VoraClient): void {

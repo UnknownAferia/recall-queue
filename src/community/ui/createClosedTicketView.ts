@@ -27,7 +27,7 @@ export function createClosedTicketView(
             ? `**Closed:** <t:${Math.floor(ticket.closedAt.getTime() / 1_000)}:F>`
             : null,
           "",
-          "Staff may retain this channel for review or remove it when no longer needed.",
+          "A staff-only transcript has been archived. This channel is retained for seven days before automatic cleanup.",
         ]
           .filter((line): line is string => line !== null)
           .join("\n"),

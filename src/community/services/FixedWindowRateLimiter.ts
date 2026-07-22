@@ -1,0 +1,46 @@
+export interface RateLimitResult {
+  readonly allowed: boolean;
+  readonly retryAfterMs: number;
+}
+
+interface RateLimitBucket {
+  count: number;
+  resetsAt: number;
+}
+
+export class FixedWindowRateLimiter {
+  private readonly buckets = new Map<string, RateLimitBucket>();
+
+  public consume(
+    key: string,
+    limit: number,
+    windowMs: number,
+    now = Date.now(),
+  ): RateLimitResult {
+    const existing = this.buckets.get(key);
+    const bucket =
+      !existing || existing.resetsAt <= now
+        ? { count: 0, resetsAt: now + windowMs }
+        : existing;
+
+    bucket.count += 1;
+    this.buckets.set(key, bucket);
+
+    if (this.buckets.size > 10_000) {
+      this.removeExpired(now);
+    }
+
+    return {
+      allowed: bucket.count <= limit,
+      retryAfterMs: Math.max(0, bucket.resetsAt - now),
+    };
+  }
+
+  private removeExpired(now: number): void {
+    for (const [key, bucket] of this.buckets) {
+      if (bucket.resetsAt <= now) {
+        this.buckets.delete(key);
+      }
+    }
+  }
+}

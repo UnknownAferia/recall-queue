@@ -2,6 +2,7 @@ import type {
   CommunityPanelKind,
   ServiceHeartbeatName,
 } from "../constants/community.js";
+import type { OperationalAuditEventType } from "../constants/operationalAudit.js";
 
 export interface CommunityPanelRecord {
   guildId: string;
@@ -31,8 +32,31 @@ export interface SupportTicket {
   status: TicketStatus;
   closedByDiscordId: string | null;
   closedAt: Date | null;
+  transcriptChannelId: string | null;
+  transcriptMessageId: string | null;
+  transcriptMessageCount: number;
+  transcriptArchivedAt: Date | null;
+  channelDeleteAfter: Date | null;
+  channelDeletedAt: Date | null;
+  transcriptDeleteAfter: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export type OperationalAuditDetails = Readonly<
+  Record<string, string | number | boolean | null>
+>;
+
+export interface OperationalAuditEvent {
+  schemaVersion: number;
+  eventType: OperationalAuditEventType;
+  guildId: string;
+  actorDiscordId: string | null;
+  subjectType: "support_ticket" | "community_service";
+  subjectId: string;
+  details: OperationalAuditDetails;
+  occurredAt: Date;
+  createdAt: Date;
 }
 
 export interface MatchmakingStatusSnapshot {

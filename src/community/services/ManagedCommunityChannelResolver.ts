@@ -7,8 +7,6 @@ export class ManagedCommunityChannelResolver {
     guild: Guild,
     channelKey: string,
   ): Promise<TextChannel | null> {
-    await guild.channels.fetch();
-
     const blueprint = GuildBlueprint.channels.find(
       (channel) => channel.key === channelKey,
     );
@@ -34,8 +32,6 @@ export class ManagedCommunityChannelResolver {
     guild: Guild,
     categoryKey: string,
   ): Promise<string | null> {
-    await guild.channels.fetch();
-
     const blueprint = GuildBlueprint.categories.find(
       (category) => category.key === categoryKey,
     );

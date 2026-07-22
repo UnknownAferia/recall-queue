@@ -26,6 +26,18 @@ const supportTicketSchema = new Schema<SupportTicket>(
     },
     closedByDiscordId: { type: String, default: null, trim: true },
     closedAt: { type: Date, default: null },
+    transcriptChannelId: { type: String, default: null, trim: true },
+    transcriptMessageId: { type: String, default: null, trim: true },
+    transcriptMessageCount: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+    transcriptArchivedAt: { type: Date, default: null },
+    channelDeleteAfter: { type: Date, default: null },
+    channelDeletedAt: { type: Date, default: null },
+    transcriptDeleteAfter: { type: Date, default: null },
   },
   {
     collection: "support_tickets",
@@ -41,6 +53,18 @@ supportTicketSchema.index(
     unique: true,
     partialFilterExpression: { status: "open" },
   },
+);
+supportTicketSchema.index(
+  { guildId: 1, status: 1, transcriptArchivedAt: 1, closedAt: 1 },
+  { name: "ticket_transcript_recovery" },
+);
+supportTicketSchema.index(
+  { guildId: 1, channelDeleteAfter: 1, channelDeletedAt: 1 },
+  { name: "ticket_channel_retention" },
+);
+supportTicketSchema.index(
+  { transcriptDeleteAfter: 1 },
+  { name: "ticket_transcript_retention" },
 );
 supportTicketSchema.index(
   { guildId: 1, channelId: 1, status: 1 },

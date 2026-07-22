@@ -43,20 +43,26 @@ async function respondWithError(
     (interaction.isChatInputCommand() &&
       interaction.commandName === PublishCommunityCommandName);
 
-  if (
-    replacesLoadingResponse &&
-    (interaction.replied || interaction.deferred)
-  ) {
-    await interaction.editReply({
-      components: response.components,
-    });
-    return;
-  }
+  try {
+    if (
+      replacesLoadingResponse &&
+      (interaction.replied || interaction.deferred)
+    ) {
+      await interaction.editReply({
+        components: response.components,
+      });
+      return;
+    }
 
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(response);
-  } else {
-    await interaction.reply(response);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(response);
+    } else {
+      await interaction.reply(response);
+    }
+  } catch (error: unknown) {
+    logger.warn(
+      `Unable to deliver Community error response for interaction ${interaction.id}:\n${formatError(error)}`,
+    );
   }
 }
 

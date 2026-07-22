@@ -131,6 +131,9 @@ describe("Vora Community bot", () => {
     assert.match(ticket, /Open a Ticket/);
     assert.match(onboarding, /Find Better Teammates/);
     assert.match(onboarding, /Vora Rules/);
+    assert.match(onboarding, /retained for up to 7 days/);
+    assert.match(onboarding, /retained for up to 365 days/);
+    assert.match(onboarding, /competitive match record/);
     assert.match(onboarding, /Vora Announcements/);
     assert.match(onboarding, /How Vora Works/);
     assert.match(onboarding, /Competitive Hub/);

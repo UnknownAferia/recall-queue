@@ -125,7 +125,7 @@ they are not the primary matchmaking flow.
 - Personal season history
 - Achievements and optional Discord reward roles
 
-## ⏳ Community launch preparation
+## ✅ Community launch preparation
 
 - Ticket transcript/export and retention policy
 - Rate limiting, abuse protection and structured audit logging

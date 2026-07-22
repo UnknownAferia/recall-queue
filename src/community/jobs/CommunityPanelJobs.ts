@@ -8,15 +8,19 @@ import type { CommunityClient } from "../CommunityClient.js";
 export class CommunityPanelJobs {
   private leaderboardTimer: NodeJS.Timeout | null = null;
   private statusTimer: NodeJS.Timeout | null = null;
+  private retentionTimer: NodeJS.Timeout | null = null;
   private leaderboardRunning = false;
   private statusRunning = false;
+  private retentionRunning = false;
 
   public constructor(private readonly client: CommunityClient) {}
 
   public async start(): Promise<void> {
     await Promise.all([
+      this.synchronizeStaticPanels(),
       this.synchronizeLeaderboards(),
       this.synchronizeMatchmakingStatuses(),
+      this.runTicketRetention(),
     ]);
 
     this.leaderboardTimer = setInterval(() => {
@@ -25,8 +29,12 @@ export class CommunityPanelJobs {
     this.statusTimer = setInterval(() => {
       void this.synchronizeMatchmakingStatuses();
     }, CommunityConfig.matchmakingStatusRefreshIntervalMs);
+    this.retentionTimer = setInterval(() => {
+      void this.runTicketRetention();
+    }, CommunityConfig.ticketRetentionSweepIntervalMs);
     this.leaderboardTimer.unref();
     this.statusTimer.unref();
+    this.retentionTimer.unref();
   }
 
   public stop(): void {
@@ -39,6 +47,11 @@ export class CommunityPanelJobs {
       clearInterval(this.statusTimer);
       this.statusTimer = null;
     }
+
+    if (this.retentionTimer) {
+      clearInterval(this.retentionTimer);
+      this.retentionTimer = null;
+    }
   }
 
   private async synchronizeLeaderboards(): Promise<void> {
@@ -49,15 +62,18 @@ export class CommunityPanelJobs {
     this.leaderboardRunning = true;
 
     try {
-      await this.forEachGuild(async (guild) => {
-        await Promise.all([
-          this.client.panels.synchronizeStaticPanels(guild),
-          this.client.panels.synchronizeLeaderboard(guild),
-        ]);
-      });
+      await this.forEachGuild((guild) =>
+        this.client.panels.synchronizeLeaderboard(guild),
+      );
     } finally {
       this.leaderboardRunning = false;
     }
+  }
+
+  private async synchronizeStaticPanels(): Promise<void> {
+    await this.forEachGuild(async (guild) => {
+      await this.client.panels.synchronizeStaticPanels(guild);
+    });
   }
 
   private async synchronizeMatchmakingStatuses(): Promise<void> {
@@ -73,6 +89,22 @@ export class CommunityPanelJobs {
       );
     } finally {
       this.statusRunning = false;
+    }
+  }
+
+  private async runTicketRetention(): Promise<void> {
+    if (this.retentionRunning) {
+      return;
+    }
+
+    this.retentionRunning = true;
+
+    try {
+      await this.forEachGuild((guild) =>
+        this.client.tickets.runRetention(guild),
+      );
+    } finally {
+      this.retentionRunning = false;
     }
   }
 

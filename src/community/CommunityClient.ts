@@ -19,7 +19,13 @@ export class CommunityClient extends Client {
   public readonly heartbeat: ServiceHeartbeatService;
 
   public constructor() {
-    super({ intents: [GatewayIntentBits.Guilds] });
+    super({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+      ],
+    });
 
     const channels = new ManagedCommunityChannelResolver();
     const panelRepository = new CommunityPanelRepository();

@@ -7,16 +7,22 @@ import {
   type TextChannel,
 } from "discord.js";
 
+import { logger } from "../../config/logger.js";
+import { CommunityConfig } from "../../constants/community.js";
 import {
   GuildBlueprint,
   type GuildRoleKey,
 } from "../../config/guildBlueprint.js";
 import type { SupportTicketDocument } from "../../models/SupportTicketModel.js";
 import type { SupportTicketRepository } from "../../repositories/SupportTicketRepository.js";
+import { OperationalAuditService } from "../../services/OperationalAuditService.js";
+import { formatError } from "../../utils/formatError.js";
 import { createOpenTicketView } from "../ui/createOpenTicketView.js";
 import { TicketAlreadyOpenError } from "../errors/TicketAlreadyOpenError.js";
 import { TicketOperationError } from "../errors/TicketOperationError.js";
 import type { ManagedCommunityChannelResolver } from "./ManagedCommunityChannelResolver.js";
+import { FixedWindowRateLimiter } from "./FixedWindowRateLimiter.js";
+import { TicketTranscriptService } from "./TicketTranscriptService.js";
 
 export interface OpenTicketResult {
   readonly ticket: SupportTicketDocument;
@@ -33,6 +39,10 @@ export class TicketService {
   public constructor(
     private readonly repository: SupportTicketRepository,
     private readonly channels: ManagedCommunityChannelResolver,
+    private readonly rateLimiter = new FixedWindowRateLimiter(),
+    private readonly audit = new OperationalAuditService(),
+    private readonly transcripts = new TicketTranscriptService(channels),
+    private readonly dependencyTimeoutMs = CommunityConfig.ticketDependencyTimeoutMs,
   ) {}
 
   public async open(
@@ -41,6 +51,26 @@ export class TicketService {
     subjectInput: string,
     descriptionInput: string,
   ): Promise<OpenTicketResult> {
+    const rateLimit = this.rateLimiter.consume(
+      `ticket:create:${guild.id}:${requester.id}`,
+      CommunityConfig.ticketCreateLimit,
+      CommunityConfig.ticketCreateWindowMs,
+    );
+
+    if (!rateLimit.allowed) {
+      void this.audit.record({
+        eventType: "ticket_rate_limited",
+        guildId: guild.id,
+        actorDiscordId: requester.id,
+        subjectType: "community_service",
+        subjectId: "ticket-create",
+        details: { retryAfterMs: rateLimit.retryAfterMs },
+      });
+      throw new TicketOperationError(
+        `Too many ticket attempts. Try again in ${Math.ceil(rateLimit.retryAfterMs / 60_000)} minute(s).`,
+      );
+    }
+
     const subject = subjectInput.trim().replace(/\s+/g, " ");
     const description = descriptionInput.trim();
 
@@ -56,15 +86,22 @@ export class TicketService {
       );
     }
 
-    const existing = await this.repository.findOpenByRequester(
-      guild.id,
-      requester.id,
+    logger.info(
+      `Ticket creation started for ${requester.id} in guild ${guild.id}.`,
+    );
+
+    const existing = await this.waitForDependency(
+      this.repository.findOpenByRequester(guild.id, requester.id),
+      "checking existing support tickets",
     );
 
     if (existing) {
-      const existingChannel = await guild.channels
-        .fetch(existing.channelId)
-        .catch(() => null);
+      const existingChannel = await this.waitForDependency(
+        guild.channels
+          .fetch(existing.channelId, { force: true })
+          .catch(() => null),
+        "checking the existing support channel",
+      );
 
       if (existingChannel) {
         throw new TicketAlreadyOpenError(existing.channelId);
@@ -73,7 +110,10 @@ export class TicketService {
       await this.repository.closeOrphan(existing.id);
     }
 
-    const categoryId = await this.channels.resolveCategoryId(guild, "support");
+    const categoryId = await this.waitForDependency(
+      this.channels.resolveCategoryId(guild, "support"),
+      "resolving the support category",
+    );
 
     if (!categoryId || !guild.members.me) {
       throw new TicketOperationError(
@@ -132,6 +172,9 @@ export class TicketService {
       ],
       reason: `Vora support ticket opened by ${requester.user.tag}`,
     });
+    logger.info(
+      `Created support channel ${channel.id} for ${requester.id} in guild ${guild.id}.`,
+    );
 
     let createdTicket: SupportTicketDocument | null = null;
 
@@ -143,11 +186,26 @@ export class TicketService {
         subject,
         description,
       });
+      logger.info(
+        `Stored support ticket ${createdTicket.id} for channel ${channel.id}.`,
+      );
 
       await channel.send({
         components: [createOpenTicketView(createdTicket)],
         flags: MessageFlags.IsComponentsV2,
       });
+
+      void this.audit.record({
+        eventType: "ticket_opened",
+        guildId: guild.id,
+        actorDiscordId: requester.id,
+        subjectType: "support_ticket",
+        subjectId: createdTicket.id,
+        details: { channelId: channel.id, subject },
+      });
+      logger.info(
+        `Support ticket ${createdTicket.id} opened successfully in guild ${guild.id}.`,
+      );
 
       return { ticket: createdTicket, channel };
     } catch (error: unknown) {
@@ -177,6 +235,26 @@ export class TicketService {
     channel: TextChannel,
     member: GuildMember,
   ): Promise<SupportTicketDocument> {
+    const rateLimit = this.rateLimiter.consume(
+      `ticket:close:${guild.id}:${member.id}`,
+      CommunityConfig.ticketCloseLimit,
+      CommunityConfig.ticketCloseWindowMs,
+    );
+
+    if (!rateLimit.allowed) {
+      void this.audit.record({
+        eventType: "ticket_rate_limited",
+        guildId: guild.id,
+        actorDiscordId: member.id,
+        subjectType: "community_service",
+        subjectId: "ticket-close",
+        details: { retryAfterMs: rateLimit.retryAfterMs },
+      });
+      throw new TicketOperationError(
+        `Too many ticket actions. Try again in ${Math.ceil(rateLimit.retryAfterMs / 60_000)} minute(s).`,
+      );
+    }
+
     const ticket = await this.repository.findOpenByChannel(
       guild.id,
       channel.id,
@@ -196,7 +274,18 @@ export class TicketService {
       );
     }
 
-    const closed = await this.repository.close(ticket.id, member.id);
+    const closedAt = new Date();
+    const closed = await this.repository.close(
+      ticket.id,
+      member.id,
+      closedAt,
+      new Date(
+        closedAt.getTime() + CommunityConfig.ticketClosedChannelRetentionMs,
+      ),
+      new Date(
+        closedAt.getTime() + CommunityConfig.ticketTranscriptRetentionMs,
+      ),
+    );
 
     if (!closed) {
       throw new TicketOperationError("This ticket is already closed.");
@@ -211,7 +300,242 @@ export class TicketService {
       await channel.setName(`closed-${channel.name}`.slice(0, 100));
     }
 
+    void this.audit.record({
+      eventType: "ticket_closed",
+      guildId: guild.id,
+      actorDiscordId: member.id,
+      subjectType: "support_ticket",
+      subjectId: closed.id,
+      details: { channelId: channel.id },
+    });
+    void this.archiveTicket(guild, channel, closed);
+
     return closed;
+  }
+
+  public async runRetention(guild: Guild, now = new Date()): Promise<void> {
+    const missingTranscripts =
+      await this.repository.findClosedWithoutTranscript(guild.id, 25);
+
+    for (const ticket of missingTranscripts) {
+      await this.runRetentionOperation(
+        guild,
+        ticket,
+        "transcript_recovery",
+        async () => {
+          const channel = await guild.channels
+            .fetch(ticket.channelId, { force: true })
+            .catch(() => null);
+
+          if (channel?.type === ChannelType.GuildText) {
+            await this.archiveTicket(guild, channel, ticket);
+          } else {
+            await this.repository.markChannelDeleted(ticket.id, now);
+            await this.repository.scheduleRecordPurge(
+              ticket.id,
+              new Date(
+                now.getTime() + CommunityConfig.ticketTranscriptRetentionMs,
+              ),
+            );
+          }
+        },
+      );
+    }
+
+    const channelsDue = await this.repository.findChannelsDueForDeletion(
+      guild.id,
+      now,
+      25,
+    );
+
+    for (const ticket of channelsDue) {
+      await this.runRetentionOperation(
+        guild,
+        ticket,
+        "channel_deletion",
+        async () => {
+          const channel = await guild.channels
+            .fetch(ticket.channelId, { force: true })
+            .catch(() => null);
+
+          if (channel) {
+            await channel.delete(
+              "Vora support ticket retention period elapsed",
+            );
+          }
+
+          await this.repository.markChannelDeleted(ticket.id, now);
+          await this.audit.record({
+            eventType: "ticket_channel_deleted",
+            guildId: guild.id,
+            actorDiscordId: null,
+            subjectType: "support_ticket",
+            subjectId: ticket.id,
+            details: { channelId: ticket.channelId },
+          });
+        },
+      );
+    }
+
+    const transcriptsDue = await this.repository.findTranscriptsDueForDeletion(
+      guild.id,
+      now,
+      25,
+    );
+
+    for (const ticket of transcriptsDue) {
+      await this.runRetentionOperation(
+        guild,
+        ticket,
+        "transcript_deletion",
+        async () => {
+          await this.deleteTranscriptMessage(guild, ticket);
+
+          if (await this.repository.deleteRecord(ticket.id)) {
+            await this.audit.record({
+              eventType: "ticket_record_purged",
+              guildId: guild.id,
+              actorDiscordId: null,
+              subjectType: "support_ticket",
+              subjectId: ticket.id,
+              details: { retentionDays: 365 },
+            });
+          }
+        },
+      );
+    }
+  }
+
+  private async runRetentionOperation(
+    guild: Guild,
+    ticket: SupportTicketDocument,
+    operation: string,
+    action: () => Promise<void>,
+  ): Promise<void> {
+    try {
+      await action();
+    } catch (error: unknown) {
+      logger.error(
+        `Ticket retention operation ${operation} failed for ${ticket.id}:\n${formatError(error)}`,
+      );
+      await this.audit.record({
+        eventType: "ticket_operation_failed",
+        guildId: guild.id,
+        actorDiscordId: null,
+        subjectType: "support_ticket",
+        subjectId: ticket.id,
+        details: { operation },
+      });
+    }
+  }
+
+  private async waitForDependency<T>(
+    operation: Promise<T>,
+    description: string,
+  ): Promise<T> {
+    let timeout: NodeJS.Timeout | null = null;
+
+    try {
+      return await Promise.race([
+        operation,
+        new Promise<never>((_resolve, reject) => {
+          timeout = setTimeout(() => {
+            reject(
+              new TicketOperationError(
+                `Vora timed out while ${description}. Please try again.`,
+              ),
+            );
+          }, this.dependencyTimeoutMs);
+          timeout.unref();
+        }),
+      ]);
+    } finally {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    }
+  }
+
+  private async archiveTicket(
+    guild: Guild,
+    channel: TextChannel,
+    ticket: SupportTicketDocument,
+  ): Promise<void> {
+    if (ticket.transcriptArchivedAt) {
+      return;
+    }
+
+    try {
+      const reference = await this.transcripts.archive(guild, channel, ticket);
+      const retentionStartsAt =
+        ticket.closedAt ?? reference.transcriptArchivedAt;
+      const stored = await this.repository.storeTranscript(
+        ticket.id,
+        reference,
+        ticket.channelDeleteAfter ??
+          new Date(
+            retentionStartsAt.getTime() +
+              CommunityConfig.ticketClosedChannelRetentionMs,
+          ),
+        ticket.transcriptDeleteAfter ??
+          new Date(
+            retentionStartsAt.getTime() +
+              CommunityConfig.ticketTranscriptRetentionMs,
+          ),
+      );
+
+      if (stored) {
+        await this.audit.record({
+          eventType: "ticket_transcript_archived",
+          guildId: guild.id,
+          actorDiscordId: null,
+          subjectType: "support_ticket",
+          subjectId: ticket.id,
+          details: {
+            archiveChannelId: reference.transcriptChannelId,
+            archiveMessageId: reference.transcriptMessageId,
+            messageCount: reference.transcriptMessageCount,
+          },
+        });
+      }
+    } catch (error: unknown) {
+      logger.error(
+        `Ticket transcript archive failed for ${ticket.id}:\n${formatError(error)}`,
+      );
+      await this.audit.record({
+        eventType: "ticket_operation_failed",
+        guildId: guild.id,
+        actorDiscordId: null,
+        subjectType: "support_ticket",
+        subjectId: ticket.id,
+        details: { operation: "transcript_archive" },
+      });
+    }
+  }
+
+  private async deleteTranscriptMessage(
+    guild: Guild,
+    ticket: SupportTicketDocument,
+  ): Promise<void> {
+    if (!ticket.transcriptChannelId || !ticket.transcriptMessageId) {
+      return;
+    }
+
+    const channel = await guild.channels
+      .fetch(ticket.transcriptChannelId, { force: true })
+      .catch(() => null);
+
+    if (channel?.type !== ChannelType.GuildText) {
+      return;
+    }
+
+    const message = await channel.messages
+      .fetch(ticket.transcriptMessageId)
+      .catch(() => null);
+
+    if (message) {
+      await message.delete();
+    }
   }
 
   private createChannelName(displayName: string): string {

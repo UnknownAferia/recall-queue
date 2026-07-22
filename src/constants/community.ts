@@ -23,6 +23,16 @@ export const CommunityConfig = Object.freeze({
   matchmakingStatusRefreshIntervalMs: 30 * 1_000,
   heartbeatIntervalMs: 20 * 1_000,
   heartbeatOfflineAfterMs: 60 * 1_000,
+  ticketCreateLimit: 3,
+  ticketCreateWindowMs: 10 * 60 * 1_000,
+  ticketCloseLimit: 10,
+  ticketCloseWindowMs: 5 * 60 * 1_000,
+  ticketDependencyTimeoutMs: 10 * 1_000,
+  operationalAuditTimeoutMs: 3 * 1_000,
+  ticketTranscriptMaximumMessages: 5_000,
+  ticketClosedChannelRetentionMs: 7 * 24 * 60 * 60 * 1_000,
+  ticketTranscriptRetentionMs: 365 * 24 * 60 * 60 * 1_000,
+  ticketRetentionSweepIntervalMs: 6 * 60 * 60 * 1_000,
 });
 
 export const CommunityCustomIds = Object.freeze({

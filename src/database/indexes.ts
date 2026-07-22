@@ -8,6 +8,7 @@ import { ServiceHeartbeatModel } from "../models/ServiceHeartbeatModel.js";
 import { SupportTicketModel } from "../models/SupportTicketModel.js";
 import { SeasonMembershipModel } from "../models/SeasonMembershipModel.js";
 import { SeasonModel } from "../models/SeasonModel.js";
+import { OperationalAuditModel } from "../models/OperationalAuditModel.js";
 
 export async function synchronizeDatabaseIndexes(): Promise<void> {
   logger.info("Synchronizing database indexes...");
@@ -22,6 +23,7 @@ export async function synchronizeDatabaseIndexes(): Promise<void> {
     SupportTicketModel.syncIndexes(),
     SeasonModel.syncIndexes(),
     SeasonMembershipModel.syncIndexes(),
+    OperationalAuditModel.syncIndexes(),
   ]);
 
   logger.info("Database indexes synchronized.");

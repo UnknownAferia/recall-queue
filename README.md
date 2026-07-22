@@ -93,12 +93,17 @@ development and planned releases.
 
 ## Project status
 
-Vora is in **private alpha**. The core player, queue, squad, voice, result,
-rating and moderation workflows are implemented and covered by automated
-tests. Seasons, progression, operational monitoring and launch documentation
-are still in development.
+Vora is in **private alpha**. The player, queue, squad, voice, result, rating,
+moderation, season and operational workflows are implemented and covered by
+automated tests. The remaining release gate is a successful multi-week beta
+without critical data-integrity incidents.
 
 The data model and commands may change before the first stable release.
+
+Production procedures are documented in
+[Operations](docs/OPERATIONS.md),
+[Backup and Recovery](docs/BACKUP_RECOVERY.md) and the
+[Launch Checklist](docs/LAUNCH_CHECKLIST.md).
 
 ## Technology
 
@@ -158,9 +163,10 @@ from spreading into the core.
 - A MongoDB deployment with transaction support, such as MongoDB Atlas
 - A Discord test server where the bot has Administrator permission
 
-Enable the **Server Members Intent** for Vora Core in the Discord Developer
-Portal. Vora Community currently requires only the Guilds intent. Add both bots
-to every server configured in `DISCORD_GUILD_IDS`.
+Enable the **Server Members Intent** for Vora Core and the **Message Content
+Intent** for Vora Community in the Discord Developer Portal. Message Content is
+required solely to export complete support-ticket transcripts. Add both bots to
+every server configured in `DISCORD_GUILD_IDS`.
 
 ### Installation
 

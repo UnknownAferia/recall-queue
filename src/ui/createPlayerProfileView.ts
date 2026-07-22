@@ -3,6 +3,7 @@ import type { ContainerBuilder } from "discord.js";
 import { PlayerRoleLabels, type PlayerRole } from "../constants/playerRoles.js";
 import type { PlayerDto } from "../dto/PlayerDto.js";
 import { RatingConfig } from "../domain/rating/RatingConfig.js";
+import type { PlayerVerificationStatus } from "../constants/playerVerification.js";
 import { createBackToMainMenuButton } from "./createBackToMainMenuButton.js";
 import { ViewFactory } from "./ViewFactory.js";
 
@@ -19,6 +20,24 @@ function calculateWinRate(player: PlayerDto): string {
 
 function formatRole(role: PlayerRole | null, fallback: string): string {
   return role ? PlayerRoleLabels[role] : fallback;
+}
+
+function formatVerificationStatus(
+  status: PlayerVerificationStatus,
+  submittedAt: Date | null,
+): string {
+  switch (status) {
+    case "verified":
+      return "✅ Verified";
+    case "legacy_verified":
+      return "✅ Legacy verified";
+    case "rejected":
+      return "❌ Rejected — use `/verify-account` to resubmit";
+    case "pending":
+      return submittedAt
+        ? "⏳ Pending Operations review"
+        : "⚠️ Evidence required — use `/verify-account`";
+  }
 }
 
 export function createPlayerProfileView(player: PlayerDto): ContainerBuilder {
@@ -64,6 +83,7 @@ export function createPlayerProfileView(player: PlayerDto): ContainerBuilder {
       ViewFactory.text(
         [
           "### Account standing",
+          `🔐 **Account verification**  ${formatVerificationStatus(player.verification.status, player.verification.submittedAt)}`,
           `🛡️ **Behavior**  ${player.behavior.score}/100  •  **Penalties**  ${player.behavior.penalties}`,
           `✅ **Ready checks**  ${player.queue.acceptedMatches} accepted  •  ${player.queue.declinedMatches} declined or missed`,
           player.behavior.integrityLevel > 0

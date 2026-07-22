@@ -30,7 +30,8 @@ they are not the primary matchmaking flow.
 - Persistent player profiles and DTO mapping
 - Primary, secondary and avoided role preferences
 - Profile, preferences and main-menu component views
-- Verified Player role synchronization
+- Manual MLBB account evidence review with immutable request history
+- Queue gating and Verified Player role synchronization after approval
 - Registration and role-preference validation
 
 ## ✅ Matchmaking and squad lifecycle

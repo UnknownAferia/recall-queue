@@ -19,8 +19,9 @@ const command: Command = {
     );
 
     if (player && interaction.inCachedGuild()) {
-      await client.services.guildAccess.ensureVerifiedPlayerRole(
+      await client.services.guildAccess.synchronizeVerifiedPlayerRole(
         interaction.member,
+        player.verification.status,
       );
       await client.services.divisionRoles.synchronizeMember(
         interaction.member,

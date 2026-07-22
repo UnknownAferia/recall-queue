@@ -12,6 +12,7 @@ import { OperationalAuditModel } from "../models/OperationalAuditModel.js";
 import { CommunityModerationCaseModel } from "../models/CommunityModerationCaseModel.js";
 import { CommunityModerationCounterModel } from "../models/CommunityModerationCounterModel.js";
 import { CommunityReportModel } from "../models/CommunityReportModel.js";
+import { PlayerVerificationModel } from "../models/PlayerVerificationModel.js";
 
 export async function synchronizeDatabaseIndexes(): Promise<void> {
   logger.info("Synchronizing database indexes...");
@@ -30,6 +31,7 @@ export async function synchronizeDatabaseIndexes(): Promise<void> {
     CommunityModerationCaseModel.syncIndexes(),
     CommunityModerationCounterModel.syncIndexes(),
     CommunityReportModel.syncIndexes(),
+    PlayerVerificationModel.syncIndexes(),
   ]);
 
   logger.info("Database indexes synchronized.");

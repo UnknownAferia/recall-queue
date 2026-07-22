@@ -1,6 +1,7 @@
 import { normalizePlayerRole } from "../constants/playerRoles.js";
 import type { SquadResult } from "../constants/squad.js";
 import type { ClientSession } from "mongoose";
+import type { PlayerVerificationStatus } from "../constants/playerVerification.js";
 import { PlayerModel, type PlayerDocument } from "../models/PlayerModel.js";
 
 import type {
@@ -249,6 +250,13 @@ export class PlayerRepository {
       statistics: {},
       behavior: {},
       queue: {},
+      verification: {
+        status: "pending",
+        submittedAt: null,
+        reviewedAt: null,
+        reviewedByDiscordId: null,
+        rejectionReason: null,
+      },
 
       preferences: {
         roles: {
@@ -258,6 +266,35 @@ export class PlayerRepository {
         },
       },
     });
+  }
+
+  public async updateVerificationStatus(
+    discordId: string,
+    expectedStatuses: readonly PlayerVerificationStatus[],
+    verification: {
+      status: PlayerVerificationStatus;
+      submittedAt: Date | null;
+      reviewedAt: Date | null;
+      reviewedByDiscordId: string | null;
+      rejectionReason: string | null;
+    },
+    session: ClientSession,
+  ): Promise<boolean> {
+    const result = await PlayerModel.updateOne(
+      {
+        "discord.id": discordId,
+        $or: [
+          { "verification.status": { $in: [...expectedStatuses] } },
+          ...(expectedStatuses.includes("legacy_verified")
+            ? [{ verification: { $exists: false } }]
+            : []),
+        ],
+      },
+      { $set: { verification } },
+      { runValidators: true, session },
+    ).exec();
+
+    return result.matchedCount === 1;
   }
 
   public async updateRolePreferences(
@@ -288,7 +325,12 @@ export class PlayerRepository {
     ).exec();
   }
   public async findHighestRated(limit: number): Promise<PlayerDocument[]> {
-    return PlayerModel.find()
+    return PlayerModel.find({
+      $or: [
+        { "verification.status": { $in: ["verified", "legacy_verified"] } },
+        { verification: { $exists: false } },
+      ],
+    })
       .sort({
         "rating.rsr": -1,
         "statistics.wins": -1,

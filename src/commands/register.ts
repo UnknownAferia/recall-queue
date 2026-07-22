@@ -11,6 +11,7 @@ import {
 import { CustomIds } from "../constants/customIds.js";
 import type { Command } from "../interfaces/Command.js";
 import { createAlertView } from "../ui/createAlertView.js";
+import { isPlayerVerificationApproved } from "../constants/playerVerification.js";
 
 const command: Command = {
   data: new SlashCommandBuilder()
@@ -19,13 +20,15 @@ const command: Command = {
     .setContexts(InteractionContextType.Guild),
 
   async execute(client, interaction): Promise<void> {
-    const isRegistered =
-      await client.services.player.isRegistered(interaction.user.id);
+    const player = await client.services.player.getByDiscordId(
+      interaction.user.id,
+    );
 
-    if (isRegistered) {
+    if (player) {
       if (interaction.inCachedGuild()) {
-        await client.services.guildAccess.ensureVerifiedPlayerRole(
+        await client.services.guildAccess.synchronizeVerifiedPlayerRole(
           interaction.member,
+          player.verification.status,
         );
       }
 
@@ -34,7 +37,9 @@ const command: Command = {
           createAlertView(
             "information",
             "Profile Already Connected",
-            "Your Discord account is already connected to a Vora player profile. Server access has been synchronized.",
+            isPlayerVerificationApproved(player.verification.status)
+              ? "Your Discord account is already connected to a verified Vora player profile. Server access has been synchronized."
+              : "Your profile is registered but not verified yet. Use `/verify-account` to submit your Mobile Legends profile screenshot.",
           ),
         ],
         flags:

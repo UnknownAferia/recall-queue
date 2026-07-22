@@ -11,6 +11,11 @@ import { QueueAccessSuspendedError } from "./errors/QueueAccessSuspendedError.js
 import { QueueFullError } from "./errors/QueueFullError.js";
 import { QueueLockedError } from "./errors/QueueLockedError.js";
 import { RolePreferencesRequiredError } from "./errors/RolePreferencesRequiredError.js";
+import { PlayerVerificationRequiredError } from "./errors/PlayerVerificationRequiredError.js";
+import {
+  isPlayerVerificationApproved,
+  normalizePlayerVerificationStatus,
+} from "../constants/playerVerification.js";
 
 export class QueueService {
   public constructor(
@@ -45,6 +50,14 @@ export class QueueService {
 
     if (!player) {
       throw new PlayerRegistrationRequiredError();
+    }
+
+    const verificationStatus = normalizePlayerVerificationStatus(
+      player.verification?.status,
+    );
+
+    if (!isPlayerVerificationApproved(verificationStatus)) {
+      throw new PlayerVerificationRequiredError(verificationStatus);
     }
 
     const primaryRole = player.preferences?.roles?.primary ?? null;

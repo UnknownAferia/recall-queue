@@ -3,6 +3,8 @@ const SquadLifecycleRoute = "squad:lifecycle";
 const SquadResultRoute = "squad:result";
 const SquadResultEvidenceRoute = "squad:result-evidence";
 const SeasonLifecycleRoute = "season-admin:lifecycle";
+const PlayerVerificationReviewRoute = "player-verification:review";
+const PlayerVerificationRejectionRoute = "player-verification:reject";
 
 export type ReadyCheckAction = "accept" | "decline";
 
@@ -40,6 +42,11 @@ export interface ParsedSeasonLifecycleCustomId {
   readonly seasonId: string;
 }
 
+export interface ParsedPlayerVerificationReviewCustomId {
+  readonly action: "approve" | "reject";
+  readonly requestId: string;
+}
+
 export const CustomIds = Object.freeze({
   buttons: {
     mainMenu: {
@@ -60,6 +67,14 @@ export const CustomIds = Object.freeze({
     serverSetup: {
       refresh: "server-setup:refresh",
       apply: "server-setup:apply",
+    },
+
+    playerVerification: {
+      route: PlayerVerificationReviewRoute,
+      approve: (requestId: string) =>
+        `${PlayerVerificationReviewRoute}:approve:${requestId}`,
+      reject: (requestId: string) =>
+        `${PlayerVerificationReviewRoute}:reject:${requestId}`,
     },
 
     seasonAdmin: {
@@ -117,6 +132,12 @@ export const CustomIds = Object.freeze({
 
   modals: {
     registerPlayer: "player:register",
+    playerVerificationEvidence: "player:verification:evidence",
+    playerVerificationRejection: {
+      route: PlayerVerificationRejectionRoute,
+      submit: (requestId: string) =>
+        `${PlayerVerificationRejectionRoute}:${requestId}`,
+    },
     createSeason: "season-admin:create",
     squadResultEvidence: {
       route: SquadResultEvidenceRoute,
@@ -130,6 +151,10 @@ export const CustomIds = Object.freeze({
       ign: "player:register:ign",
       playerId: "player:register:player-id",
       serverId: "player:register:server-id",
+    },
+    playerVerification: {
+      screenshot: "player:verification:screenshot",
+      rejectionReason: "player:verification:rejection-reason",
     },
     squadResultEvidence: {
       screenshot: "squad:result-evidence:screenshot",
@@ -228,4 +253,31 @@ export function parseSeasonLifecycleCustomId(
     action: match[2]!.toLowerCase() as SeasonLifecycleAction,
     seasonId: match[3]!.toLowerCase(),
   };
+}
+
+export function parsePlayerVerificationReviewCustomId(
+  customId: string,
+): ParsedPlayerVerificationReviewCustomId | null {
+  const match = customId.match(
+    /^player-verification:review:(approve|reject):([a-f\d]{24})$/i,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    action: match[1]!.toLowerCase() as "approve" | "reject",
+    requestId: match[2]!.toLowerCase(),
+  };
+}
+
+export function parsePlayerVerificationRejectionCustomId(
+  customId: string,
+): string | null {
+  const match = customId.match(
+    /^player-verification:reject:([a-f\d]{24})$/i,
+  );
+
+  return match?.[1]?.toLowerCase() ?? null;
 }

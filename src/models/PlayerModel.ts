@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import { PlayerDefaults } from "../constants/playerDefaults.js";
 import { PlayerRoles } from "../constants/playerRoles.js";
+import { PlayerVerificationStatuses } from "../constants/playerVerification.js";
 import type { Player } from "../types/player.js";
 
 const { Schema } = mongoose;
@@ -203,6 +204,22 @@ const rolePreferencesSchema = new Schema(
   },
 );
 
+const verificationSchema = new Schema(
+  {
+    status: {
+      type: String,
+      required: true,
+      enum: PlayerVerificationStatuses,
+      default: "legacy_verified",
+    },
+    submittedAt: { type: Date, default: null },
+    reviewedAt: { type: Date, default: null },
+    reviewedByDiscordId: { type: String, default: null, trim: true },
+    rejectionReason: { type: String, default: null, trim: true },
+  },
+  { _id: false },
+);
+
 const preferencesSchema = new Schema(
   {
     roles: {
@@ -250,6 +267,12 @@ const playerSchema = new Schema<Player>(
       type: queueSchema,
       required: true,
       default: () => ({}),
+    },
+
+    verification: {
+      type: verificationSchema,
+      required: true,
+      default: () => ({ status: "legacy_verified" }),
     },
 
     preferences: {

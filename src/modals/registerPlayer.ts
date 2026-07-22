@@ -34,8 +34,9 @@ const modal: Modal = {
       });
 
       if (interaction.inCachedGuild()) {
-        await client.services.guildAccess.ensureVerifiedPlayerRole(
+        await client.services.guildAccess.synchronizeVerifiedPlayerRole(
           interaction.member,
+          player.verification.status,
         );
       }
 

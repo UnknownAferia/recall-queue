@@ -1,4 +1,5 @@
 import { normalizePlayerRole } from "../constants/playerRoles.js";
+import { normalizePlayerVerificationStatus } from "../constants/playerVerification.js";
 import { calculateEffectiveDisciplineLevel } from "../domain/discipline/QueueDisciplinePolicy.js";
 import { calculateEffectiveIntegrityLevel } from "../domain/integrity/IntegritySanctionPolicy.js";
 import type { PlayerDto } from "../dto/PlayerDto.js";
@@ -60,6 +61,22 @@ export class PlayerMapper {
         lastPenaltyAt: player.queue.lastPenaltyAt
           ? new Date(player.queue.lastPenaltyAt)
           : null,
+      },
+
+      verification: {
+        status: normalizePlayerVerificationStatus(
+          player.verification?.status,
+        ),
+        submittedAt: player.verification?.submittedAt
+          ? new Date(player.verification.submittedAt)
+          : null,
+        reviewedAt: player.verification?.reviewedAt
+          ? new Date(player.verification.reviewedAt)
+          : null,
+        reviewedByDiscordId:
+          player.verification?.reviewedByDiscordId ?? null,
+        rejectionReason:
+          player.verification?.rejectionReason ?? null,
       },
 
       preferences: {

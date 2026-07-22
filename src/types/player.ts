@@ -1,4 +1,5 @@
 import type { PlayerRole } from "../constants/playerRoles.js";
+import type { PlayerVerificationStatus } from "../constants/playerVerification.js";
 
 export interface PlayerDiscordProfile {
   id: string;
@@ -43,6 +44,14 @@ export interface PlayerRolePreferences {
   avoided: PlayerRole | null;
 }
 
+export interface PlayerVerification {
+  status: PlayerVerificationStatus;
+  submittedAt: Date | null;
+  reviewedAt: Date | null;
+  reviewedByDiscordId: string | null;
+  rejectionReason: string | null;
+}
+
 export interface Player {
   discord: PlayerDiscordProfile;
   game: PlayerGameProfile;
@@ -50,6 +59,9 @@ export interface Player {
   statistics: PlayerStatistics;
   behavior: PlayerBehavior;
   queue: PlayerQueueData;
+
+  /* Missing on profiles created before account verification was introduced. */
+  verification?: PlayerVerification;
 
   /*
    * Optional for compatibility with player documents created before

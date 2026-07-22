@@ -41,6 +41,9 @@ function createMember(roleAvailable: boolean): {
         assignments += 1;
         memberRoles.set(assignedRole.id, assignedRole);
       },
+      remove: async (removedRole: Role) => {
+        memberRoles.delete(removedRole.id);
+      },
     },
   } as unknown as GuildMember;
 
@@ -75,5 +78,19 @@ describe("GuildAccessService", () => {
       "unavailable",
     );
     assert.equal(fixture.getAssignments(), 0);
+  });
+
+  it("removes stale access from an unverified player", async () => {
+    const fixture = createMember(true);
+    const service = new GuildAccessService();
+
+    await service.ensureVerifiedPlayerRole(fixture.member);
+    assert.equal(
+      await service.synchronizeVerifiedPlayerRole(
+        fixture.member,
+        "rejected",
+      ),
+      "removed",
+    );
   });
 });

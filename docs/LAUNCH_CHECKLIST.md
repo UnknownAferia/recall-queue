@@ -16,6 +16,11 @@ community.
 ## Discord
 
 - [ ] `/server-setup` reports no missing or modified resources.
+- [ ] A new account can submit `/verify-account`, appears in the managed
+      account-verification channel and remains blocked from matchmaking until
+      Operations approves it.
+- [ ] Verification rejection records a reason, removes stale player access and
+      allows a corrected evidence submission.
 - [ ] `/publish-community` has populated every managed information channel.
 - [ ] Core and Community bots are present in every configured guild.
 - [ ] A real support ticket can be opened, answered, closed and archived.

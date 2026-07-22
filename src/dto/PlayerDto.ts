@@ -1,4 +1,5 @@
 import type { PlayerRole } from "../constants/playerRoles.js";
+import type { PlayerVerificationStatus } from "../constants/playerVerification.js";
 
 export interface PlayerDiscordDto {
   readonly id: string;
@@ -47,6 +48,14 @@ export interface PlayerPreferencesDto {
   readonly roles: PlayerRolePreferencesDto;
 }
 
+export interface PlayerVerificationDto {
+  readonly status: PlayerVerificationStatus;
+  readonly submittedAt: Date | null;
+  readonly reviewedAt: Date | null;
+  readonly reviewedByDiscordId: string | null;
+  readonly rejectionReason: string | null;
+}
+
 export interface PlayerDto {
   readonly id: string;
   readonly discord: PlayerDiscordDto;
@@ -55,6 +64,7 @@ export interface PlayerDto {
   readonly statistics: PlayerStatisticsDto;
   readonly behavior: PlayerBehaviorDto;
   readonly queue: PlayerQueueDto;
+  readonly verification: PlayerVerificationDto;
   readonly preferences: PlayerPreferencesDto;
   readonly createdAt: Date;
   readonly updatedAt: Date;

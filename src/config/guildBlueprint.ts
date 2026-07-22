@@ -55,7 +55,7 @@ export interface GuildChannelBlueprint {
 }
 
 export const GuildBlueprint = Object.freeze({
-  version: 5,
+  version: 6,
 
   roles: [
     {
@@ -329,6 +329,14 @@ export const GuildBlueprint = Object.freeze({
       name: "💬｜staff-chat",
       type: ChannelType.GuildText,
       access: "staffOnly",
+    },
+    {
+      key: "accountVerifications",
+      categoryKey: "staff",
+      name: "🔐｜account-verification",
+      type: ChannelType.GuildText,
+      access: "staffOnly",
+      topic: "Mobile Legends account evidence awaiting Operations review.",
     },
     {
       key: "reports",

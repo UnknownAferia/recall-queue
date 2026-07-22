@@ -27,6 +27,9 @@ import { SeasonRepository } from "../repositories/SeasonRepository.js";
 import { SeasonProgressionService } from "./SeasonProgressionService.js";
 import { SeasonService } from "./SeasonService.js";
 import { SeasonRewardRoleService } from "./SeasonRewardRoleService.js";
+import { PlayerVerificationRepository } from "../repositories/PlayerVerificationRepository.js";
+import { PlayerVerificationEvidenceService } from "./PlayerVerificationEvidenceService.js";
+import { PlayerVerificationService } from "./PlayerVerificationService.js";
 
 export class ServiceContainer {
   public readonly player: PlayerService;
@@ -45,6 +48,7 @@ export class ServiceContainer {
   public readonly resultLifecycleExpiration: ResultLifecycleExpirationService;
   public readonly seasons: SeasonService;
   public readonly seasonRewards: SeasonRewardRoleService;
+  public readonly playerVerification: PlayerVerificationService;
 
   public constructor() {
     const playerRepository = new PlayerRepository();
@@ -53,6 +57,8 @@ export class ServiceContainer {
     const moderationAuditRepository = new ModerationAuditRepository();
     const seasonRepository = new SeasonRepository();
     const transactionRunner = new MongoTransactionRunner();
+    const playerVerificationRepository =
+      new PlayerVerificationRepository();
     const queueDiscipline = new QueueDisciplineService(playerRepository);
     this.resultLifecycleExpiration = new ResultLifecycleExpirationService(
       squadRepository,
@@ -71,6 +77,12 @@ export class ServiceContainer {
     const seasonProgression = new SeasonProgressionService(seasonRepository);
 
     this.player = new PlayerService(playerRepository);
+    this.playerVerification = new PlayerVerificationService(
+      playerVerificationRepository,
+      playerRepository,
+      transactionRunner,
+      new PlayerVerificationEvidenceService(),
+    );
 
     this.queue = new QueueService(
       queueRepository,

@@ -46,6 +46,7 @@ automatically.
 ### Player experience
 
 - Discord-based registration with MLBB player ID, server ID and in-game name
+- Manual MLBB profile-evidence review before new accounts receive matchmaking access
 - Primary, secondary and avoided role preferences
 - Player profiles, verified match history and provisional leaderboards
 - Behavior score, queue reliability and integrity standing
@@ -237,8 +238,9 @@ npm start
 2. Review the proposed Vora server blueprint.
 3. Apply the setup to create or repair managed roles, categories, channels and
    permission overwrites.
-4. Run `/register`, configure role preferences and open `/vora`.
-5. Join the managed `queue-lobby` voice channel before entering matchmaking.
+4. Run `/register`, then `/verify-account` and upload a clear MLBB profile screenshot.
+5. Wait for Operations approval, configure role preferences and open `/vora`.
+6. Join the managed `queue-lobby` voice channel before entering matchmaking.
 
 The setup is idempotent: running it again repairs managed resources without
 deleting unrelated community content.

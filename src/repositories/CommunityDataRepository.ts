@@ -14,7 +14,12 @@ export class CommunityDataRepository {
   ) {}
 
   public async findHighestRated(limit: number): Promise<PlayerDocument[]> {
-    return PlayerModel.find()
+    return PlayerModel.find({
+      $or: [
+        { "verification.status": { $in: ["verified", "legacy_verified"] } },
+        { verification: { $exists: false } },
+      ],
+    })
       .sort({
         "rating.rsr": -1,
         "statistics.wins": -1,

@@ -69,7 +69,14 @@ const command: Command = {
       return;
     }
 
-    await interaction.deferReply({
+    await interaction.reply({
+      components: [
+        createAlertView(
+          "information",
+          "Resolving Dispute",
+          "Vora is applying the moderation decision and synchronizing affected player records.",
+        ),
+      ],
       flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
 

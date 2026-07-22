@@ -7,7 +7,10 @@ export function createMatchmakingStatusView(
   status: MatchmakingStatusSnapshot,
   iconAttachmentName?: string,
 ): ContainerBuilder {
-  const operational = status.coreOnline && status.queueStatus === "open";
+  const operational =
+    status.coreOnline &&
+    status.queueStatus === "open" &&
+    status.matchmakingOpen;
   const headline = operational
     ? "🟢 Matchmaking Operational"
     : status.coreOnline
@@ -38,6 +41,9 @@ export function createMatchmakingStatusView(
           `## ${headline}`,
           `**Core heartbeat:** ${heartbeat}`,
           `**Queue access:** ${status.queueStatus === "open" ? "Open" : "Locked"}`,
+          `**Matchmaking control:** ${status.matchmakingOpen ? "Open" : "Maintenance"}`,
+          `**Registration:** ${status.registrationOpen ? "Open" : "Maintenance"}`,
+          status.maintenanceReason ? `> ${status.maintenanceReason}` : null,
           "",
           "### Live activity",
           `**Waiting players:** ${status.queuedPlayers}`,
@@ -49,7 +55,7 @@ export function createMatchmakingStatusView(
           status.coreOnline
             ? "-# Vora Core is reporting normally."
             : "-# Do not join matchmaking until Core connectivity is restored.",
-        ].join("\n"),
+        ].filter((line): line is string => line !== null).join("\n"),
       ),
     )
     .addSeparatorComponents(ViewFactory.separator())

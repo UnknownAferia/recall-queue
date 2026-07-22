@@ -102,23 +102,29 @@ export class PlayerVerificationEvidenceService {
   public async discard(
     guild: Guild,
     evidence: PlayerVerificationEvidence,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const channel = await guild.channels.fetch(evidence.archiveChannelId);
 
       if (channel?.type !== ChannelType.GuildText) {
-        return;
+        return false;
       }
 
       const message = await channel.messages
         .fetch(evidence.archiveMessageId)
         .catch(() => null);
 
-      await message?.delete();
+      if (!message) {
+        return false;
+      }
+
+      await message.delete();
+      return true;
     } catch (error: unknown) {
       logger.warn(
         `Unable to remove unused verification evidence ${evidence.archiveMessageId}: ${String(error)}`,
       );
+      return false;
     }
   }
 

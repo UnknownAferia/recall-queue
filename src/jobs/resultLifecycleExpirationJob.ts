@@ -88,6 +88,8 @@ export function startResultLifecycleExpirationJob(client: VoraClient): void {
     }
   };
 
+  void sweep();
+
   const timer = setInterval(
     () => void sweep(),
     SquadConfig.resultLifecycleSweepIntervalMs,

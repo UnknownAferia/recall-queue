@@ -5,6 +5,7 @@ const SquadResultEvidenceRoute = "squad:result-evidence";
 const SeasonLifecycleRoute = "season-admin:lifecycle";
 const PlayerVerificationReviewRoute = "player-verification:review";
 const PlayerVerificationRejectionRoute = "player-verification:reject";
+const PlayerAdministrationOperationRoute = "player-admin:operation";
 
 export type ReadyCheckAction = "accept" | "decline";
 
@@ -47,6 +48,12 @@ export interface ParsedPlayerVerificationReviewCustomId {
   readonly requestId: string;
 }
 
+export interface ParsedPlayerAdministrationOperationCustomId {
+  readonly decision: "confirm" | "cancel";
+  readonly action: "reset_verification" | "unregister";
+  readonly operationId: string;
+}
+
 export const CustomIds = Object.freeze({
   buttons: {
     mainMenu: {
@@ -75,6 +82,20 @@ export const CustomIds = Object.freeze({
         `${PlayerVerificationReviewRoute}:approve:${requestId}`,
       reject: (requestId: string) =>
         `${PlayerVerificationReviewRoute}:reject:${requestId}`,
+    },
+
+    playerAdministration: {
+      route: PlayerAdministrationOperationRoute,
+      confirm: (
+        action: "reset_verification" | "unregister",
+        operationId: string,
+      ) =>
+        `${PlayerAdministrationOperationRoute}:confirm:${action}:${operationId}`,
+      cancel: (
+        action: "reset_verification" | "unregister",
+        operationId: string,
+      ) =>
+        `${PlayerAdministrationOperationRoute}:cancel:${action}:${operationId}`,
     },
 
     seasonAdmin: {
@@ -280,4 +301,24 @@ export function parsePlayerVerificationRejectionCustomId(
   );
 
   return match?.[1]?.toLowerCase() ?? null;
+}
+
+export function parsePlayerAdministrationOperationCustomId(
+  customId: string,
+): ParsedPlayerAdministrationOperationCustomId | null {
+  const match = customId.match(
+    /^player-admin:operation:(confirm|cancel):(reset_verification|unregister):([a-f\d]{24})$/i,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    decision: match[1]!.toLowerCase() as "confirm" | "cancel",
+    action: match[2]!.toLowerCase() as
+      | "reset_verification"
+      | "unregister",
+    operationId: match[3]!.toLowerCase(),
+  };
 }

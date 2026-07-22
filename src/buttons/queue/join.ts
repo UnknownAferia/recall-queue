@@ -11,6 +11,7 @@ import { QueueFullError } from "../../services/errors/QueueFullError.js";
 import { QueueLockedError } from "../../services/errors/QueueLockedError.js";
 import { RolePreferencesRequiredError } from "../../services/errors/RolePreferencesRequiredError.js";
 import { PlayerVerificationRequiredError } from "../../services/errors/PlayerVerificationRequiredError.js";
+import { SystemMaintenanceError } from "../../services/errors/SystemMaintenanceError.js";
 import { createAlertView } from "../../ui/createAlertView.js";
 import { createClosedSquadView } from "../../ui/createClosedSquadView.js";
 import { createQueueView } from "../../ui/createQueueView.js";
@@ -130,7 +131,8 @@ const button: Button = {
         error instanceof PlayerVerificationRequiredError ||
         error instanceof RolePreferencesRequiredError ||
         error instanceof QueueFullError ||
-        error instanceof QueueLockedError
+        error instanceof QueueLockedError ||
+        error instanceof SystemMaintenanceError
       ) {
         await interaction.followUp({
           components: [

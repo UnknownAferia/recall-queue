@@ -5,6 +5,7 @@ import type { Modal } from "../interfaces/Modal.js";
 import { GameAccountAlreadyRegisteredError } from "../services/errors/GameAccountAlreadyRegisteredError.js";
 import { InvalidRegistrationDataError } from "../services/errors/InvalidRegistrationDataError.js";
 import { PlayerAlreadyRegisteredError } from "../services/errors/PlayerAlreadyRegisteredError.js";
+import { SystemMaintenanceError } from "../services/errors/SystemMaintenanceError.js";
 import { createAlertView } from "../ui/createAlertView.js";
 import { createPlayerProfileView } from "../ui/createPlayerProfileView.js";
 
@@ -50,7 +51,8 @@ const modal: Modal = {
       if (
         error instanceof PlayerAlreadyRegisteredError ||
         error instanceof GameAccountAlreadyRegisteredError ||
-        error instanceof InvalidRegistrationDataError
+        error instanceof InvalidRegistrationDataError ||
+        error instanceof SystemMaintenanceError
       ) {
         await interaction.reply({
           components: [

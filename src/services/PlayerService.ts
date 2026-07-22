@@ -20,15 +20,19 @@ import { InvalidRegistrationDataError } from "./errors/InvalidRegistrationDataEr
 import { InvalidRolePreferenceError } from "./errors/InvalidRolePreferenceError.js";
 import { PlayerAlreadyRegisteredError } from "./errors/PlayerAlreadyRegisteredError.js";
 import { PlayerProfileNotFoundError } from "./errors/PlayerProfileNotFoundError.js";
+import type { OperationalControlService } from "./OperationalControlService.js";
 
 export class PlayerService {
   public constructor(
     private readonly playerRepository: PlayerRepository,
+    private readonly operationalControl?: OperationalControlService,
   ) {}
 
   public async registerPlayer(
     input: CreatePlayerInput,
   ): Promise<PlayerDto> {
+    await this.operationalControl?.assertRegistrationOpen();
+
     const normalizedInput =
       this.normalizeRegistrationInput(input);
 

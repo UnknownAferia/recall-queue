@@ -9,7 +9,7 @@ export interface CreateOperationalAuditInput {
   readonly eventType: OperationalAuditEventType;
   readonly guildId: string;
   readonly actorDiscordId: string | null;
-  readonly subjectType: "support_ticket" | "community_service";
+  readonly subjectType: "support_ticket" | "community_service" | "system";
   readonly subjectId: string;
   readonly details?: OperationalAuditDetails;
   readonly occurredAt?: Date;

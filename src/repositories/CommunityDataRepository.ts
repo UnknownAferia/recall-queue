@@ -3,6 +3,7 @@ import { QueueModel } from "../models/QueueModel.js";
 import { ServiceHeartbeatModel } from "../models/ServiceHeartbeatModel.js";
 import { SquadModel } from "../models/SquadModel.js";
 import type { MatchmakingStatusSnapshot } from "../types/community.js";
+import { OperationalStateModel } from "../models/OperationalStateModel.js";
 
 interface CommunityDataConfiguration {
   readonly coreOfflineAfterMs: number;
@@ -33,7 +34,7 @@ export class CommunityDataRepository {
     guildId: string,
     now = new Date(),
   ): Promise<MatchmakingStatusSnapshot> {
-    const [queue, statusCounts, heartbeat] = await Promise.all([
+    const [queue, statusCounts, heartbeat, operationalState] = await Promise.all([
       QueueModel.findOne({ guildId }).exec(),
       SquadModel.aggregate<{ _id: string; count: number }>([
         {
@@ -47,6 +48,7 @@ export class CommunityDataRepository {
         { $group: { _id: "$status", count: { $sum: 1 } } },
       ]).exec(),
       ServiceHeartbeatModel.findOne({ service: "core" }).exec(),
+      OperationalStateModel.findOne({ key: "global" }).lean().exec(),
     ]);
     const counts = new Map(
       statusCounts.map((entry) => [entry._id, entry.count]),
@@ -63,6 +65,9 @@ export class CommunityDataRepository {
           this.configuration.coreOfflineAfterMs,
       coreHeartbeatAt: heartbeatAt,
       queueStatus: queue?.status ?? "open",
+      registrationOpen: operationalState?.registrationOpen ?? true,
+      matchmakingOpen: operationalState?.matchmakingOpen ?? true,
+      maintenanceReason: operationalState?.reason ?? null,
       queuedPlayers: queue?.entries.length ?? 0,
       readyChecks: counts.get("ready_check") ?? 0,
       activeSquads: counts.get("active") ?? 0,

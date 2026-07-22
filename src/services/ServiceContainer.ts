@@ -30,6 +30,10 @@ import { SeasonRewardRoleService } from "./SeasonRewardRoleService.js";
 import { PlayerVerificationRepository } from "../repositories/PlayerVerificationRepository.js";
 import { PlayerVerificationEvidenceService } from "./PlayerVerificationEvidenceService.js";
 import { PlayerVerificationService } from "./PlayerVerificationService.js";
+import { PlayerAdministrationRepository } from "../repositories/PlayerAdministrationRepository.js";
+import { PlayerAdministrationService } from "./PlayerAdministrationService.js";
+import { OperationalControlService } from "./OperationalControlService.js";
+import { SystemOperationsService } from "./SystemOperationsService.js";
 
 export class ServiceContainer {
   public readonly player: PlayerService;
@@ -49,6 +53,10 @@ export class ServiceContainer {
   public readonly seasons: SeasonService;
   public readonly seasonRewards: SeasonRewardRoleService;
   public readonly playerVerification: PlayerVerificationService;
+  public readonly playerVerificationEvidence: PlayerVerificationEvidenceService;
+  public readonly playerAdministration: PlayerAdministrationService;
+  public readonly operationalControl: OperationalControlService;
+  public readonly systemOperations: SystemOperationsService;
 
   public constructor() {
     const playerRepository = new PlayerRepository();
@@ -76,18 +84,25 @@ export class ServiceContainer {
     this.seasonRewards = new SeasonRewardRoleService(seasonRepository);
     const seasonProgression = new SeasonProgressionService(seasonRepository);
 
-    this.player = new PlayerService(playerRepository);
+    this.operationalControl = new OperationalControlService();
+    this.player = new PlayerService(playerRepository, this.operationalControl);
+    this.playerVerificationEvidence = new PlayerVerificationEvidenceService();
     this.playerVerification = new PlayerVerificationService(
       playerVerificationRepository,
       playerRepository,
       transactionRunner,
-      new PlayerVerificationEvidenceService(),
+      this.playerVerificationEvidence,
+    );
+    this.playerAdministration = new PlayerAdministrationService(
+      new PlayerAdministrationRepository(),
+      transactionRunner,
     );
 
     this.queue = new QueueService(
       queueRepository,
       playerRepository,
       squadRepository,
+      this.operationalControl,
     );
     this.queueVoice = new QueueVoiceService(this.queue);
     this.squadVoice = new SquadVoiceService(squadRepository, this.queueVoice);
@@ -125,6 +140,14 @@ export class ServiceContainer {
         enabled: env.testModeEnabled,
         databaseName: env.mongodbDatabase,
       },
+    );
+    this.systemOperations = new SystemOperationsService(
+      this.operationalControl,
+      this.guildSetup,
+      this.teamFormation,
+      this.resultLifecycleExpiration,
+      this.queueVoice,
+      this.squadVoice,
     );
   }
 }

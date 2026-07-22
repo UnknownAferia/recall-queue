@@ -13,26 +13,55 @@ import { CommunityModerationCaseModel } from "../models/CommunityModerationCaseM
 import { CommunityModerationCounterModel } from "../models/CommunityModerationCounterModel.js";
 import { CommunityReportModel } from "../models/CommunityReportModel.js";
 import { PlayerVerificationModel } from "../models/PlayerVerificationModel.js";
+import { PlayerAdministrationOperationModel } from "../models/PlayerAdministrationOperationModel.js";
+import { OperationalStateModel } from "../models/OperationalStateModel.js";
+
+const ManagedModels = [
+  CommunityPanelModel,
+  ModerationAuditModel,
+  PlayerModel,
+  QueueModel,
+  SquadModel,
+  ServiceHeartbeatModel,
+  SupportTicketModel,
+  SeasonModel,
+  SeasonMembershipModel,
+  OperationalAuditModel,
+  CommunityModerationCaseModel,
+  CommunityModerationCounterModel,
+  CommunityReportModel,
+  PlayerVerificationModel,
+  PlayerAdministrationOperationModel,
+  OperationalStateModel,
+] as const;
+
+export interface DatabaseIndexAudit {
+  readonly models: number;
+  readonly missingIndexes: number;
+  readonly obsoleteIndexes: number;
+}
+
+export async function auditDatabaseIndexes(): Promise<DatabaseIndexAudit> {
+  const differences = await Promise.all(
+    ManagedModels.map((model) => model.diffIndexes()),
+  );
+  return {
+    models: ManagedModels.length,
+    missingIndexes: differences.reduce(
+      (sum, difference) => sum + difference.toCreate.length,
+      0,
+    ),
+    obsoleteIndexes: differences.reduce(
+      (sum, difference) => sum + difference.toDrop.length,
+      0,
+    ),
+  };
+}
 
 export async function synchronizeDatabaseIndexes(): Promise<void> {
   logger.info("Synchronizing database indexes...");
 
-  await Promise.all([
-    CommunityPanelModel.syncIndexes(),
-    ModerationAuditModel.syncIndexes(),
-    PlayerModel.syncIndexes(),
-    QueueModel.syncIndexes(),
-    SquadModel.syncIndexes(),
-    ServiceHeartbeatModel.syncIndexes(),
-    SupportTicketModel.syncIndexes(),
-    SeasonModel.syncIndexes(),
-    SeasonMembershipModel.syncIndexes(),
-    OperationalAuditModel.syncIndexes(),
-    CommunityModerationCaseModel.syncIndexes(),
-    CommunityModerationCounterModel.syncIndexes(),
-    CommunityReportModel.syncIndexes(),
-    PlayerVerificationModel.syncIndexes(),
-  ]);
+  await Promise.all(ManagedModels.map((model) => model.syncIndexes()));
 
   logger.info("Database indexes synchronized.");
 }

@@ -21,7 +21,7 @@ const operationalAuditSchema = new Schema<OperationalAuditEvent>(
     subjectType: {
       type: String,
       required: true,
-      enum: ["support_ticket", "community_service"],
+      enum: ["support_ticket", "community_service", "system"],
     },
     subjectId: { type: String, required: true, trim: true },
     details: { type: Schema.Types.Mixed, required: true, default: {} },

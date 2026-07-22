@@ -53,7 +53,7 @@ export interface OperationalAuditEvent {
   eventType: OperationalAuditEventType;
   guildId: string;
   actorDiscordId: string | null;
-  subjectType: "support_ticket" | "community_service";
+  subjectType: "support_ticket" | "community_service" | "system";
   subjectId: string;
   details: OperationalAuditDetails;
   occurredAt: Date;
@@ -65,6 +65,9 @@ export interface MatchmakingStatusSnapshot {
   coreOnline: boolean;
   coreHeartbeatAt: Date | null;
   queueStatus: "open" | "locked";
+  registrationOpen: boolean;
+  matchmakingOpen: boolean;
+  maintenanceReason: string | null;
   queuedPlayers: number;
   readyChecks: number;
   activeSquads: number;

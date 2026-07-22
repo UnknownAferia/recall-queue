@@ -35,13 +35,28 @@ export async function bootstrap(client: VoraClient): Promise<void> {
     const heartbeat = new ServiceHeartbeatService("core");
 
     client.once(Events.ClientReady, (readyClient) => {
-      void heartbeat
-        .start()
+      void client.services.systemOperations
+        .recover(client)
+        .then(async (summary) => {
+          if (summary.warnings.length > 0) {
+            for (const guild of readyClient.guilds.cache.values()) {
+              await client.services.systemOperations.publishCriticalAlert(
+                guild,
+                "Startup Recovery Warning",
+                summary.warnings.join("\n"),
+              );
+            }
+          }
+
+          await heartbeat.start();
+        })
         .then(() => {
           logger.info(`Logged in as ${readyClient.user.tag}`);
         })
         .catch((error: unknown) => {
-          logger.error(`Core heartbeat failed:\n${formatError(error)}`);
+          logger.error(
+            `Core startup recovery or heartbeat failed:\n${formatError(error)}`,
+          );
         });
     });
 

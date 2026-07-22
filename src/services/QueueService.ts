@@ -16,12 +16,14 @@ import {
   isPlayerVerificationApproved,
   normalizePlayerVerificationStatus,
 } from "../constants/playerVerification.js";
+import type { OperationalControlService } from "./OperationalControlService.js";
 
 export class QueueService {
   public constructor(
     private readonly queueRepository: QueueRepository,
     private readonly playerRepository: PlayerRepository,
     private readonly squadRepository: SquadRepository,
+    private readonly operationalControl?: OperationalControlService,
   ) {}
 
   public async getQueue(guildId: string): Promise<QueueDocument> {
@@ -46,6 +48,8 @@ export class QueueService {
     guildId: string,
     discordId: string,
   ): Promise<QueueDocument> {
+    await this.operationalControl?.assertMatchmakingOpen();
+
     const player = await this.playerRepository.findByDiscordId(discordId);
 
     if (!player) {

@@ -1,6 +1,9 @@
 import type { GuildMember } from "discord.js";
 
-import { GuildBlueprint } from "../config/guildBlueprint.js";
+import {
+  GuildBlueprint,
+  type GuildRoleKey,
+} from "../config/guildBlueprint.js";
 import { logger } from "../config/logger.js";
 import {
   isPlayerVerificationApproved,
@@ -15,6 +18,65 @@ export type VerifiedRoleSyncResult =
   | "unavailable";
 
 export class GuildAccessService {
+  public async removeManagedPlayerRoles(
+    member: GuildMember,
+    includeProgressionRoles: boolean,
+  ): Promise<number> {
+    if (member.user.bot) {
+      return 0;
+    }
+
+    const progressionKeys: readonly GuildRoleKey[] = [
+      "divisionBronze",
+      "divisionSilver",
+      "divisionGold",
+      "divisionPlatinum",
+      "divisionDiamond",
+      "divisionMaster",
+      "divisionApex",
+      "seasonChampion",
+      "seasonElite",
+      "seasonVeteran",
+    ];
+    const managedKeys = new Set<GuildRoleKey>([
+      "verifiedPlayer",
+      ...(includeProgressionRoles ? progressionKeys : []),
+    ]);
+    const managedNames = new Set(
+      GuildBlueprint.roles
+        .filter((role) => managedKeys.has(role.key))
+        .flatMap((role) => [role.name, ...(role.legacyNames ?? [])]),
+    );
+
+    try {
+      await member.guild.roles.fetch();
+      const roles = member.roles.cache.filter(
+        (role) => managedNames.has(role.name) && role.editable,
+      );
+
+      if (roles.size === 0) {
+        return 0;
+      }
+
+      await member.roles.remove(
+        [...roles.keys()],
+        includeProgressionRoles
+          ? "Vora player profile unregistered"
+          : "Vora account verification reset",
+      );
+
+      logger.info(
+        `Removed ${roles.size} managed player role(s) from ${member.user.id} in guild ${member.guild.id}.`,
+      );
+      return roles.size;
+    } catch (error: unknown) {
+      logger.warn(
+        `Unable to clean managed player roles for ${member.user.id} in guild ${member.guild.id}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return 0;
+    }
+  }
+
   public async synchronizeVerifiedPlayerRole(
     member: GuildMember,
     status: PlayerVerificationStatus,

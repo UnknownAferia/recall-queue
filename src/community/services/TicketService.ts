@@ -73,6 +73,9 @@ export class TicketService {
 
     const subject = subjectInput.trim().replace(/\s+/g, " ");
     const description = descriptionInput.trim();
+    const relatedModerationCaseNumber = this.extractCaseNumber(
+      `${subject}\n${description}`,
+    );
 
     if (subject.length < 3 || subject.length > 80) {
       throw new TicketOperationError(
@@ -185,6 +188,7 @@ export class TicketService {
         requesterDiscordId: requester.id,
         subject,
         description,
+        relatedModerationCaseNumber,
       });
       logger.info(
         `Stored support ticket ${createdTicket.id} for channel ${channel.id}.`,
@@ -547,5 +551,10 @@ export class TicketService {
       .slice(0, 70);
 
     return `ticket-${normalized || "player"}`;
+  }
+
+  private extractCaseNumber(content: string): number | null {
+    const match = content.match(/\bVORA-(\d{1,6})\b/i);
+    return match ? Number(match[1]) : null;
   }
 }

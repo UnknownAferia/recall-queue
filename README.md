@@ -87,6 +87,11 @@ automatically.
 - Automated help panel and private support-ticket creation
 - One open ticket per member and server
 - Requester/staff closure permissions and read-only closed-ticket retention
+- Private message/member reporting and a staff-only Operations inbox
+- Audited warnings, timeouts, kicks, bans, purges and managed-channel controls
+- Confirmation gates for destructive actions and reversible case handling
+- Conservative flood, repeated-message and mass-mention protection
+- Support-ticket appeals linked through `VORA-######` case references
 
 See the [project roadmap](docs/ROADMAP.md) for completed work, active
 development and planned releases.
@@ -215,8 +220,9 @@ Start Vora Community in a second terminal:
 npm run dev:community
 ```
 
-The Community bot does not register slash commands. Its persistent buttons and
-modals are published automatically in the managed `help` and `open-a-ticket`
+The Community bot registers its own administrative and moderation commands as
+well as the **Report Message** and **Report User** context-menu actions. Its
+persistent help, ticket and information panels are published in managed
 channels.
 
 For a production-style start after building:

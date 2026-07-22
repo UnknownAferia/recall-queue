@@ -8,13 +8,26 @@ applications and tokens.
 
 - Use Node.js 24 LTS or the provided container image.
 - Enable **Server Members Intent** for Vora Core.
-- Enable **Message Content Intent** for Vora Community so private ticket
-  transcripts contain the actual conversation.
+- Enable **Server Members** and **Message Content** intents for Vora Community.
+  They power hierarchy-safe staff actions, report evidence, conservative spam
+  protection and private ticket transcripts.
 - Give both bots only the permissions produced by `/server-setup`. During the
   private alpha, Administrator permission remains acceptable for the managed
   server-setup workflow.
 - Use a MongoDB deployment with replica-set transactions and automated backups.
 - Never commit `.env`, logs, backup archives or Discord tokens.
+
+## Community moderation boundaries
+
+Vora Community owns server conduct: reports, warnings, timeouts, kicks, bans,
+message cleanup and managed-channel controls. Vora Core continues to own match
+result disputes, evidence decisions, rating corrections and competitive
+integrity sanctions. Community cases never alter RSR or squad results.
+
+Kick and ban requests remain pending until the requesting moderator confirms
+them in `moderation-log`. Members can appeal by opening a support ticket and
+including the displayed `VORA-######` reference. Moderation and report records
+are retained for 365 days, then removed by MongoDB TTL cleanup.
 
 ## Deployment
 

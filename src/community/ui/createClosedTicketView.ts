@@ -19,6 +19,9 @@ export function createClosedTicketView(
       ViewFactory.text(
         [
           `**Subject:** ${ticket.subject}`,
+          ticket.relatedModerationCaseNumber
+            ? `**Appeal case:** VORA-${ticket.relatedModerationCaseNumber.toString().padStart(6, "0")}`
+            : null,
           `**Opened by:** <@${ticket.requesterDiscordId}>`,
           ticket.closedByDiscordId
             ? `**Closed by:** <@${ticket.closedByDiscordId}>`

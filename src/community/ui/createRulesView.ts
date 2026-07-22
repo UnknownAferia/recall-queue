@@ -28,10 +28,10 @@ export function createRulesView(): ContainerBuilder {
           "Never share passwords, authentication codes, bot tokens or private personal information. Use a private ticket for sensitive support matters.",
           "",
           "### 5 — Understand data retention",
-          "Closed ticket channels are retained for up to 7 days. Their staff-only transcripts and ticket records are retained for up to 365 days. Match-result screenshots and their audit records remain staff-only and are retained with the competitive match record for integrity reviews and appeals.",
+          "Closed ticket channels are retained for up to 7 days. Staff-only ticket transcripts, Community reports and moderation cases are retained for up to 365 days. Match-result screenshots and their audit records remain staff-only and are retained with the competitive match record for integrity reviews and appeals.",
           "",
           "### 6 — Follow staff direction",
-          "Staff may remove content, close disruptive sessions, apply queue cooldowns or issue suspensions. Competitive decisions and sanctions are recorded for accountability.",
+          "Staff may remove content, close disruptive sessions, apply queue cooldowns or issue suspensions. Community and competitive decisions are recorded with case references for accountability and appeals.",
         ].join("\n"),
       ),
     )

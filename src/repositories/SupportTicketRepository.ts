@@ -9,6 +9,7 @@ export interface CreateSupportTicketInput {
   readonly requesterDiscordId: string;
   readonly subject: string;
   readonly description: string;
+  readonly relatedModerationCaseNumber?: number | null;
 }
 
 export interface SupportTicketTranscriptReference {
@@ -47,6 +48,8 @@ export class SupportTicketRepository {
     return SupportTicketModel.create({
       ...input,
       status: "open",
+      relatedModerationCaseNumber:
+        input.relatedModerationCaseNumber ?? null,
       closedByDiscordId: null,
       closedAt: null,
       transcriptChannelId: null,

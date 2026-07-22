@@ -29,6 +29,7 @@ export interface SupportTicket {
   requesterDiscordId: string;
   subject: string;
   description: string;
+  relatedModerationCaseNumber: number | null;
   status: TicketStatus;
   closedByDiscordId: string | null;
   closedAt: Date | null;

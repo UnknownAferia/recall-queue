@@ -33,6 +33,7 @@ export class CommunityPanelPublisher {
 
       await existingMessage.edit({
         components: [view],
+        allowedMentions: { parse: [] },
         files:
           asset && !assetAlreadyAttached
             ? [
@@ -47,6 +48,7 @@ export class CommunityPanelPublisher {
 
     const message = await channel.send({
       components: [view],
+      allowedMentions: { parse: [] },
       files: asset
         ? [
             new AttachmentBuilder(asset.filePath, {

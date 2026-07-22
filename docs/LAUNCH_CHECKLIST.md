@@ -10,7 +10,7 @@ community.
 - [ ] MongoDB uses a dedicated least-privilege application user.
 - [ ] Atlas network access is restricted to the production host where practical.
 - [ ] Server Members Intent is enabled for Core.
-- [ ] Message Content Intent is enabled for Community.
+- [ ] Server Members and Message Content intents are enabled for Community.
 - [ ] Staff role hierarchy allows managed verification, division and season roles.
 
 ## Discord
@@ -20,6 +20,11 @@ community.
 - [ ] Core and Community bots are present in every configured guild.
 - [ ] A real support ticket can be opened, answered, closed and archived.
 - [ ] `vora-log`, `moderation-log` and staff channels are invisible to members.
+- [ ] The staff-only `reports` channel exists after `/server-setup`.
+- [ ] A test message report reaches `reports` and can be dismissed.
+- [ ] Warning, timeout, timeout reversal and kick/ban confirmation were tested
+      against a non-staff test account.
+- [ ] AutoMod deletes a controlled spam test without affecting staff messages.
 
 ## Application
 
@@ -38,6 +43,7 @@ community.
 - [ ] A restore rehearsal has succeeded against an isolated database.
 - [ ] Ticket and evidence retention has been disclosed in the server rules or
       privacy notice.
+- [ ] Community report and moderation-case retention has been disclosed.
 - [ ] A named owner is responsible for incident response and data requests.
 
 ## Release decision

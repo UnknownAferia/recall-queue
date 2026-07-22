@@ -55,7 +55,7 @@ export interface GuildChannelBlueprint {
 }
 
 export const GuildBlueprint = Object.freeze({
-  version: 4,
+  version: 5,
 
   roles: [
     {
@@ -329,6 +329,14 @@ export const GuildBlueprint = Object.freeze({
       name: "💬｜staff-chat",
       type: ChannelType.GuildText,
       access: "staffOnly",
+    },
+    {
+      key: "reports",
+      categoryKey: "staff",
+      name: "🚨｜reports",
+      type: ChannelType.GuildText,
+      access: "staffOnly",
+      topic: "Private community reports awaiting Vora Operations review.",
     },
     {
       key: "moderationLog",

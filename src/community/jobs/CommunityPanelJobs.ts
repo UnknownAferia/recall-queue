@@ -100,9 +100,12 @@ export class CommunityPanelJobs {
     this.retentionRunning = true;
 
     try {
-      await this.forEachGuild((guild) =>
-        this.client.tickets.runRetention(guild),
-      );
+      await this.forEachGuild(async (guild) => {
+        await Promise.all([
+          this.client.tickets.runRetention(guild),
+          this.client.moderation.expirePendingCases(guild.id),
+        ]);
+      });
     } finally {
       this.retentionRunning = false;
     }

@@ -18,6 +18,11 @@ const supportTicketSchema = new Schema<SupportTicket>(
       trim: true,
       maxlength: 1_000,
     },
+    relatedModerationCaseNumber: {
+      type: Number,
+      default: null,
+      min: 1,
+    },
     status: {
       type: String,
       required: true,

@@ -93,6 +93,20 @@ they are not the primary matchmaking flow.
   platform guidance, command help and support panels
 - Idempotent administrator publication of branded release announcements
 
+## ✅ Community moderation
+
+- Private message and member reports through Discord context menus
+- Per-guild report and case references with a staff-only review inbox
+- Recorded warnings, timeouts, timeout removal, kicks and bans
+- Explicit confirmation gates for kick and ban actions
+- Reversible warnings, timeouts and bans with retained reasons
+- Member moderation history, audited message purge and safe channel controls
+- Conservative flood, repeated-message and mass-mention protection
+- Automatic escalation from message removal to a temporary timeout
+- Direct member notices with support-ticket appeal instructions
+- Automatic appeal-case linking when a ticket includes a `VORA-######` reference
+- One-year moderation/report retention with database TTL cleanup
+
 ## ✅ Competitive integrity
 
 - Ready-check decline and timeout penalties with queue cooldowns

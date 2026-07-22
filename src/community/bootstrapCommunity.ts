@@ -7,6 +7,7 @@ import type { CommunityClient } from "./CommunityClient.js";
 import { communityEnv } from "./config/communityEnv.js";
 import { CommunityPanelJobs } from "./jobs/CommunityPanelJobs.js";
 import { registerCommunityInteractionHandler } from "./registerCommunityInteractionHandler.js";
+import { registerCommunityModerationHandler } from "./registerCommunityModerationHandler.js";
 
 export async function bootstrapCommunity(
   client: CommunityClient,
@@ -17,6 +18,7 @@ export async function bootstrapCommunity(
 
     await initializeDatabase();
     registerCommunityInteractionHandler(client);
+    registerCommunityModerationHandler(client);
 
     client.once(Events.ClientReady, async (readyClient) => {
       try {

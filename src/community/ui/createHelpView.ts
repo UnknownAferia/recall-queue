@@ -42,6 +42,8 @@ export function createHelpView(): ContainerBuilder {
           "**Cannot join the queue:** Check registration, role preferences, voice lobby and active cooldowns.",
           "**Ready check unavailable:** It expired or the squad was already cancelled.",
           "**Result disputed:** Staff will review the archived screenshot and confirmations.",
+          "**Report conduct:** Right-click a message or member and select `Apps` → `Report Message` or `Report User`.",
+          "**Appeal moderation:** Open a private ticket and include your `VORA-######` case reference.",
           "",
           "Need private help with an account, sanction or match result? Open a ticket below.",
         ].join("\n"),

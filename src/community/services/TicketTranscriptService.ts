@@ -30,6 +30,9 @@ export function serializeTicketTranscript(
     `Channel: ${ticket.channelId}`,
     `Requester: ${ticket.requesterDiscordId}`,
     `Subject: ${ticket.subject}`,
+    ticket.relatedModerationCaseNumber
+      ? `Appeal case: VORA-${ticket.relatedModerationCaseNumber.toString().padStart(6, "0")}`
+      : "Appeal case: None",
     `Opened: ${ticket.createdAt.toISOString()}`,
     `Closed: ${ticket.closedAt?.toISOString() ?? "Not closed"}`,
     "",

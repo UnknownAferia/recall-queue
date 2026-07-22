@@ -7,11 +7,33 @@ import { formatError } from "../../utils/formatError.js";
 import { publishCommunityCommandData } from "../commands/publishCommunity.js";
 import { publishAnnouncementCommandData } from "../commands/publishAnnouncement.js";
 import { communityEnv } from "../config/communityEnv.js";
+import {
+  channelControlCommandData,
+  moderateCommandData,
+  moderationHistoryCommandData,
+  purgeCommandData,
+  reportsCommandData,
+  resolveReportCommandData,
+  revokeCaseCommandData,
+} from "../commands/moderation.js";
+import {
+  reportMessageCommandData,
+  reportUserCommandData,
+} from "../commands/reportContext.js";
 
 async function deployCommunityCommands(): Promise<void> {
   const commandData = [
     publishCommunityCommandData.toJSON(),
     publishAnnouncementCommandData.toJSON(),
+    moderateCommandData.toJSON(),
+    moderationHistoryCommandData.toJSON(),
+    revokeCaseCommandData.toJSON(),
+    reportsCommandData.toJSON(),
+    resolveReportCommandData.toJSON(),
+    purgeCommandData.toJSON(),
+    channelControlCommandData.toJSON(),
+    reportMessageCommandData.toJSON(),
+    reportUserCommandData.toJSON(),
   ];
   const rest = new REST({ version: "10" }).setToken(communityEnv.discordToken);
 

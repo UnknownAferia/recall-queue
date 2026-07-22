@@ -10,6 +10,7 @@ export const CommunityPanelKinds = [
   "help",
   "ticket_launcher",
   "register",
+  "community_reports",
 ] as const;
 
 export type CommunityPanelKind = (typeof CommunityPanelKinds)[number];

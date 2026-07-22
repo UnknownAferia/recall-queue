@@ -34,10 +34,13 @@ export function createOpenTicketView(
         [
           "### Request",
           ticket.description,
+          ticket.relatedModerationCaseNumber
+            ? `**Appeal case:** VORA-${ticket.relatedModerationCaseNumber.toString().padStart(6, "0")}`
+            : null,
           "",
           "A staff member can respond directly in this channel.",
           "-# Close the ticket when the issue has been resolved.",
-        ].join("\n"),
+        ].filter((line): line is string => line !== null).join("\n"),
       ),
     )
     .addActionRowComponents(actions)

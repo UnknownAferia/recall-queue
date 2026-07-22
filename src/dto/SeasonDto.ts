@@ -1,4 +1,4 @@
-import type { SeasonStatus } from "../constants/season.js";
+import type { SeasonAchievement, SeasonStatus } from "../constants/season.js";
 
 export interface SeasonRulesDto {
   readonly baselineRsr: number;
@@ -28,4 +28,35 @@ export interface SeasonControlStateDto {
   readonly active: SeasonDto | null;
   readonly scheduled: readonly SeasonDto[];
   readonly recentlyCompleted: readonly SeasonDto[];
+}
+
+export interface SeasonLeaderboardEntryDto {
+  readonly rank: number;
+  readonly discordId: string;
+  readonly ign: string;
+  readonly currentRsr: number;
+  readonly peakRsr: number;
+  readonly matchesPlayed: number;
+  readonly wins: number;
+  readonly losses: number;
+  readonly achievements: readonly SeasonAchievement[];
+}
+
+export interface SeasonLeaderboardDto {
+  readonly season: SeasonDto;
+  readonly entries: readonly SeasonLeaderboardEntryDto[];
+}
+
+export interface SeasonHistoryEntryDto {
+  readonly season: SeasonDto;
+  readonly initialRsr: number;
+  readonly currentRsr: number;
+  readonly peakRsr: number;
+  readonly finalRsr: number | null;
+  readonly finalRank: number | null;
+  readonly matchesPlayed: number;
+  readonly wins: number;
+  readonly losses: number;
+  readonly placementComplete: boolean;
+  readonly achievements: readonly SeasonAchievement[];
 }

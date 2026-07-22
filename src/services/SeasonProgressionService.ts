@@ -37,6 +37,7 @@ export class SeasonProgressionService {
       players,
       ratingChanges,
       outcome,
+      activeSeason.rules,
       recordedAt,
       session,
     );

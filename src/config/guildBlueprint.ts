@@ -13,7 +13,10 @@ export type GuildRoleKey =
   | "divisionPlatinum"
   | "divisionDiamond"
   | "divisionMaster"
-  | "divisionApex";
+  | "divisionApex"
+  | "seasonChampion"
+  | "seasonElite"
+  | "seasonVeteran";
 
 export type GuildCategoryKey =
   "information" | "vora" | "community" | "support" | "squadVoice" | "staff";
@@ -52,7 +55,7 @@ export interface GuildChannelBlueprint {
 }
 
 export const GuildBlueprint = Object.freeze({
-  version: 3,
+  version: 4,
 
   roles: [
     {
@@ -151,6 +154,27 @@ export const GuildBlueprint = Object.freeze({
       key: "divisionApex",
       name: "Vora Apex",
       color: 0x1fc8ff,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "seasonChampion",
+      name: "Season Champion",
+      color: 0xffd700,
+      permissions: [],
+      hoist: true,
+    },
+    {
+      key: "seasonElite",
+      name: "Season Top 10",
+      color: 0x1fc8ff,
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "seasonVeteran",
+      name: "Season Veteran",
+      color: 0x10b981,
       permissions: [],
       hoist: false,
     },

@@ -9,6 +9,9 @@ import { CommunityPanelPublisher } from "./services/CommunityPanelPublisher.js";
 import { CommunityPanelService } from "./services/CommunityPanelService.js";
 import { ManagedCommunityChannelResolver } from "./services/ManagedCommunityChannelResolver.js";
 import { TicketService } from "./services/TicketService.js";
+import { SeasonRepository } from "../repositories/SeasonRepository.js";
+import { SeasonService } from "../services/SeasonService.js";
+import { MongoTransactionRunner } from "../database/MongoTransactionRunner.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -27,6 +30,7 @@ export class CommunityClient extends Client {
       }),
       new CommunityPanelPublisher(panelRepository),
       channels,
+      new SeasonService(new SeasonRepository(), new MongoTransactionRunner()),
     );
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.heartbeat = new ServiceHeartbeatService("community");

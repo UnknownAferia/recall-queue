@@ -1,6 +1,6 @@
 import type { Types } from "mongoose";
 
-import type { SeasonStatus } from "../constants/season.js";
+import type { SeasonAchievement, SeasonStatus } from "../constants/season.js";
 
 export interface SeasonRules {
   baselineRsr: number;
@@ -29,10 +29,13 @@ export interface SeasonMembership {
   seasonId: Types.ObjectId;
   playerId: Types.ObjectId;
   discordId: string;
+  ign: string;
   initialRsr: number;
   currentRsr: number;
   peakRsr: number;
   finalRsr: number | null;
+  finalRank: number | null;
+  achievements: SeasonAchievement[];
   matchesPlayed: number;
   wins: number;
   losses: number;

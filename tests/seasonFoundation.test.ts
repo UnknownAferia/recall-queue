@@ -48,6 +48,7 @@ describe("Season foundation", () => {
       seasonId: new Types.ObjectId(),
       playerId: new Types.ObjectId(),
       discordId: "player-id",
+      ign: "Test Player",
       initialRsr: 1_000,
       currentRsr: 1_020,
       peakRsr: 1_020,
@@ -153,9 +154,11 @@ describe("Season foundation", () => {
       },
       finalizeMemberships: async (
         seasonId: Types.ObjectId,
+        placementMatches: number,
         currentSession: ClientSession,
       ) => {
         finalizedSeasonId = seasonId.toString();
+        assert.equal(placementMatches, 10);
         assert.equal(currentSession, session);
         return 5;
       },
@@ -176,6 +179,7 @@ describe("Season foundation", () => {
     const players = Array.from({ length: 5 }, (_value, index) => ({
       playerId: new Types.ObjectId(),
       discordId: `player-${index}`,
+      ign: `Player ${index}`,
     }));
     const ratingChanges: SquadRatingChange[] = players.map((player) => ({
       discordId: player.discordId,

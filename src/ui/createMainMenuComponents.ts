@@ -1,57 +1,47 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
 import { CustomIds } from "../constants/customIds.js";
 import { Emojis } from "../constants/emojis.js";
 
 export function createMainMenuComponents(): ActionRowBuilder<ButtonBuilder>[] {
-  const firstRow =
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(CustomIds.buttons.mainMenu.profile)
-        .setLabel("Profile")
-        .setEmoji(Emojis.profile)
-        .setStyle(ButtonStyle.Primary),
+  const firstRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.profile)
+      .setLabel("Profile")
+      .setEmoji(Emojis.profile)
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.queue)
+      .setLabel("Queue")
+      .setEmoji(Emojis.queue)
+      .setStyle(ButtonStyle.Success),
+  );
 
-      new ButtonBuilder()
-        .setCustomId(CustomIds.buttons.mainMenu.queue)
-        .setLabel("Queue")
-        .setEmoji(Emojis.queue)
-        .setStyle(ButtonStyle.Success),
-    );
+  const secondRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.matchHistory)
+      .setLabel("Match History")
+      .setEmoji(Emojis.history)
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.leaderboard)
+      .setLabel("Leaderboard")
+      .setEmoji(Emojis.leaderboard)
+      .setStyle(ButtonStyle.Secondary),
+  );
 
-  const secondRow =
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          CustomIds.buttons.mainMenu.matchHistory,
-        )
-        .setLabel("Match History")
-        .setEmoji(Emojis.history)
-        .setStyle(ButtonStyle.Secondary),
-
-      new ButtonBuilder()
-        .setCustomId(
-          CustomIds.buttons.mainMenu.leaderboard,
-        )
-        .setLabel("Leaderboard")
-        .setEmoji(Emojis.leaderboard)
-        .setStyle(ButtonStyle.Secondary),
-    );
-
-  const thirdRow =
-    new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(
-          CustomIds.buttons.mainMenu.preferences,
-        )
-        .setLabel("Preferences")
-        .setEmoji("⚙️")
-        .setStyle(ButtonStyle.Secondary),
-    );
+  const thirdRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.preferences)
+      .setLabel("Preferences")
+      .setEmoji("⚙️")
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId(CustomIds.buttons.mainMenu.seasonHistory)
+      .setLabel("Seasons")
+      .setEmoji("📅")
+      .setStyle(ButtonStyle.Secondary),
+  );
 
   return [firstRow, secondRow, thirdRow];
 }

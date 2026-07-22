@@ -198,6 +198,7 @@ export class VerifiedResultProcessor {
       players.map((player) => ({
         playerId: player._id,
         discordId: player.discord.id,
+        ign: player.game.ign,
       })),
       ratingChanges,
       outcome,

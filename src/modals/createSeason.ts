@@ -37,8 +37,10 @@ const modal: Modal = {
     const name = interaction.fields.getTextInputValue(
       CustomIds.inputs.createSeason.name,
     );
-    const slug = interaction.fields.getTextInputValue(
-      CustomIds.inputs.createSeason.slug,
+    const softResetRetention = Number(
+      interaction.fields.getTextInputValue(
+        CustomIds.inputs.createSeason.softResetRetention,
+      ),
     );
     const startsAt = new Date(
       interaction.fields.getTextInputValue(
@@ -55,10 +57,17 @@ const modal: Modal = {
       const season = await client.services.seasons.createScheduled({
         sequence,
         name,
-        slug,
+        slug: `season-${sequence}-${name
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")}`,
         startsAt,
         endsAt,
         createdByDiscordId: interaction.user.id,
+        rules: {
+          softResetRetention: softResetRetention / 100,
+        },
       });
       const state = await client.services.seasons.getControlState();
 

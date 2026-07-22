@@ -1,7 +1,12 @@
 import type { ClientSession, Types } from "mongoose";
 
 import type { SquadResult } from "../constants/squad.js";
-import { SeasonMembershipModel } from "../models/SeasonMembershipModel.js";
+import { resolveSeasonAchievements } from "../domain/season/SeasonAchievementPolicy.js";
+import { calculateSeasonInitialRsr } from "../domain/season/SeasonRatingPolicy.js";
+import {
+  SeasonMembershipModel,
+  type SeasonMembershipDocument,
+} from "../models/SeasonMembershipModel.js";
 import { SeasonModel, type SeasonDocument } from "../models/SeasonModel.js";
 import type { SquadRatingChange } from "../types/squad.js";
 import type { CreateSeasonInput, SeasonRules } from "../types/season.js";
@@ -9,6 +14,7 @@ import type { CreateSeasonInput, SeasonRules } from "../types/season.js";
 export interface SeasonalPlayerSnapshot {
   readonly playerId: Types.ObjectId;
   readonly discordId: string;
+  readonly ign: string;
 }
 
 export class SeasonRepository {
@@ -64,6 +70,45 @@ export class SeasonRepository {
       .exec();
   }
 
+  public async findByIds(
+    seasonIds: readonly Types.ObjectId[],
+  ): Promise<SeasonDocument[]> {
+    return SeasonModel.find({ _id: { $in: [...seasonIds] } }).exec();
+  }
+
+  public async findLeaderboard(
+    seasonId: Types.ObjectId,
+    placementMatches: number,
+    limit: number,
+  ): Promise<SeasonMembershipDocument[]> {
+    return SeasonMembershipModel.find({
+      seasonId,
+      matchesPlayed: { $gte: placementMatches },
+    })
+      .sort({ currentRsr: -1, wins: -1, joinedAt: 1 })
+      .limit(limit)
+      .exec();
+  }
+
+  public async findPlayerMemberships(
+    discordId: string,
+    limit: number,
+  ): Promise<SeasonMembershipDocument[]> {
+    return SeasonMembershipModel.find({ discordId })
+      .sort({ lastMatchAt: -1 })
+      .limit(limit)
+      .exec();
+  }
+
+  public async findRewardRecipients(
+    seasonId: Types.ObjectId,
+  ): Promise<SeasonMembershipDocument[]> {
+    return SeasonMembershipModel.find({
+      seasonId,
+      "achievements.0": { $exists: true },
+    }).exec();
+  }
+
   public async activateScheduled(
     seasonId: string,
     actorDiscordId: string,
@@ -103,13 +148,43 @@ export class SeasonRepository {
 
   public async finalizeMemberships(
     seasonId: Types.ObjectId,
+    placementMatches: number,
     session: ClientSession,
   ): Promise<number> {
-    const result = await SeasonMembershipModel.updateMany(
-      { seasonId, finalRsr: null },
-      [{ $set: { finalRsr: "$currentRsr" } }],
-      { updatePipeline: true, session },
-    ).exec();
+    const memberships = await SeasonMembershipModel.find({ seasonId })
+      .sort({ currentRsr: -1, wins: -1, joinedAt: 1 })
+      .session(session)
+      .exec();
+
+    if (memberships.length === 0) {
+      return 0;
+    }
+
+    let eligibleRank = 0;
+    const result = await SeasonMembershipModel.bulkWrite(
+      memberships.map((membership) => {
+        const placementComplete = membership.matchesPlayed >= placementMatches;
+        const finalRank = placementComplete ? ++eligibleRank : null;
+        const achievements = resolveSeasonAchievements({
+          finalRank,
+          matchesPlayed: membership.matchesPlayed,
+        });
+
+        return {
+          updateOne: {
+            filter: { _id: membership._id, finalRsr: null },
+            update: {
+              $set: {
+                finalRsr: membership.currentRsr,
+                finalRank,
+                achievements,
+              },
+            },
+          },
+        };
+      }),
+      { ordered: true, session },
+    );
 
     return result.modifiedCount;
   }
@@ -119,6 +194,7 @@ export class SeasonRepository {
     players: readonly SeasonalPlayerSnapshot[],
     ratingChanges: readonly SquadRatingChange[],
     outcome: SquadResult,
+    rules: SeasonRules,
     recordedAt: Date,
     session: ClientSession,
   ): Promise<number> {
@@ -136,6 +212,22 @@ export class SeasonRepository {
           );
         }
 
+        const initialSeasonRsr = calculateSeasonInitialRsr(
+          change.rsrBefore,
+          rules,
+        );
+        const currentSeasonRsr = {
+          $max: [
+            0,
+            {
+              $add: [
+                { $ifNull: ["$currentRsr", initialSeasonRsr] },
+                change.delta,
+              ],
+            },
+          ],
+        };
+
         return {
           updateOne: {
             filter: { seasonId, playerId: player.playerId },
@@ -145,16 +237,20 @@ export class SeasonRepository {
                   seasonId,
                   playerId: player.playerId,
                   discordId: player.discordId,
-                  initialRsr: { $ifNull: ["$initialRsr", change.rsrBefore] },
-                  currentRsr: change.rsrAfter,
+                  ign: player.ign,
+                  initialRsr: {
+                    $ifNull: ["$initialRsr", initialSeasonRsr],
+                  },
+                  currentRsr: currentSeasonRsr,
                   peakRsr: {
                     $max: [
-                      { $ifNull: ["$peakRsr", change.rsrBefore] },
-                      change.rsrBefore,
-                      change.rsrAfter,
+                      { $ifNull: ["$peakRsr", initialSeasonRsr] },
+                      currentSeasonRsr,
                     ],
                   },
                   finalRsr: null,
+                  finalRank: null,
+                  achievements: [],
                   matchesPlayed: {
                     $add: [{ $ifNull: ["$matchesPlayed", 0] }, 1],
                   },

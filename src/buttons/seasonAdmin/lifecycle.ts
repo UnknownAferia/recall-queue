@@ -91,11 +91,25 @@ const button: Button = {
               parsed.seasonId,
               interaction.user.id,
             );
+      const rewardSync =
+        parsed.action === "complete"
+          ? await client.services.seasonRewards.synchronize(
+              client.guilds.cache.values(),
+              season.id,
+            )
+          : null;
       const state = await client.services.seasons.getControlState();
       const notice =
         parsed.action === "activate"
           ? `Season ${season.sequence} · ${season.name} is now active.`
-          : `Season ${season.sequence} · ${season.name} was completed.`;
+          : [
+              `Season ${season.sequence} · ${season.name} was completed.`,
+              rewardSync
+                ? `${rewardSync.membersChanged} member reward assignment(s) changed across ${rewardSync.guildsProcessed} server(s).`
+                : null,
+            ]
+              .filter((entry): entry is string => Boolean(entry))
+              .join(" ");
 
       await interaction.editReply({
         components: [createSeasonControlView(state, new Date(), notice)],

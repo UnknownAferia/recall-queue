@@ -122,7 +122,7 @@ describe("Vora Community bot", () => {
       .map((view) => JSON.stringify(view.toJSON()))
       .join("\n");
 
-    assert.match(leaderboard, /Global Leaderboard/);
+    assert.match(leaderboard, /Competitive Leaderboards/);
     assert.match(leaderboard, /1,250 RSR/);
     assert.match(status, /Matchmaking Operational/);
     assert.match(status, /Waiting players/);

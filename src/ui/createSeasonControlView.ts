@@ -86,6 +86,16 @@ export function createSeasonControlView(
     );
   }
 
+  if (state.recentlyCompleted.length > 0) {
+    actions.addComponents(
+      new ButtonBuilder()
+        .setCustomId(CustomIds.buttons.seasonAdmin.syncRewards)
+        .setLabel("Sync Reward Roles")
+        .setEmoji("🎖️")
+        .setStyle(ButtonStyle.Secondary),
+    );
+  }
+
   const activeSection = state.active
     ? formatList("Active Season", [state.active], "")
     : "### Active Season\n> No season is active. Eligible scheduled seasons can be activated below.";

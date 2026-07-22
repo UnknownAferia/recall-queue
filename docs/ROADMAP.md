@@ -113,7 +113,7 @@ they are not the primary matchmaking flow.
 - Proportional penalties applied only to responsible non-reporting or non-responsive players
 - Automatic private voice cleanup after expired result cases
 
-## 🚧 Seasons and progression
+## ✅ Seasons and progression
 
 - Persistent scheduled, active and completed season lifecycle
 - Transactional season memberships updated alongside lifetime results

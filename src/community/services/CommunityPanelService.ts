@@ -21,6 +21,7 @@ import { createWelcomeView } from "../ui/createWelcomeView.js";
 import type { CommunityPanelPublisher } from "./CommunityPanelPublisher.js";
 import type { ManagedCommunityChannelResolver } from "./ManagedCommunityChannelResolver.js";
 import { createRegisterView } from "../ui/createRegisterView.js";
+import type { SeasonService } from "../../services/SeasonService.js";
 
 interface StaticPanelDefinition {
   readonly channelKey: string;
@@ -75,6 +76,10 @@ export class CommunityPanelService {
     private readonly data: CommunityDataRepository,
     private readonly publisher: CommunityPanelPublisher,
     private readonly channels: ManagedCommunityChannelResolver,
+    private readonly seasons: Pick<
+      SeasonService,
+      "getLeaderboard"
+    > | null = null,
   ) {}
 
   public async synchronizeStaticPanels(
@@ -126,9 +131,10 @@ export class CommunityPanelService {
       return;
     }
 
-    const players = await this.data.findHighestRated(
-      CommunityConfig.leaderboardLimit,
-    );
+    const [players, seasonal] = await Promise.all([
+      this.data.findHighestRated(CommunityConfig.leaderboardLimit),
+      this.seasons?.getLeaderboard(CommunityConfig.leaderboardLimit) ?? null,
+    ]);
 
     await this.publisher.publish(
       channel,
@@ -136,6 +142,7 @@ export class CommunityPanelService {
       createPublicLeaderboardView(
         players.map((player) => PlayerMapper.toDto(player)),
         new Date(),
+        seasonal,
       ),
     );
   }

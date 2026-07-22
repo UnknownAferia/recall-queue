@@ -1,6 +1,11 @@
 import { SeasonConfig } from "../constants/season.js";
 import type { TransactionRunner } from "../database/MongoTransactionRunner.js";
-import type { SeasonControlStateDto, SeasonDto } from "../dto/SeasonDto.js";
+import type {
+  SeasonControlStateDto,
+  SeasonDto,
+  SeasonHistoryEntryDto,
+  SeasonLeaderboardDto,
+} from "../dto/SeasonDto.js";
 import { SeasonMapper } from "../mappers/SeasonMapper.js";
 import type { SeasonRepository } from "../repositories/SeasonRepository.js";
 import type { CreateSeasonInput, SeasonRules } from "../types/season.js";
@@ -56,6 +61,78 @@ export class SeasonService {
         SeasonMapper.toDto(season),
       ),
     };
+  }
+
+  public async getLeaderboard(
+    limit = SeasonConfig.leaderboardLimit,
+  ): Promise<SeasonLeaderboardDto | null> {
+    const active = await this.seasonRepository.findActive();
+    const season =
+      active ?? (await this.seasonRepository.findRecentlyCompleted(1))[0];
+
+    if (!season) {
+      return null;
+    }
+
+    const memberships = await this.seasonRepository.findLeaderboard(
+      season._id,
+      season.rules.placementMatches,
+      limit,
+    );
+
+    return {
+      season: SeasonMapper.toDto(season),
+      entries: memberships.map((membership, index) => ({
+        rank: membership.finalRank ?? index + 1,
+        discordId: membership.discordId,
+        ign: membership.ign || "Unknown Player",
+        currentRsr: membership.currentRsr,
+        peakRsr: membership.peakRsr,
+        matchesPlayed: membership.matchesPlayed,
+        wins: membership.wins,
+        losses: membership.losses,
+        achievements: [...membership.achievements],
+      })),
+    };
+  }
+
+  public async getPlayerHistory(
+    discordId: string,
+    limit = SeasonConfig.historyLimit,
+  ): Promise<SeasonHistoryEntryDto[]> {
+    const memberships = await this.seasonRepository.findPlayerMemberships(
+      discordId,
+      limit,
+    );
+    const seasons = await this.seasonRepository.findByIds(
+      memberships.map((membership) => membership.seasonId),
+    );
+    const seasonsById = new Map(seasons.map((season) => [season.id, season]));
+
+    return memberships.flatMap((membership) => {
+      const season = seasonsById.get(membership.seasonId.toString());
+
+      if (!season) {
+        return [];
+      }
+
+      return [
+        {
+          season: SeasonMapper.toDto(season),
+          initialRsr: membership.initialRsr,
+          currentRsr: membership.currentRsr,
+          peakRsr: membership.peakRsr,
+          finalRsr: membership.finalRsr,
+          finalRank: membership.finalRank,
+          matchesPlayed: membership.matchesPlayed,
+          wins: membership.wins,
+          losses: membership.losses,
+          placementComplete:
+            membership.matchesPlayed >= season.rules.placementMatches,
+          achievements: [...membership.achievements],
+        },
+      ];
+    });
   }
 
   public async activate(
@@ -142,7 +219,11 @@ export class SeasonService {
         );
       }
 
-      await this.seasonRepository.finalizeMemberships(completed._id, session);
+      await this.seasonRepository.finalizeMemberships(
+        completed._id,
+        completed.rules.placementMatches,
+        session,
+      );
 
       return SeasonMapper.toDto(completed);
     });

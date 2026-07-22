@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+import { SeasonAchievements } from "../constants/season.js";
 import type { SeasonMembership } from "../types/season.js";
 
 const { Schema } = mongoose;
@@ -20,10 +21,24 @@ const seasonMembershipSchema = new Schema<SeasonMembership>(
       required: true,
     },
     discordId: { type: String, required: true, trim: true },
+    ign: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 2,
+      maxlength: 32,
+      default: "Unknown Player",
+    },
     initialRsr: { type: Number, required: true, min: 0 },
     currentRsr: { type: Number, required: true, min: 0 },
     peakRsr: { type: Number, required: true, min: 0 },
     finalRsr: { type: Number, default: null, min: 0 },
+    finalRank: { type: Number, default: null, min: 1 },
+    achievements: {
+      type: [{ type: String, enum: SeasonAchievements }],
+      required: true,
+      default: [],
+    },
     matchesPlayed: { type: Number, required: true, min: 0, default: 0 },
     wins: { type: Number, required: true, min: 0, default: 0 },
     losses: { type: Number, required: true, min: 0, default: 0 },
@@ -60,6 +75,14 @@ seasonMembershipSchema.index(
 seasonMembershipSchema.index(
   { playerId: 1, seasonId: -1 },
   { name: "player_season_history" },
+);
+seasonMembershipSchema.index(
+  { seasonId: 1, finalRank: 1 },
+  { name: "season_final_rank" },
+);
+seasonMembershipSchema.index(
+  { seasonId: 1, achievements: 1 },
+  { name: "season_achievements" },
 );
 
 export const SeasonMembershipModel: mongoose.Model<SeasonMembership> =

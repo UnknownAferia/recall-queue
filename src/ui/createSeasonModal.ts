@@ -42,10 +42,10 @@ export function createSeasonModal(): ModalBuilder {
         64,
       ),
       createInput(
-        CustomIds.inputs.createSeason.slug,
-        "Stable slug",
-        "Example: alpha-season",
-        64,
+        CustomIds.inputs.createSeason.softResetRetention,
+        "Soft reset retention (%)",
+        "Example: 50",
+        3,
       ),
       createInput(
         CustomIds.inputs.createSeason.startsAt,

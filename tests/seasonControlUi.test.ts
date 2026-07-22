@@ -119,7 +119,7 @@ describe("Season control UI", () => {
       [
         CustomIds.inputs.createSeason.sequence,
         CustomIds.inputs.createSeason.name,
-        CustomIds.inputs.createSeason.slug,
+        CustomIds.inputs.createSeason.softResetRetention,
         CustomIds.inputs.createSeason.startsAt,
         CustomIds.inputs.createSeason.endsAt,
       ],

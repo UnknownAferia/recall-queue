@@ -47,6 +47,7 @@ export const CustomIds = Object.freeze({
       queue: "main-menu:queue",
       matchHistory: "main-menu:match-history",
       leaderboard: "main-menu:leaderboard",
+      seasonHistory: "main-menu:season-history",
       preferences: "main-menu:preferences",
     },
 
@@ -64,6 +65,7 @@ export const CustomIds = Object.freeze({
     seasonAdmin: {
       create: "season-admin:create",
       refresh: "season-admin:refresh",
+      syncRewards: "season-admin:sync-rewards",
       cancel: "season-admin:cancel",
       lifecycle: {
         route: SeasonLifecycleRoute,
@@ -135,7 +137,7 @@ export const CustomIds = Object.freeze({
     createSeason: {
       sequence: "season-admin:create:sequence",
       name: "season-admin:create:name",
-      slug: "season-admin:create:slug",
+      softResetRetention: "season-admin:create:retention",
       startsAt: "season-admin:create:starts-at",
       endsAt: "season-admin:create:ends-at",
     },

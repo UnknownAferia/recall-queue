@@ -65,6 +65,7 @@ function createPendingSquad(): SquadDocument {
 function createPlayers(count = 5): PlayerDocument[] {
   return Array.from({ length: count }, (_value, index) => ({
     discord: { id: `player-${index}` },
+    game: { ign: `Player ${index}` },
     rating: { rsr: 1_000, confidence: 20 },
     statistics: { matchesPlayed: 0, wins: 0, losses: 0 },
     behavior: {

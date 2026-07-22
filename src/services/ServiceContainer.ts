@@ -26,6 +26,7 @@ import { ResultLifecycleExpirationService } from "./ResultLifecycleExpirationSer
 import { SeasonRepository } from "../repositories/SeasonRepository.js";
 import { SeasonProgressionService } from "./SeasonProgressionService.js";
 import { SeasonService } from "./SeasonService.js";
+import { SeasonRewardRoleService } from "./SeasonRewardRoleService.js";
 
 export class ServiceContainer {
   public readonly player: PlayerService;
@@ -43,6 +44,7 @@ export class ServiceContainer {
   public readonly divisionRoles: DivisionRoleService;
   public readonly resultLifecycleExpiration: ResultLifecycleExpirationService;
   public readonly seasons: SeasonService;
+  public readonly seasonRewards: SeasonRewardRoleService;
 
   public constructor() {
     const playerRepository = new PlayerRepository();
@@ -65,6 +67,7 @@ export class ServiceContainer {
       moderationAuditRepository,
     );
     this.seasons = new SeasonService(seasonRepository, transactionRunner);
+    this.seasonRewards = new SeasonRewardRoleService(seasonRepository);
     const seasonProgression = new SeasonProgressionService(seasonRepository);
 
     this.player = new PlayerService(playerRepository);

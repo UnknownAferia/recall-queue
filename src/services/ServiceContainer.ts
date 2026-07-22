@@ -23,6 +23,9 @@ import { ResultEvidenceService } from "./ResultEvidenceService.js";
 import { ModerationAuditService } from "./ModerationAuditService.js";
 import { DivisionRoleService } from "./DivisionRoleService.js";
 import { ResultLifecycleExpirationService } from "./ResultLifecycleExpirationService.js";
+import { SeasonRepository } from "../repositories/SeasonRepository.js";
+import { SeasonProgressionService } from "./SeasonProgressionService.js";
+import { SeasonService } from "./SeasonService.js";
 
 export class ServiceContainer {
   public readonly player: PlayerService;
@@ -39,12 +42,15 @@ export class ServiceContainer {
   public readonly moderationAudit: ModerationAuditService;
   public readonly divisionRoles: DivisionRoleService;
   public readonly resultLifecycleExpiration: ResultLifecycleExpirationService;
+  public readonly seasons: SeasonService;
 
   public constructor() {
     const playerRepository = new PlayerRepository();
     const queueRepository = new QueueRepository();
     const squadRepository = new SquadRepository();
     const moderationAuditRepository = new ModerationAuditRepository();
+    const seasonRepository = new SeasonRepository();
+    const transactionRunner = new MongoTransactionRunner();
     const queueDiscipline = new QueueDisciplineService(playerRepository);
     this.resultLifecycleExpiration = new ResultLifecycleExpirationService(
       squadRepository,
@@ -58,6 +64,8 @@ export class ServiceContainer {
     this.moderationAudit = new ModerationAuditService(
       moderationAuditRepository,
     );
+    this.seasons = new SeasonService(seasonRepository, transactionRunner);
+    const seasonProgression = new SeasonProgressionService(seasonRepository);
 
     this.player = new PlayerService(playerRepository);
 
@@ -72,9 +80,10 @@ export class ServiceContainer {
     const verifiedResultProcessor = new VerifiedResultProcessor(
       squadRepository,
       playerRepository,
-      new MongoTransactionRunner(),
+      transactionRunner,
       SquadConfig,
       this.moderationAudit,
+      seasonProgression,
     );
     this.disputeModeration = new DisputeModerationService(
       squadRepository,

@@ -10,6 +10,7 @@ import { SquadModel, type SquadDocument } from "../src/models/SquadModel.js";
 import type { PlayerRepository } from "../src/repositories/PlayerRepository.js";
 import type { SquadRepository } from "../src/repositories/SquadRepository.js";
 import { VerifiedResultProcessor } from "../src/services/VerifiedResultProcessor.js";
+import type { SeasonProgressionService } from "../src/services/SeasonProgressionService.js";
 import type {
   SquadIntegritySanction,
   SquadRatingChange,
@@ -86,6 +87,7 @@ describe("VerifiedResultProcessor", () => {
     let resultAvailable = true;
     let playerUpdateCount = 0;
     let behaviorRecoveryCount = 0;
+    let seasonProgressionCount = 0;
     let capturedChanges: readonly SquadRatingChange[] = [];
 
     const squadRepository = {
@@ -131,6 +133,13 @@ describe("VerifiedResultProcessor", () => {
       playerRepository,
       transactionRunner,
       { resultConfirmationsRequired: 3 },
+      null,
+      {
+        recordVerifiedResult: async (players: readonly unknown[]) => {
+          seasonProgressionCount = players.length;
+          return players.length;
+        },
+      } as unknown as SeasonProgressionService,
     );
 
     const completed = await processor.process(squad.id);
@@ -141,6 +150,7 @@ describe("VerifiedResultProcessor", () => {
     assert.equal(repeated, null);
     assert.equal(playerUpdateCount, 1);
     assert.equal(behaviorRecoveryCount, 1);
+    assert.equal(seasonProgressionCount, 5);
     assert.equal(capturedChanges[0]?.delta, 32);
     assert.equal(capturedChanges[0]?.confidenceAfter, 28);
   });

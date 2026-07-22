@@ -14,6 +14,7 @@ import type { PlayerRepository } from "../repositories/PlayerRepository.js";
 import type { SquadRepository } from "../repositories/SquadRepository.js";
 import type { SquadIntegritySanction } from "../types/squad.js";
 import type { ModerationAuditService } from "./ModerationAuditService.js";
+import type { SeasonProgressionService } from "./SeasonProgressionService.js";
 
 type ResultVerificationConfiguration = Pick<
   typeof SquadConfig,
@@ -27,6 +28,7 @@ export class VerifiedResultProcessor {
     private readonly transactionRunner: TransactionRunner,
     private readonly config: ResultVerificationConfiguration,
     private readonly moderationAudit: ModerationAuditService | null = null,
+    private readonly seasonProgression: SeasonProgressionService | null = null,
     private readonly ratingCalculator = new RatingCalculator(),
     private readonly integritySanctionPolicy = new IntegritySanctionPolicy(),
   ) {}
@@ -191,6 +193,16 @@ export class VerifiedResultProcessor {
         `Verified squad ${squad.id} could not update all ${participantIds.length} player profiles.`,
       );
     }
+
+    await this.seasonProgression?.recordVerifiedResult(
+      players.map((player) => ({
+        playerId: player._id,
+        discordId: player.discord.id,
+      })),
+      ratingChanges,
+      outcome,
+      session,
+    );
 
     const behaviorRecoveryIds = behaviorRecoveryExcludedDiscordId
       ? participantIds.filter(

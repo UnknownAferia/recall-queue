@@ -38,6 +38,7 @@ export const CommunityConfig = Object.freeze({
   ticketRetentionSweepIntervalMs: 6 * 60 * 60 * 1_000,
   onboardingReminderCooldownMs: 7 * 24 * 60 * 60 * 1_000,
   onboardingReminderBatchSize: 25,
+  onboardingMemberCacheMs: 30 * 1_000,
 });
 
 export const CommunityCustomIds = Object.freeze({

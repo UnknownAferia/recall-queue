@@ -168,9 +168,18 @@ describe("Community onboarding", () => {
 
   it("counts only human members and respects the reminder cooldown", async () => {
     const now = new Date("2026-07-26T12:00:00.000Z");
+    let listCalls = 0;
     const guild = {
       id: "guild-id",
-      members: { fetch: async () => members },
+      members: {
+        list: async () => {
+          listCalls += 1;
+          return members;
+        },
+        fetch: async () => {
+          throw new Error("Gateway member fetching must not be used.");
+        },
+      },
     } as unknown as Guild;
     const members = new Collection<string, GuildMember>([
       ["unregistered", member("unregistered", guild)],
@@ -207,6 +216,15 @@ describe("Community onboarding", () => {
       awaitingVerification: 1,
       reminderEligible: 1,
     });
+    assert.deepEqual(await service.getSnapshot(guild), {
+      members: 3,
+      registered: 2,
+      verified: 1,
+      unregistered: 1,
+      awaitingVerification: 1,
+      reminderEligible: 1,
+    });
+    assert.equal(listCalls, 1);
   });
 
   it("delivers a private welcome and records the attempt", async () => {

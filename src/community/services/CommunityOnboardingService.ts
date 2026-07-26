@@ -22,7 +22,14 @@ interface OnboardingAudience {
   readonly reminderEligibleIds: ReadonlySet<string>;
 }
 
+interface CachedGuildMembers {
+  readonly expiresAt: number;
+  readonly members: readonly GuildMember[];
+}
+
 export class CommunityOnboardingService {
+  private readonly membersByGuild = new Map<string, CachedGuildMembers>();
+
   public constructor(
     private readonly repository: MemberOnboardingRepository,
     private readonly players: Pick<PlayerService, "getByDiscordIds">,
@@ -96,14 +103,11 @@ export class CommunityOnboardingService {
 
   private async createAudience(guild: Guild): Promise<OnboardingAudience> {
     const [members, contacts] = await Promise.all([
-      guild.members.fetch(),
+      this.listHumanMembers(guild),
       this.repository.findByGuild(guild.id),
     ]);
-    const humanMembers = [...members.values()].filter(
-      (member) => !member.user.bot,
-    );
     const players = await this.players.getByDiscordIds(
-      humanMembers.map((member) => member.id),
+      members.map((member) => member.id),
     );
     const playersByDiscordId = new Map(
       players.map((player) => [player.discord.id, player]),
@@ -115,7 +119,7 @@ export class CommunityOnboardingService {
       this.now().getTime() - CommunityConfig.onboardingReminderCooldownMs,
     );
     const reminderEligibleIds = new Set(
-      humanMembers
+      members
         .filter((member) => {
           const player = playersByDiscordId.get(member.id);
           if (
@@ -132,10 +136,54 @@ export class CommunityOnboardingService {
     );
 
     return {
-      members: humanMembers,
+      members,
       playersByDiscordId,
       reminderEligibleIds,
     };
+  }
+
+  private async listHumanMembers(guild: Guild): Promise<readonly GuildMember[]> {
+    const now = this.now().getTime();
+    const cached = this.membersByGuild.get(guild.id);
+
+    if (cached && cached.expiresAt > now) {
+      return cached.members;
+    }
+
+    const members: GuildMember[] = [];
+    let after: string | undefined;
+
+    while (true) {
+      const page = await guild.members.list({
+        after,
+        limit: 1_000,
+        cache: true,
+      });
+
+      members.push(
+        ...[...page.values()].filter((member) => !member.user.bot),
+      );
+
+      if (page.size < 1_000) {
+        break;
+      }
+
+      const nextAfter = page.last()?.id;
+
+      if (!nextAfter || nextAfter === after) {
+        throw new Error("Discord member pagination did not advance.");
+      }
+
+      after = nextAfter;
+    }
+
+    const result = Object.freeze([...members]);
+    this.membersByGuild.set(guild.id, {
+      expiresAt: now + CommunityConfig.onboardingMemberCacheMs,
+      members: result,
+    });
+
+    return result;
   }
 
   private async deliver(member: GuildMember): Promise<boolean> {

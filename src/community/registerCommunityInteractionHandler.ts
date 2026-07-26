@@ -85,7 +85,10 @@ async function respondWithError(
       (interaction.commandName === PublishCommunityCommandName ||
         interaction.commandName === PublishAnnouncementCommandName ||
         interaction.commandName === OnboardingCommandName ||
-        interaction.commandName === purgeCommandData.name));
+        interaction.commandName === purgeCommandData.name)) ||
+    (interaction.isButton() &&
+      (interaction.customId === CommunityCustomIds.onboarding.refresh ||
+        interaction.customId === CommunityCustomIds.onboarding.nudge));
 
   try {
     if (

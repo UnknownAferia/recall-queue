@@ -85,6 +85,62 @@ describe("Community onboarding", () => {
     assert.match(JSON.stringify(edits[0]), /Player Onboarding/);
   });
 
+  it("acknowledges reminder batches with a Components V2 update", async () => {
+    const updates: unknown[] = [];
+    const edits: unknown[] = [];
+    let reminderBatches = 0;
+    const client = {
+      onboarding: {
+        remindEligible: async () => {
+          reminderBatches += 1;
+          return {
+            eligible: 31,
+            attempted: 25,
+            delivered: 24,
+            failed: 1,
+          };
+        },
+        getSnapshot: async () => ({
+          members: 35,
+          registered: 7,
+          verified: 4,
+          unregistered: 28,
+          awaitingVerification: 3,
+          reminderEligible: 6,
+        }),
+      },
+    } as unknown as CommunityClient;
+    const interaction = {
+      isButton: () => true,
+      isModalSubmit: () => false,
+      isChatInputCommand: () => false,
+      customId: CommunityCustomIds.onboarding.nudge,
+      inCachedGuild: () => true,
+      memberPermissions: {
+        has: (permission: bigint) =>
+          permission === PermissionFlagsBits.ManageMessages,
+      },
+      guild: {},
+      update: async (options: unknown) => {
+        updates.push(options);
+      },
+      editReply: async (options: unknown) => {
+        edits.push(options);
+      },
+    } as unknown as ButtonInteraction<"cached">;
+
+    assert.equal(
+      await handleCommunityOnboardingInteraction(client, interaction),
+      true,
+    );
+    assert.equal(reminderBatches, 1);
+    assert.equal(updates.length, 1);
+    assert.match(JSON.stringify(updates[0]), /Sending Reminders/);
+    assert.equal(edits.length, 1);
+    assert.match(JSON.stringify(edits[0]), /24 reminder\(s\) delivered/);
+    assert.match(JSON.stringify(edits[0]), /6 remain eligible/);
+  });
+
   it("serializes direct registration controls and the Operations dashboard", () => {
     const prompt = JSON.stringify(
       createMemberOnboardingView(

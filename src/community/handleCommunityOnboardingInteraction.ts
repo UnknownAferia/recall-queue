@@ -439,9 +439,23 @@ export async function handleCommunityOnboardingInteraction(
       return true;
     }
 
-    await interaction.deferUpdate();
+    const sendsReminders =
+      interaction.customId === CommunityCustomIds.onboarding.nudge;
+
+    await interaction.update({
+      components: [
+        createAlertView(
+          "information",
+          sendsReminders ? "Sending Reminders" : "Refreshing Onboarding",
+          sendsReminders
+            ? "Vora Community is privately contacting the next eligible onboarding batch."
+            : "Vora Community is refreshing the onboarding overview.",
+        ),
+      ],
+    });
+
     const result =
-      interaction.customId === CommunityCustomIds.onboarding.nudge
+      sendsReminders
         ? await client.onboarding.remindEligible(interaction.guild)
         : null;
     const snapshot = await client.onboarding.getSnapshot(interaction.guild);

@@ -45,4 +45,14 @@ describe("Production deployment", () => {
     assert.match(backupTimer, /Persistent=true/);
     assert.match(healthTimer, /OnUnitActiveSec=2min/);
   });
+
+  it("builds the shared release image exactly once before Compose starts services", () => {
+    const deploy = readProjectFile("deploy/ubuntu/deploy.sh");
+
+    assert.match(
+      deploy,
+      /docker build --pull --target runtime --tag "vora:\$\{release\}"/,
+    );
+    assert.doesNotMatch(deploy, /compose "\$\{release\}" build/);
+  });
 });

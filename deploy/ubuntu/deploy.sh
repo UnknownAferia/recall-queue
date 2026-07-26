@@ -49,7 +49,9 @@ compose() {
 
 echo "Validating release ${release}..."
 docker build --pull --target quality --tag "vora-quality:${release}" "${VORA_REPOSITORY}"
-compose "${release}" build --pull
+
+echo "Building shared runtime image vora:${release}..."
+docker build --pull --target runtime --tag "vora:${release}" "${VORA_REPOSITORY}"
 
 echo "Creating a verified pre-deployment backup..."
 compose "${release}" --profile maintenance run --rm --no-deps vora-backup

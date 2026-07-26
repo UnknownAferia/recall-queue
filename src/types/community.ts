@@ -3,6 +3,7 @@ import type {
   ServiceHeartbeatName,
 } from "../constants/community.js";
 import type { OperationalAuditEventType } from "../constants/operationalAudit.js";
+import type { QueueSessionSummary } from "./queueActivation.js";
 
 export interface CommunityPanelRecord {
   guildId: string;
@@ -73,6 +74,7 @@ export interface MatchmakingStatusSnapshot {
   activeSquads: number;
   pendingResults: number;
   disputedResults: number;
+  nextQueueSession?: QueueSessionSummary | null;
   capturedAt: Date;
 }
 

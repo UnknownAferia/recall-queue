@@ -26,6 +26,8 @@ import { PlayerVerificationEvidenceService } from "../services/PlayerVerificatio
 import { PlayerVerificationService } from "../services/PlayerVerificationService.js";
 import { GuildAccessService } from "../services/GuildAccessService.js";
 import { CommunityOnboardingService } from "./services/CommunityOnboardingService.js";
+import { QueueActivationRepository } from "../repositories/QueueActivationRepository.js";
+import { QueueActivationService } from "./services/QueueActivationService.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -38,6 +40,7 @@ export class CommunityClient extends Client {
   public readonly playerVerification: PlayerVerificationService;
   public readonly guildAccess: GuildAccessService;
   public readonly onboarding: CommunityOnboardingService;
+  public readonly activation: QueueActivationService;
 
   public constructor() {
     super({
@@ -76,6 +79,10 @@ export class CommunityClient extends Client {
       playerVerificationRepository,
       new OnboardingAudienceExclusionRepository(),
       playerVerificationEvidence,
+      channels,
+    );
+    this.activation = new QueueActivationService(
+      new QueueActivationRepository(),
       channels,
     );
 

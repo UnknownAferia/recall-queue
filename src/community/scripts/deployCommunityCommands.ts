@@ -23,6 +23,8 @@ import {
 import { onboardingCommandData } from "../commands/onboarding.js";
 import { onboardingAudienceCommandData } from "../commands/onboardingAudience.js";
 import { verificationInboxCommandData } from "../commands/verificationInbox.js";
+import { queueSessionCommandData } from "../commands/queueSession.js";
+import { activationDashboardCommandData } from "../commands/activationDashboard.js";
 
 async function deployCommunityCommands(): Promise<void> {
   const commandData = [
@@ -40,6 +42,8 @@ async function deployCommunityCommands(): Promise<void> {
     onboardingCommandData.toJSON(),
     onboardingAudienceCommandData.toJSON(),
     verificationInboxCommandData.toJSON(),
+    queueSessionCommandData.toJSON(),
+    activationDashboardCommandData.toJSON(),
   ];
   const rest = new REST({ version: "10" }).setToken(communityEnv.discordToken);
 

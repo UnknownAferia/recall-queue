@@ -4,6 +4,7 @@ import { ServiceHeartbeatModel } from "../models/ServiceHeartbeatModel.js";
 import { SquadModel } from "../models/SquadModel.js";
 import type { MatchmakingStatusSnapshot } from "../types/community.js";
 import { OperationalStateModel } from "../models/OperationalStateModel.js";
+import { QueueSessionModel } from "../models/QueueSessionModel.js";
 
 interface CommunityDataConfiguration {
   readonly coreOfflineAfterMs: number;
@@ -34,22 +35,30 @@ export class CommunityDataRepository {
     guildId: string,
     now = new Date(),
   ): Promise<MatchmakingStatusSnapshot> {
-    const [queue, statusCounts, heartbeat, operationalState] = await Promise.all([
-      QueueModel.findOne({ guildId }).exec(),
-      SquadModel.aggregate<{ _id: string; count: number }>([
-        {
-          $match: {
-            guildId,
-            status: {
-              $in: ["ready_check", "active", "result_pending", "disputed"],
+    const [queue, statusCounts, heartbeat, operationalState, nextSession] =
+      await Promise.all([
+        QueueModel.findOne({ guildId }).exec(),
+        SquadModel.aggregate<{ _id: string; count: number }>([
+          {
+            $match: {
+              guildId,
+              status: {
+                $in: ["ready_check", "active", "result_pending", "disputed"],
+              },
             },
           },
-        },
-        { $group: { _id: "$status", count: { $sum: 1 } } },
-      ]).exec(),
-      ServiceHeartbeatModel.findOne({ service: "core" }).exec(),
-      OperationalStateModel.findOne({ key: "global" }).lean().exec(),
-    ]);
+          { $group: { _id: "$status", count: { $sum: 1 } } },
+        ]).exec(),
+        ServiceHeartbeatModel.findOne({ service: "core" }).exec(),
+        OperationalStateModel.findOne({ key: "global" }).lean().exec(),
+        QueueSessionModel.findOne({
+          guildId,
+          status: { $in: ["scheduled", "live"] },
+          endsAt: { $gt: now },
+        })
+          .sort({ startsAt: 1 })
+          .exec(),
+      ]);
     const counts = new Map(
       statusCounts.map((entry) => [entry._id, entry.count]),
     );
@@ -73,6 +82,15 @@ export class CommunityDataRepository {
       activeSquads: counts.get("active") ?? 0,
       pendingResults: counts.get("result_pending") ?? 0,
       disputedResults: counts.get("disputed") ?? 0,
+      nextQueueSession: nextSession
+        ? {
+            id: nextSession.id,
+            title: nextSession.title,
+            startsAt: new Date(nextSession.startsAt),
+            endsAt: new Date(nextSession.endsAt),
+            status: nextSession.status,
+          }
+        : null,
       capturedAt: new Date(now),
     };
   }

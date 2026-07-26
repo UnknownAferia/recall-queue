@@ -148,6 +148,16 @@ they are not the primary matchmaking flow.
 - CI checks, deployment environment and production monitoring
 - Backup and recovery procedure
 
+## ✅ Post-launch queue activation
+
+- Voluntary Squad Alerts role managed through the matchmaking-status panel
+- Queue milestone notifications without `@everyone`
+- Persistent 30-minute anti-spam cooldown and per-cycle milestone tracking
+- Operations-scheduled community queue sessions
+- Controlled reminders for opted-in players before scheduled sessions
+- Public upcoming-session visibility in matchmaking status
+- Seven-day onboarding, queue and squad conversion dashboard for Operations
+
 ## 🔭 Later exploration
 
 - Premade duo/trio support with party balancing

@@ -7,6 +7,7 @@ export type GuildRoleKey =
   | "verifiedPlayer"
   | "announcementNotifications"
   | "updateNotifications"
+  | "squadAlerts"
   | "divisionBronze"
   | "divisionSilver"
   | "divisionGold"
@@ -95,7 +96,7 @@ const HolographicRoleColor: GuildRoleColorsBlueprint = Object.freeze({
 });
 
 export const GuildBlueprint = Object.freeze({
-  version: 7,
+  version: 8,
 
   roles: [
     {
@@ -145,6 +146,13 @@ export const GuildBlueprint = Object.freeze({
       key: "updateNotifications",
       name: "Update Notifications",
       colors: solidRoleColor(0x1abc9c),
+      permissions: [],
+      hoist: false,
+    },
+    {
+      key: "squadAlerts",
+      name: "Squad Alerts",
+      colors: solidRoleColor(0x1fc8ff),
       permissions: [],
       hoist: false,
     },

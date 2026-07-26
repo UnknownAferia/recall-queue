@@ -17,6 +17,8 @@ import { PlayerAdministrationOperationModel } from "../models/PlayerAdministrati
 import { OperationalStateModel } from "../models/OperationalStateModel.js";
 import { MemberOnboardingModel } from "../models/MemberOnboardingModel.js";
 import { OnboardingAudienceExclusionModel } from "../models/OnboardingAudienceExclusionModel.js";
+import { QueueActivationStateModel } from "../models/QueueActivationStateModel.js";
+import { QueueSessionModel } from "../models/QueueSessionModel.js";
 
 const ManagedModels = [
   CommunityPanelModel,
@@ -37,6 +39,8 @@ const ManagedModels = [
   OperationalStateModel,
   MemberOnboardingModel,
   OnboardingAudienceExclusionModel,
+  QueueActivationStateModel,
+  QueueSessionModel,
 ] as const;
 
 export interface DatabaseIndexAudit {

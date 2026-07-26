@@ -66,6 +66,17 @@ import {
 import { createClosedTicketView } from "./ui/createClosedTicketView.js";
 import { createTicketModal } from "./ui/createTicketModal.js";
 import { handleCommunityOnboardingInteraction } from "./handleCommunityOnboardingInteraction.js";
+import {
+  ActivationDashboardCommandName,
+  executeActivationDashboardCommand,
+} from "./commands/activationDashboard.js";
+import {
+  executeQueueSessionCommand,
+  QueueSessionCommandName,
+} from "./commands/queueSession.js";
+import { isPlayerVerificationApproved } from "../constants/playerVerification.js";
+import { QueueActivationError } from "./errors/QueueActivationError.js";
+import { createUpcomingQueueSessionsView } from "./ui/createQueueActivationView.js";
 
 function createErrorResponse(title: string, description: string) {
   return {
@@ -95,6 +106,8 @@ async function respondWithError(
         interaction.commandName === OnboardingCommandName ||
         interaction.commandName === OnboardingAudienceCommandName ||
         interaction.commandName === VerificationInboxCommandName ||
+        interaction.commandName === QueueSessionCommandName ||
+        interaction.commandName === ActivationDashboardCommandName ||
         interaction.commandName === purgeCommandData.name)) ||
     (interaction.isButton() &&
       (interaction.customId === CommunityCustomIds.onboarding.refresh ||
@@ -165,6 +178,8 @@ export function registerCommunityInteractionHandler(
           [resolveReportCommandData.name]: executeResolveReportCommand,
           [purgeCommandData.name]: executePurgeCommand,
           [channelControlCommandData.name]: executeChannelControlCommand,
+          [QueueSessionCommandName]: executeQueueSessionCommand,
+          [ActivationDashboardCommandName]: executeActivationDashboardCommand,
         };
         const execute = commands[interaction.commandName];
         if (execute) {
@@ -202,6 +217,74 @@ export function registerCommunityInteractionHandler(
         interaction.commandName === PublishCommunityCommandName
       ) {
         await executePublishCommunityCommand(client, interaction);
+        return;
+      }
+
+      if (
+        interaction.isButton() &&
+        interaction.customId ===
+          CommunityCustomIds.queueActivation.toggleAlerts
+      ) {
+        if (!interaction.inCachedGuild()) {
+          return;
+        }
+
+        const player = await client.player.getByDiscordId(interaction.user.id);
+
+        if (
+          !player ||
+          !isPlayerVerificationApproved(player.verification.status)
+        ) {
+          await interaction.reply({
+            components: [
+              createAlertView(
+                "warning",
+                "Verification Required",
+                "Complete Vora account verification before enabling Squad Alerts.",
+              ),
+            ],
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+          });
+          return;
+        }
+
+        const state = await client.activation.toggleAlerts(
+          interaction.guild,
+          interaction.member,
+        );
+        await interaction.reply({
+          components: [
+            createAlertView(
+              state === "enabled" ? "success" : "information",
+              state === "enabled"
+                ? "Squad Alerts Enabled"
+                : "Squad Alerts Disabled",
+              state === "enabled"
+                ? "You will be mentioned only for controlled teammate-pool milestones and planned community sessions."
+                : "You will no longer receive Vora Squad Alert mentions.",
+            ),
+          ],
+          flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+        });
+        return;
+      }
+
+      if (
+        interaction.isButton() &&
+        interaction.customId ===
+          CommunityCustomIds.queueActivation.upcomingSessions
+      ) {
+        if (!interaction.inCachedGuild()) {
+          return;
+        }
+
+        const sessions = await client.activation.getUpcomingSessions(
+          interaction.guildId,
+        );
+        await interaction.reply({
+          components: [createUpcomingQueueSessionsView(sessions)],
+          flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+        });
         return;
       }
 
@@ -376,11 +459,14 @@ export function registerCommunityInteractionHandler(
         error instanceof TicketAlreadyOpenError ||
         error instanceof TicketOperationError ||
         error instanceof CommunityModerationError ||
-        error instanceof CommunityReportError
+        error instanceof CommunityReportError ||
+        error instanceof QueueActivationError
       ) {
         await respondWithError(
           interaction,
-          "Ticket Unavailable",
+          error instanceof QueueActivationError
+            ? "Squad Alerts Unavailable"
+            : "Ticket Unavailable",
           error.message,
         );
         return;

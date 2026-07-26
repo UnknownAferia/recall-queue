@@ -61,4 +61,8 @@ export const CommunityCustomIds = Object.freeze({
     serverId: "community:onboarding:register:server-id",
     screenshot: "community:onboarding:verification:screenshot",
   },
+  queueActivation: {
+    toggleAlerts: "community:queue-activation:toggle-alerts",
+    upcomingSessions: "community:queue-activation:upcoming-sessions",
+  },
 });

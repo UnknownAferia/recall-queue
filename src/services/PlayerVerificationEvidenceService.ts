@@ -1,8 +1,4 @@
-import {
-  ChannelType,
-  type Attachment,
-  type Guild,
-} from "discord.js";
+import { ChannelType, type Attachment, type Guild } from "discord.js";
 
 import { GuildBlueprint } from "../config/guildBlueprint.js";
 import { logger } from "../config/logger.js";
@@ -14,6 +10,9 @@ import type { PlayerDto } from "../dto/PlayerDto.js";
 import type { PlayerVerificationEvidence } from "../types/playerVerification.js";
 import { createPendingPlayerVerificationReviewView } from "../ui/createPlayerVerificationReviewView.js";
 import { PlayerVerificationError } from "./errors/PlayerVerificationError.js";
+
+export type PlayerVerificationEvidenceHealth =
+  "available" | "channel_missing" | "message_missing" | "attachment_missing";
 
 export class PlayerVerificationEvidenceService {
   public validate(attachment: Attachment): PlayerVerificationContentType {
@@ -126,6 +125,31 @@ export class PlayerVerificationEvidenceService {
       );
       return false;
     }
+  }
+
+  public async inspectArchive(
+    guild: Guild,
+    evidence: PlayerVerificationEvidence,
+  ): Promise<PlayerVerificationEvidenceHealth> {
+    const channel = await guild.channels
+      .fetch(evidence.archiveChannelId)
+      .catch(() => null);
+
+    if (channel?.type !== ChannelType.GuildText) {
+      return "channel_missing";
+    }
+
+    const message = await channel.messages
+      .fetch(evidence.archiveMessageId)
+      .catch(() => null);
+
+    if (!message) {
+      return "message_missing";
+    }
+
+    return message.attachments.has(evidence.archiveAttachmentId)
+      ? "available"
+      : "attachment_missing";
   }
 
   private async resolveReviewChannel(guild: Guild) {

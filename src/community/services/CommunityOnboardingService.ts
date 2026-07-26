@@ -3,10 +3,15 @@ import { MessageFlags, type Guild, type GuildMember } from "discord.js";
 import { CommunityConfig } from "../../constants/community.js";
 import { isPlayerVerificationApproved } from "../../constants/playerVerification.js";
 import type { PlayerDto } from "../../dto/PlayerDto.js";
+import { PlayerVerificationMapper } from "../../mappers/PlayerVerificationMapper.js";
 import type { MemberOnboardingRepository } from "../../repositories/MemberOnboardingRepository.js";
 import type { OnboardingAudienceExclusionRepository } from "../../repositories/OnboardingAudienceExclusionRepository.js";
 import type { PlayerVerificationRepository } from "../../repositories/PlayerVerificationRepository.js";
 import type { PlayerService } from "../../services/PlayerService.js";
+import type {
+  PlayerVerificationEvidenceHealth,
+  PlayerVerificationEvidenceService,
+} from "../../services/PlayerVerificationEvidenceService.js";
 import { OnboardingAudienceError } from "../errors/OnboardingAudienceError.js";
 import { createMemberOnboardingView } from "../ui/createMemberOnboardingView.js";
 import type { OnboardingSnapshot } from "../ui/createOnboardingDashboardView.js";
@@ -17,6 +22,23 @@ export interface OnboardingReminderResult {
   readonly attempted: number;
   readonly delivered: number;
   readonly failed: number;
+}
+
+export interface VerificationWorklistEntry {
+  readonly discordId: string;
+  readonly ign: string;
+  readonly profileStatus: PlayerDto["verification"]["status"];
+  readonly state: "evidence_required" | "awaiting_review";
+  readonly requestId: string | null;
+  readonly submittedAt: Date | null;
+  readonly evidenceChannelId: string | null;
+  readonly evidenceMessageId: string | null;
+  readonly evidenceHealth: PlayerVerificationEvidenceHealth | null;
+}
+
+export interface VerificationWorklist {
+  readonly evidenceRequired: readonly VerificationWorklistEntry[];
+  readonly awaitingReview: readonly VerificationWorklistEntry[];
 }
 
 interface OnboardingAudience {
@@ -41,11 +63,15 @@ export class CommunityOnboardingService {
     private readonly players: Pick<PlayerService, "getByDiscordIds">,
     private readonly verifications: Pick<
       PlayerVerificationRepository,
-      "findPendingPlayerDiscordIds"
+      "findPendingByGuild" | "findPendingPlayerDiscordIds"
     >,
     private readonly exclusions: Pick<
       OnboardingAudienceExclusionRepository,
       "findActiveByGuild" | "isActive" | "excludeMany" | "restore"
+    >,
+    private readonly verificationEvidence: Pick<
+      PlayerVerificationEvidenceService,
+      "inspectArchive"
     >,
     private readonly channels: ManagedCommunityChannelResolver,
     private readonly now: () => Date = () => new Date(),
@@ -80,6 +106,66 @@ export class CommunityOnboardingService {
       verificationRequired,
       awaitingOperationsReview,
       reminderEligible: audience.reminderEligibleIds.size,
+    };
+  }
+
+  public async getVerificationWorklist(
+    guild: Guild,
+  ): Promise<VerificationWorklist> {
+    const audience = await this.createAudience(guild);
+    const unverifiedPlayers = [...audience.playersByDiscordId.values()].filter(
+      (player) => !isPlayerVerificationApproved(player.verification.status),
+    );
+    const requests = await this.verifications.findPendingByGuild(
+      guild.id,
+      unverifiedPlayers.map((player) => player.discord.id),
+    );
+    const requestsByPlayer = new Map(
+      requests.map((request) => [request.playerDiscordId, request]),
+    );
+    const evidenceRequired: VerificationWorklistEntry[] = [];
+    const awaitingReview: VerificationWorklistEntry[] = [];
+
+    for (const player of unverifiedPlayers) {
+      const request = requestsByPlayer.get(player.discord.id);
+
+      if (!request) {
+        evidenceRequired.push({
+          discordId: player.discord.id,
+          ign: player.game.ign,
+          profileStatus: player.verification.status,
+          state: "evidence_required",
+          requestId: null,
+          submittedAt: null,
+          evidenceChannelId: null,
+          evidenceMessageId: null,
+          evidenceHealth: null,
+        });
+        continue;
+      }
+
+      const dto = PlayerVerificationMapper.toDto(request);
+      awaitingReview.push({
+        discordId: player.discord.id,
+        ign: player.game.ign,
+        profileStatus: player.verification.status,
+        state: "awaiting_review",
+        requestId: dto.id,
+        submittedAt: dto.submittedAt,
+        evidenceChannelId: dto.evidence.archiveChannelId,
+        evidenceMessageId: dto.evidence.archiveMessageId,
+        evidenceHealth: await this.verificationEvidence.inspectArchive(
+          guild,
+          dto.evidence,
+        ),
+      });
+    }
+
+    return {
+      evidenceRequired: evidenceRequired.sort((left, right) =>
+        left.ign.localeCompare(right.ign),
+      ),
+      awaitingReview,
     };
   }
 

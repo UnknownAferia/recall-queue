@@ -79,7 +79,7 @@ export function createOnboardingDashboardView(
     .addActionRowComponents(actions)
     .addTextDisplayComponents(
       ViewFactory.footer(
-        "Reminders use a seven-day cooldown and are sent in controlled batches.",
+        "Use /verification-inbox for the player-level worklist. Reminders use a seven-day cooldown and controlled batches.",
       ),
     );
 }

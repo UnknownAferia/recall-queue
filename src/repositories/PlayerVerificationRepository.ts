@@ -8,6 +8,23 @@ import {
 import type { CreatePlayerVerificationRequestInput } from "../types/playerVerification.js";
 
 export class PlayerVerificationRepository {
+  public async findPendingByGuild(
+    guildId: string,
+    playerDiscordIds: readonly string[],
+  ): Promise<PlayerVerificationDocument[]> {
+    if (playerDiscordIds.length === 0) {
+      return [];
+    }
+
+    return PlayerVerificationModel.find({
+      guildId,
+      playerDiscordId: { $in: [...new Set(playerDiscordIds)] },
+      status: "pending",
+    })
+      .sort({ submittedAt: 1 })
+      .exec();
+  }
+
   public async findPendingPlayerDiscordIds(
     guildId: string,
     playerDiscordIds: readonly string[],

@@ -21,7 +21,6 @@ import { PlayerProfileNotFoundError } from "../services/errors/PlayerProfileNotF
 import { PlayerVerificationError } from "../services/errors/PlayerVerificationError.js";
 import { SystemMaintenanceError } from "../services/errors/SystemMaintenanceError.js";
 import { createAlertView } from "../ui/createAlertView.js";
-import { createPlayerRegistrationModal } from "../ui/createPlayerRegistrationModal.js";
 import { createPlayerVerificationModal } from "../ui/createPlayerVerificationModal.js";
 import { createPlayerVerificationRejectionModal } from "../ui/createPlayerVerificationRejectionModal.js";
 import { createResolvedPlayerVerificationReviewView } from "../ui/createPlayerVerificationReviewView.js";
@@ -31,13 +30,7 @@ import {
   OnboardingCommandName,
 } from "./commands/onboarding.js";
 import { createOnboardingDashboardView } from "./ui/createOnboardingDashboardView.js";
-
-const RegistrationModalIds = Object.freeze({
-  modal: CommunityCustomIds.onboarding.registerModal,
-  ign: CommunityCustomIds.onboarding.ign,
-  playerId: CommunityCustomIds.onboarding.playerId,
-  serverId: CommunityCustomIds.onboarding.serverId,
-});
+import { createPlayerOnboardingModal } from "./ui/createPlayerOnboardingModal.js";
 
 const VerificationModalIds = Object.freeze({
   modal: CommunityCustomIds.onboarding.verificationModal,
@@ -91,9 +84,7 @@ async function openVerification(
   const player = await client.player.getByDiscordId(interaction.user.id);
 
   if (!player) {
-    await interaction.showModal(
-      createPlayerRegistrationModal(RegistrationModalIds),
-    );
+    await interaction.showModal(createPlayerOnboardingModal());
     return;
   }
 
@@ -276,9 +267,7 @@ export async function handleCommunityOnboardingInteraction(
     if (player) {
       await openVerification(client, interaction);
     } else {
-      await interaction.showModal(
-        createPlayerRegistrationModal(RegistrationModalIds),
-      );
+      await interaction.showModal(createPlayerOnboardingModal());
     }
     return true;
   }
@@ -295,6 +284,35 @@ export async function handleCommunityOnboardingInteraction(
     interaction.isModalSubmit() &&
     interaction.customId === CommunityCustomIds.onboarding.registerModal
   ) {
+    if (!interaction.inCachedGuild()) {
+      return true;
+    }
+
+    const attachment = interaction.fields
+      .getUploadedFiles(CommunityCustomIds.onboarding.screenshot, true)
+      .first();
+
+    if (!attachment) {
+      await replyWithAlert(
+        interaction,
+        "warning",
+        "Screenshot Required",
+        "Upload one current Mobile Legends profile screenshot to register.",
+      );
+      return true;
+    }
+
+    await interaction.reply({
+      components: [
+        createAlertView(
+          "information",
+          "Creating Vora Profile",
+          "Vora is registering your account and securely submitting your screenshot for Operations review.",
+        ),
+      ],
+      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+    });
+
     try {
       const player = await client.player.registerPlayer({
         discordId: interaction.user.id,
@@ -310,23 +328,44 @@ export async function handleCommunityOnboardingInteraction(
         ),
       });
 
-      if (interaction.inCachedGuild()) {
-        await client.guildAccess.synchronizeVerifiedPlayerRole(
-          interaction.member,
-          player.verification.status,
+      await client.guildAccess.synchronizeVerifiedPlayerRole(
+        interaction.member,
+        player.verification.status,
+      );
+
+      try {
+        const request = await client.playerVerification.submit(
+          interaction.guild,
+          interaction.user.id,
+          attachment,
         );
+        await client.guildAccess.removeVerifiedPlayerRole(interaction.member);
+        await interaction.editReply({
+          components: [
+            createAlertView(
+              "success",
+              "Registration & Verification Submitted",
+              `Your profile for **${player.game.ign}** is registered and Operations received your screenshot. Request reference: \`${request.id}\`. Matchmaking unlocks after approval.`,
+            ),
+          ],
+        });
+      } catch (error: unknown) {
+        if (
+          error instanceof PlayerVerificationError ||
+          error instanceof PlayerProfileNotFoundError
+        ) {
+          const view = createAlertView(
+            "warning",
+            "Registration Saved — Verification Needs Retry",
+            `Your Vora profile for **${player.game.ign}** was created safely, but the screenshot could not be submitted: ${error.message}`,
+          ).addActionRowComponents(verificationAction());
+
+          await interaction.editReply({ components: [view] });
+          return true;
+        }
+
+        throw error;
       }
-
-      const view = createAlertView(
-        "success",
-        "Registration Complete",
-        `Your Vora profile for **${player.game.ign}** is ready. Submit one current MLBB profile screenshot to unlock matchmaking.`,
-      ).addActionRowComponents(verificationAction());
-
-      await interaction.reply({
-        components: [view],
-        flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-      });
     } catch (error: unknown) {
       if (
         error instanceof PlayerAlreadyRegisteredError ||
@@ -334,12 +373,15 @@ export async function handleCommunityOnboardingInteraction(
         error instanceof InvalidRegistrationDataError ||
         error instanceof SystemMaintenanceError
       ) {
-        await replyWithAlert(
-          interaction,
-          "warning",
-          "Registration Unavailable",
-          error.message,
-        );
+        await interaction.editReply({
+          components: [
+            createAlertView(
+              "warning",
+              "Registration Unavailable",
+              error.message,
+            ),
+          ],
+        });
         return true;
       }
 
@@ -454,10 +496,9 @@ export async function handleCommunityOnboardingInteraction(
       ],
     });
 
-    const result =
-      sendsReminders
-        ? await client.onboarding.remindEligible(interaction.guild)
-        : null;
+    const result = sendsReminders
+      ? await client.onboarding.remindEligible(interaction.guild)
+      : null;
     const snapshot = await client.onboarding.getSnapshot(interaction.guild);
     const resultMessage = result
       ? `${result.delivered} reminder(s) delivered, ${result.failed} failed. ${Math.max(0, result.eligible - result.attempted)} remain eligible for a later batch.`

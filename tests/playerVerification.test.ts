@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import type { Attachment } from "discord.js";
+import { ChannelType, type Attachment, type Guild } from "discord.js";
 
 import {
   CustomIds,
@@ -41,7 +41,10 @@ function createAttachment(overrides: Partial<Attachment> = {}): Attachment {
 
 describe("Player account verification", () => {
   it("keeps legacy profiles approved while distinguishing new states", async () => {
-    assert.equal(normalizePlayerVerificationStatus(undefined), "legacy_verified");
+    assert.equal(
+      normalizePlayerVerificationStatus(undefined),
+      "legacy_verified",
+    );
     assert.equal(isPlayerVerificationApproved("legacy_verified"), true);
     assert.equal(isPlayerVerificationApproved("verified"), true);
     assert.equal(isPlayerVerificationApproved("pending"), false);
@@ -91,6 +94,52 @@ describe("Player account verification", () => {
     );
     assert.throws(() =>
       service.validate(createAttachment({ width: null, height: null })),
+    );
+  });
+
+  it("detects missing private review artifacts without mutating requests", async () => {
+    const service = new PlayerVerificationEvidenceService();
+    const evidence = {
+      archiveChannelId: "channel-id",
+      archiveMessageId: "message-id",
+      archiveAttachmentId: "attachment-id",
+      fileName: "profile.png",
+      contentType: "image/png" as const,
+      size: 2_048,
+    };
+    const guild = (message: unknown) =>
+      ({
+        channels: {
+          fetch: async () => ({
+            type: ChannelType.GuildText,
+            messages: {
+              fetch: async () => message,
+            },
+          }),
+        },
+      }) as unknown as Guild;
+
+    assert.equal(
+      await service.inspectArchive(
+        guild({
+          attachments: new Map([["attachment-id", {}]]),
+        }),
+        evidence,
+      ),
+      "available",
+    );
+    assert.equal(
+      await service.inspectArchive(guild(null), evidence),
+      "message_missing",
+    );
+    assert.equal(
+      await service.inspectArchive(
+        guild({
+          attachments: new Map(),
+        }),
+        evidence,
+      ),
+      "attachment_missing",
     );
   });
 

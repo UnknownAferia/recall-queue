@@ -26,7 +26,7 @@ export function createRegisterView(
   const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(CommunityCustomIds.onboarding.register)
-      .setLabel("Register Now")
+      .setLabel("Register & Submit")
       .setEmoji("📝")
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
@@ -42,17 +42,18 @@ export function createRegisterView(
       ViewFactory.text(
         [
           "### 1 · Create your player profile",
-          "Click **Register Now** below and enter your current Mobile Legends information:",
+          "Click **Register & Submit** below. One private form collects:",
           "- In-game name (IGN)",
           "- Player ID",
           "- Server ID",
+          "- One current MLBB profile screenshot",
           "",
-          "Your Discord account can be connected to one MLBB account.",
+          "Your profile and verification request are created together. Your Discord account can be connected to one MLBB account.",
           "",
-          "### 2 · Verify your MLBB account",
-          "Click **Submit Verification** and upload a current screenshot of your Mobile Legends profile.",
+          "### 2 · Operations review",
+          "The screenshot must clearly show the **IGN, Player ID and Server ID** entered in the same form. Vora Operations reviews the evidence privately.",
           "",
-          "The screenshot must clearly show the **IGN, Player ID and Server ID** entered during registration. Vora Operations reviews the evidence privately.",
+          "Already registered without a screenshot, or previously rejected? Click **Submit Verification** to send evidence without registering again.",
           "",
           "> Matchmaking remains locked while your verification is pending.",
           "",

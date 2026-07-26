@@ -8,6 +8,7 @@ import {
   type ChatInputCommandInteraction,
   type Guild,
   type GuildMember,
+  type ModalSubmitInteraction,
   type TextChannel,
 } from "discord.js";
 
@@ -15,6 +16,7 @@ import { CommunityCustomIds } from "../src/constants/community.js";
 import type { PlayerDto } from "../src/dto/PlayerDto.js";
 import { MemberOnboardingModel } from "../src/models/MemberOnboardingModel.js";
 import { OnboardingAudienceExclusionModel } from "../src/models/OnboardingAudienceExclusionModel.js";
+import { PlayerVerificationModel } from "../src/models/PlayerVerificationModel.js";
 import type { MemberOnboardingRepository } from "../src/repositories/MemberOnboardingRepository.js";
 import type { OnboardingAudienceExclusionRepository } from "../src/repositories/OnboardingAudienceExclusionRepository.js";
 import type { PlayerVerificationRepository } from "../src/repositories/PlayerVerificationRepository.js";
@@ -28,10 +30,18 @@ import { handleCommunityOnboardingInteraction } from "../src/community/handleCom
 import { CustomIds } from "../src/constants/customIds.js";
 import { executeOnboardingCommand } from "../src/community/commands/onboarding.js";
 import { onboardingAudienceCommandData } from "../src/community/commands/onboardingAudience.js";
+import { verificationInboxCommandData } from "../src/community/commands/verificationInbox.js";
+import { createPlayerOnboardingModal } from "../src/community/ui/createPlayerOnboardingModal.js";
+import { createVerificationWorklistView } from "../src/community/ui/createVerificationWorklistView.js";
 
 function player(discordId: string, status: "pending" | "verified"): PlayerDto {
   return {
-    discord: { id: discordId },
+    discord: { id: discordId, username: discordId },
+    game: {
+      ign: `IGN ${discordId}`,
+      playerId: "123456789",
+      serverId: "1234",
+    },
     verification: { status },
   } as PlayerDto;
 }
@@ -222,8 +232,12 @@ describe("Community onboarding", () => {
       ],
     } as Pick<PlayerService, "getByDiscordIds">;
     const verifications = {
+      findPendingByGuild: async () => [],
       findPendingPlayerDiscordIds: async () => ["pending"],
-    } as Pick<PlayerVerificationRepository, "findPendingPlayerDiscordIds">;
+    } as unknown as Pick<
+      PlayerVerificationRepository,
+      "findPendingByGuild" | "findPendingPlayerDiscordIds"
+    >;
     const exclusions = {
       findActiveByGuild: async () => [{ memberDiscordId: "excluded" }],
       isActive: async () => false,
@@ -238,6 +252,7 @@ describe("Community onboarding", () => {
       players,
       verifications,
       exclusions,
+      { inspectArchive: async () => "available" as const },
       {} as ManagedCommunityChannelResolver,
       () => now,
     );
@@ -265,6 +280,85 @@ describe("Community onboarding", () => {
       reminderEligible: 2,
     });
     assert.equal(listCalls, 1);
+  });
+
+  it("separates missing evidence from submitted requests and audits archives", async () => {
+    const guild = {
+      id: "guild-id",
+      members: {
+        list: async () => members,
+      },
+    } as unknown as Guild;
+    const members = new Collection<string, GuildMember>([
+      ["needs-evidence", member("needs-evidence", guild)],
+      ["awaiting-review", member("awaiting-review", guild)],
+      ["verified", member("verified", guild)],
+    ]);
+    const request = new PlayerVerificationModel({
+      guildId: guild.id,
+      playerDiscordId: "awaiting-review",
+      game: {
+        ign: "IGN awaiting-review",
+        playerId: "123456789",
+        serverId: "1234",
+      },
+      status: "pending",
+      evidence: {
+        archiveChannelId: "review-channel",
+        archiveMessageId: "missing-message",
+        archiveAttachmentId: "attachment-id",
+        fileName: "profile.png",
+        contentType: "image/png",
+        size: 2_048,
+      },
+      submittedAt: new Date("2026-07-26T10:00:00.000Z"),
+    });
+    const service = new CommunityOnboardingService(
+      {
+        findByGuild: async () => [],
+      } as unknown as MemberOnboardingRepository,
+      {
+        getByDiscordIds: async () => [
+          player("needs-evidence", "pending"),
+          player("awaiting-review", "pending"),
+          player("verified", "verified"),
+        ],
+      } as Pick<PlayerService, "getByDiscordIds">,
+      {
+        findPendingByGuild: async () => [request],
+        findPendingPlayerDiscordIds: async () => ["awaiting-review"],
+      } as unknown as Pick<
+        PlayerVerificationRepository,
+        "findPendingByGuild" | "findPendingPlayerDiscordIds"
+      >,
+      {
+        findActiveByGuild: async () => [],
+        isActive: async () => false,
+        excludeMany: async () => 0,
+        restore: async () => false,
+      } as unknown as Pick<
+        OnboardingAudienceExclusionRepository,
+        "findActiveByGuild" | "isActive" | "excludeMany" | "restore"
+      >,
+      { inspectArchive: async () => "message_missing" as const },
+      {} as ManagedCommunityChannelResolver,
+      () => new Date("2026-07-26T12:00:00.000Z"),
+    );
+
+    const worklist = await service.getVerificationWorklist(guild);
+    const view = JSON.stringify(
+      createVerificationWorklistView(guild.id, worklist).toJSON(),
+    );
+
+    assert.deepEqual(
+      worklist.evidenceRequired.map((entry) => entry.discordId),
+      ["needs-evidence"],
+    );
+    assert.equal(worklist.awaitingReview[0]?.discordId, "awaiting-review");
+    assert.equal(worklist.awaitingReview[0]?.evidenceHealth, "message_missing");
+    assert.match(view, /Screenshot required/);
+    assert.match(view, /review message missing/);
+    assert.match(view, /player-admin reset-verification/);
   });
 
   it("excludes a one-time snapshot of human role members", async () => {
@@ -313,9 +407,14 @@ describe("Community onboarding", () => {
         getByDiscordIds: async () => [],
       } as Pick<PlayerService, "getByDiscordIds">,
       {
+        findPendingByGuild: async () => [],
         findPendingPlayerDiscordIds: async () => [],
-      } as Pick<PlayerVerificationRepository, "findPendingPlayerDiscordIds">,
+      } as unknown as Pick<
+        PlayerVerificationRepository,
+        "findPendingByGuild" | "findPendingPlayerDiscordIds"
+      >,
       exclusions,
+      { inspectArchive: async () => "available" as const },
       {} as ManagedCommunityChannelResolver,
       () => new Date("2026-07-26T12:00:00.000Z"),
     );
@@ -350,8 +449,12 @@ describe("Community onboarding", () => {
       getByDiscordIds: async () => [],
     } as Pick<PlayerService, "getByDiscordIds">;
     const verifications = {
+      findPendingByGuild: async () => [],
       findPendingPlayerDiscordIds: async () => [],
-    } as Pick<PlayerVerificationRepository, "findPendingPlayerDiscordIds">;
+    } as unknown as Pick<
+      PlayerVerificationRepository,
+      "findPendingByGuild" | "findPendingPlayerDiscordIds"
+    >;
     const channels = {
       resolveTextChannel: async () =>
         ({ id: "register-channel-id" }) as TextChannel,
@@ -370,6 +473,7 @@ describe("Community onboarding", () => {
       players,
       verifications,
       exclusions,
+      { inspectArchive: async () => "available" as const },
       channels,
       () => new Date("2026-07-26T12:00:00.000Z"),
     );
@@ -421,6 +525,108 @@ describe("Community onboarding", () => {
       "restore-member",
       "list",
     ]);
+  });
+
+  it("publishes the combined onboarding modal and verification inbox", () => {
+    const command = verificationInboxCommandData.toJSON();
+    const modal = JSON.stringify(createPlayerOnboardingModal().toJSON());
+
+    assert.equal(command.name, "verification-inbox");
+    assert.match(modal, new RegExp(CommunityCustomIds.onboarding.ign));
+    assert.match(modal, new RegExp(CommunityCustomIds.onboarding.playerId));
+    assert.match(modal, new RegExp(CommunityCustomIds.onboarding.serverId));
+    assert.match(modal, new RegExp(CommunityCustomIds.onboarding.screenshot));
+  });
+
+  it("registers and submits verification from one private modal", async () => {
+    const calls: string[] = [];
+    const replies: unknown[] = [];
+    const edits: unknown[] = [];
+    const client = {
+      player: {
+        registerPlayer: async () => {
+          calls.push("registered");
+          return {
+            ...player("new-player", "pending"),
+            game: {
+              ign: "New Player",
+              playerId: "123456789",
+              serverId: "1234",
+            },
+          };
+        },
+      },
+      playerVerification: {
+        submit: async () => {
+          calls.push("verification-submitted");
+          return { id: "507f1f77bcf86cd799439011" };
+        },
+      },
+      guildAccess: {
+        synchronizeVerifiedPlayerRole: async () => {
+          calls.push("role-synchronized");
+        },
+        removeVerifiedPlayerRole: async () => {
+          calls.push("verified-role-removed");
+        },
+      },
+    } as unknown as CommunityClient;
+    const interaction = {
+      isButton: () => false,
+      isModalSubmit: () => true,
+      isChatInputCommand: () => false,
+      customId: CommunityCustomIds.onboarding.registerModal,
+      inCachedGuild: () => true,
+      guild: { id: "guild-id" },
+      guildId: "guild-id",
+      member: { id: "new-player" },
+      user: { id: "new-player", username: "new-player" },
+      fields: {
+        getTextInputValue: (customId: string) =>
+          ({
+            [CommunityCustomIds.onboarding.ign]: "New Player",
+            [CommunityCustomIds.onboarding.playerId]: "123456789",
+            [CommunityCustomIds.onboarding.serverId]: "1234",
+          })[customId] ?? "",
+        getUploadedFiles: () =>
+          new Collection([
+            [
+              "attachment-id",
+              {
+                id: "attachment-id",
+                name: "profile.png",
+                contentType: "image/png",
+                size: 2_048,
+                width: 1_920,
+                height: 1_080,
+                url: "https://cdn.discordapp.com/profile.png",
+              },
+            ],
+          ]),
+      },
+      reply: async (options: unknown) => {
+        replies.push(options);
+      },
+      editReply: async (options: unknown) => {
+        edits.push(options);
+      },
+    } as unknown as ModalSubmitInteraction<"cached">;
+
+    assert.equal(
+      await handleCommunityOnboardingInteraction(client, interaction),
+      true,
+    );
+    assert.deepEqual(calls, [
+      "registered",
+      "role-synchronized",
+      "verification-submitted",
+      "verified-role-removed",
+    ]);
+    assert.match(JSON.stringify(replies[0]), /Creating Vora Profile/);
+    assert.match(
+      JSON.stringify(edits[0]),
+      /Registration & Verification Submitted/,
+    );
   });
 
   it("lets Operations resolve reviews created by Vora Community", async () => {

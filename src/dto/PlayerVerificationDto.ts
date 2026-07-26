@@ -1,4 +1,7 @@
-import type { PlayerVerificationStatus } from "../constants/playerVerification.js";
+import type {
+  PlayerVerificationContentType,
+  PlayerVerificationStatus,
+} from "../constants/playerVerification.js";
 
 export interface PlayerVerificationDto {
   readonly id: string;
@@ -18,7 +21,7 @@ export interface PlayerVerificationDto {
     readonly archiveMessageId: string;
     readonly archiveAttachmentId: string;
     readonly fileName: string;
-    readonly contentType: string;
+    readonly contentType: PlayerVerificationContentType;
     readonly size: number;
   };
   readonly submittedAt: Date;

@@ -15,7 +15,7 @@ export function createMemberOnboardingView(
   const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(CommunityCustomIds.onboarding.register)
-      .setLabel("Register Now")
+      .setLabel("Register & Submit")
       .setEmoji("📝")
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
@@ -37,10 +37,9 @@ export function createMemberOnboardingView(
     .addTextDisplayComponents(
       ViewFactory.text(
         [
-          "### It takes three short steps",
-          "**1. Register** your IGN, Player ID and Server ID.",
-          "**2. Verify** them with one current MLBB profile screenshot.",
-          "**3. Choose** your primary and secondary roles in `/vora`.",
+          "### It takes two short steps",
+          "**1. Register & verify** your IGN, Player ID and Server ID with one current MLBB profile screenshot.",
+          "**2. Choose** your primary and secondary roles in `/vora` after Operations approves the evidence.",
           "",
           "> Registration is private. Your screenshot is visible only to Vora Operations.",
         ].join("\n"),

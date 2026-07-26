@@ -56,6 +56,7 @@ export class CommunityClient extends Client {
     const moderationRepository = new CommunityModerationRepository();
     const playerRepository = new PlayerRepository();
     const playerVerificationRepository = new PlayerVerificationRepository();
+    const playerVerificationEvidence = new PlayerVerificationEvidenceService();
     const transactionRunner = new MongoTransactionRunner();
 
     this.player = new PlayerService(
@@ -66,7 +67,7 @@ export class CommunityClient extends Client {
       playerVerificationRepository,
       playerRepository,
       transactionRunner,
-      new PlayerVerificationEvidenceService(),
+      playerVerificationEvidence,
     );
     this.guildAccess = new GuildAccessService();
     this.onboarding = new CommunityOnboardingService(
@@ -74,6 +75,7 @@ export class CommunityClient extends Client {
       this.player,
       playerVerificationRepository,
       new OnboardingAudienceExclusionRepository(),
+      playerVerificationEvidence,
       channels,
     );
 

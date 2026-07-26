@@ -15,6 +15,7 @@ import { CommunityCustomIds } from "../src/constants/community.js";
 import type { PlayerDto } from "../src/dto/PlayerDto.js";
 import { MemberOnboardingModel } from "../src/models/MemberOnboardingModel.js";
 import type { MemberOnboardingRepository } from "../src/repositories/MemberOnboardingRepository.js";
+import type { PlayerVerificationRepository } from "../src/repositories/PlayerVerificationRepository.js";
 import type { PlayerService } from "../src/services/PlayerService.js";
 import { CommunityOnboardingService } from "../src/community/services/CommunityOnboardingService.js";
 import type { ManagedCommunityChannelResolver } from "../src/community/services/ManagedCommunityChannelResolver.js";
@@ -57,7 +58,8 @@ describe("Community onboarding", () => {
           registered: 4,
           verified: 2,
           unregistered: 6,
-          awaitingVerification: 2,
+          verificationRequired: 1,
+          awaitingOperationsReview: 1,
           reminderEligible: 6,
         }),
       },
@@ -105,7 +107,8 @@ describe("Community onboarding", () => {
           registered: 7,
           verified: 4,
           unregistered: 28,
-          awaitingVerification: 3,
+          verificationRequired: 2,
+          awaitingOperationsReview: 1,
           reminderEligible: 6,
         }),
       },
@@ -153,7 +156,8 @@ describe("Community onboarding", () => {
         registered: 4,
         verified: 2,
         unregistered: 6,
-        awaitingVerification: 2,
+        verificationRequired: 1,
+        awaitingOperationsReview: 1,
         reminderEligible: 6,
       }).toJSON(),
     );
@@ -183,6 +187,7 @@ describe("Community onboarding", () => {
     } as unknown as Guild;
     const members = new Collection<string, GuildMember>([
       ["unregistered", member("unregistered", guild)],
+      ["needs-evidence", member("needs-evidence", guild)],
       ["pending", member("pending", guild)],
       ["verified", member("verified", guild)],
       ["bot", member("bot", guild, true)],
@@ -197,32 +202,42 @@ describe("Community onboarding", () => {
     } as unknown as MemberOnboardingRepository;
     const players = {
       getByDiscordIds: async () => [
+        player("needs-evidence", "pending"),
         player("pending", "pending"),
         player("verified", "verified"),
       ],
     } as Pick<PlayerService, "getByDiscordIds">;
+    const verifications = {
+      findPendingPlayerDiscordIds: async () => ["pending"],
+    } as Pick<
+      PlayerVerificationRepository,
+      "findPendingPlayerDiscordIds"
+    >;
     const service = new CommunityOnboardingService(
       repository,
       players,
+      verifications,
       {} as ManagedCommunityChannelResolver,
       () => now,
     );
 
     assert.deepEqual(await service.getSnapshot(guild), {
-      members: 3,
-      registered: 2,
+      members: 4,
+      registered: 3,
       verified: 1,
       unregistered: 1,
-      awaitingVerification: 1,
-      reminderEligible: 1,
+      verificationRequired: 1,
+      awaitingOperationsReview: 1,
+      reminderEligible: 2,
     });
     assert.deepEqual(await service.getSnapshot(guild), {
-      members: 3,
-      registered: 2,
+      members: 4,
+      registered: 3,
       verified: 1,
       unregistered: 1,
-      awaitingVerification: 1,
-      reminderEligible: 1,
+      verificationRequired: 1,
+      awaitingOperationsReview: 1,
+      reminderEligible: 2,
     });
     assert.equal(listCalls, 1);
   });
@@ -239,6 +254,12 @@ describe("Community onboarding", () => {
     const players = {
       getByDiscordIds: async () => [],
     } as Pick<PlayerService, "getByDiscordIds">;
+    const verifications = {
+      findPendingPlayerDiscordIds: async () => [],
+    } as Pick<
+      PlayerVerificationRepository,
+      "findPendingPlayerDiscordIds"
+    >;
     const channels = {
       resolveTextChannel: async () =>
         ({ id: "register-channel-id" }) as TextChannel,
@@ -246,6 +267,7 @@ describe("Community onboarding", () => {
     const service = new CommunityOnboardingService(
       repository,
       players,
+      verifications,
       channels,
       () => new Date("2026-07-26T12:00:00.000Z"),
     );

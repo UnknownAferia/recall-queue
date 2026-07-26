@@ -8,6 +8,21 @@ import {
 import type { CreatePlayerVerificationRequestInput } from "../types/playerVerification.js";
 
 export class PlayerVerificationRepository {
+  public async findPendingPlayerDiscordIds(
+    guildId: string,
+    playerDiscordIds: readonly string[],
+  ): Promise<readonly string[]> {
+    if (playerDiscordIds.length === 0) {
+      return [];
+    }
+
+    return PlayerVerificationModel.distinct("playerDiscordId", {
+      guildId,
+      playerDiscordId: { $in: playerDiscordIds },
+      status: "pending",
+    }).exec();
+  }
+
   public async existsPendingForPlayer(
     playerDiscordId: string,
   ): Promise<boolean> {

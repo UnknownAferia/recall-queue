@@ -4,6 +4,7 @@ import { CommunityConfig } from "../../constants/community.js";
 import { isPlayerVerificationApproved } from "../../constants/playerVerification.js";
 import type { PlayerDto } from "../../dto/PlayerDto.js";
 import type { MemberOnboardingRepository } from "../../repositories/MemberOnboardingRepository.js";
+import type { PlayerVerificationRepository } from "../../repositories/PlayerVerificationRepository.js";
 import type { PlayerService } from "../../services/PlayerService.js";
 import { createMemberOnboardingView } from "../ui/createMemberOnboardingView.js";
 import type { OnboardingSnapshot } from "../ui/createOnboardingDashboardView.js";
@@ -33,28 +34,44 @@ export class CommunityOnboardingService {
   public constructor(
     private readonly repository: MemberOnboardingRepository,
     private readonly players: Pick<PlayerService, "getByDiscordIds">,
+    private readonly verifications: Pick<
+      PlayerVerificationRepository,
+      "findPendingPlayerDiscordIds"
+    >,
     private readonly channels: ManagedCommunityChannelResolver,
     private readonly now: () => Date = () => new Date(),
   ) {}
 
   public async getSnapshot(guild: Guild): Promise<OnboardingSnapshot> {
     const audience = await this.createAudience(guild);
-    const registered = audience.members.filter((member) =>
-      audience.playersByDiscordId.has(member.id),
+    const registeredPlayers = audience.members
+      .map((member) => audience.playersByDiscordId.get(member.id))
+      .filter((player): player is PlayerDto => player !== undefined);
+    const verified = registeredPlayers.filter((player) =>
+      isPlayerVerificationApproved(player.verification.status),
     ).length;
-    const verified = audience.members.filter((member) => {
-      const player = audience.playersByDiscordId.get(member.id);
-      return player
-        ? isPlayerVerificationApproved(player.verification.status)
-        : false;
-    }).length;
+    const unverifiedPlayerDiscordIds = registeredPlayers
+      .filter(
+        (player) =>
+          !isPlayerVerificationApproved(player.verification.status),
+      )
+      .map((player) => player.discord.id);
+    const pendingPlayerDiscordIds =
+      await this.verifications.findPendingPlayerDiscordIds(
+        guild.id,
+        unverifiedPlayerDiscordIds,
+      );
+    const awaitingOperationsReview = pendingPlayerDiscordIds.length;
+    const verificationRequired =
+      unverifiedPlayerDiscordIds.length - awaitingOperationsReview;
 
     return {
       members: audience.members.length,
-      registered,
+      registered: registeredPlayers.length,
       verified,
-      unregistered: audience.members.length - registered,
-      awaitingVerification: registered - verified,
+      unregistered: audience.members.length - registeredPlayers.length,
+      verificationRequired,
+      awaitingOperationsReview,
       reminderEligible: audience.reminderEligibleIds.size,
     };
   }

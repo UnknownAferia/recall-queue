@@ -14,7 +14,8 @@ export interface OnboardingSnapshot {
   readonly registered: number;
   readonly verified: number;
   readonly unregistered: number;
-  readonly awaitingVerification: number;
+  readonly verificationRequired: number;
+  readonly awaitingOperationsReview: number;
   readonly reminderEligible: number;
 }
 
@@ -61,7 +62,8 @@ export function createOnboardingDashboardView(
           `**Registered:** ${snapshot.registered} · ${registrationRate}%`,
           `**Verified:** ${snapshot.verified} · ${verificationRate}%`,
           `**Not registered:** ${snapshot.unregistered}`,
-          `**Awaiting verification:** ${snapshot.awaitingVerification}`,
+          `**Verification evidence required:** ${snapshot.verificationRequired}`,
+          `**Awaiting Operations review:** ${snapshot.awaitingOperationsReview}`,
           "",
           `**Eligible for a private reminder:** ${snapshot.reminderEligible}`,
           resultMessage ? `\n> ${resultMessage}` : null,

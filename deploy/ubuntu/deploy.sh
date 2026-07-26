@@ -53,6 +53,13 @@ docker build --pull --target quality --tag "vora-quality:${release}" "${VORA_REP
 echo "Building shared runtime image vora:${release}..."
 docker build --pull --target runtime --tag "vora:${release}" "${VORA_REPOSITORY}"
 
+echo "Building website runtime image vora-website:${release}..."
+docker build \
+  --pull \
+  --target runtime \
+  --tag "vora-website:${release}" \
+  "${VORA_REPOSITORY}/website"
+
 echo "Creating a verified pre-deployment backup..."
 compose "${release}" --profile maintenance run --rm --no-deps vora-backup
 compose "${release}" --profile maintenance run --rm --no-deps vora-backup-verify
@@ -62,14 +69,30 @@ compose "${release}" run --rm --no-deps vora-core node dist/scripts/deployComman
 compose "${release}" run --rm --no-deps vora-community node dist/community/scripts/deployCommunityCommands.js
 
 echo "Starting release ${release}..."
-compose "${release}" up --detach --remove-orphans vora-core vora-community
+compose "${release}" up \
+  --detach \
+  --remove-orphans \
+  vora-core \
+  vora-community \
+  vora-website \
+  vora-web
 
 healthy=true
-for service in core community; do
+for service in core community website; do
   passed=false
 
   for _ in {1..18}; do
-    if compose "${release}" exec -T "vora-${service}" node scripts/healthcheck.mjs "${service}"; then
+    if [[ ${service} == website ]]; then
+      health_command=(
+        node
+        -e
+        "fetch('http://127.0.0.1:3000').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      )
+    else
+      health_command=(node scripts/healthcheck.mjs "${service}")
+    fi
+
+    if compose "${release}" exec -T "vora-${service}" "${health_command[@]}"; then
       passed=true
       break
     fi
@@ -83,12 +106,47 @@ for service in core community; do
   fi
 done
 
+if [[ ${healthy} == true ]]; then
+  public_site_ready=false
+
+  for _ in {1..24}; do
+    if curl \
+      --fail \
+      --silent \
+      --show-error \
+      --head \
+      --max-time 15 \
+      https://voramlbb.com/ >/dev/null; then
+      public_site_ready=true
+      break
+    fi
+
+    sleep 5
+  done
+
+  if [[ ${public_site_ready} != true ]]; then
+    healthy=false
+    echo "The public website did not become reachable over HTTPS." >&2
+  fi
+fi
+
 if [[ ${healthy} != true ]]; then
-  compose "${release}" logs --tail 100 vora-core vora-community >&2 || true
+  compose "${release}" logs \
+    --tail 100 \
+    vora-core \
+    vora-community \
+    vora-website \
+    vora-web >&2 || true
 
   if [[ -n ${previous_release} ]] && docker image inspect "vora:${previous_release}" >/dev/null 2>&1; then
     echo "Rolling back to ${previous_release}..." >&2
     compose "${previous_release}" up --detach --remove-orphans vora-core vora-community
+  fi
+
+  if [[ -n ${previous_release} ]] && docker image inspect "vora-website:${previous_release}" >/dev/null 2>&1; then
+    compose "${previous_release}" up --detach vora-website vora-web
+  else
+    compose "${release}" stop vora-web vora-website >/dev/null 2>&1 || true
   fi
 
   exit 1

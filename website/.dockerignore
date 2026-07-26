@@ -1,0 +1,15 @@
+.git
+.next
+.npm-cache
+.openai
+.vinext
+.wrangler
+build
+db
+dist
+drizzle
+examples
+node_modules
+tests
+worker
+*.log

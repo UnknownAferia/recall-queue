@@ -4,6 +4,7 @@ import {
   type Guild,
   type NonThreadGuildBasedChannel,
   type Role,
+  type RoleColorsResolvable,
 } from "discord.js";
 
 import {
@@ -63,7 +64,7 @@ export class GuildSetupService {
     for (const role of plan.rolesToCreate) {
       await guild.roles.create({
         name: role.name,
-        color: role.color,
+        colors: this.createRoleColors(role.colors),
         permissions: role.permissions,
         hoist: role.hoist,
         mentionable: false,
@@ -176,7 +177,7 @@ export class GuildSetupService {
         role &&
         (role.permissions.bitfield !==
           combinePermissions(roleBlueprint.permissions) ||
-          role.color !== roleBlueprint.color ||
+          !this.roleColorsMatch(role, roleBlueprint.colors) ||
           role.hoist !== roleBlueprint.hoist ||
           role.mentionable)
       ) {
@@ -263,7 +264,7 @@ export class GuildSetupService {
       }
 
       await role.edit({
-        color: roleBlueprint.color,
+        colors: roleBlueprint.colors,
         permissions: roleBlueprint.permissions,
         hoist: roleBlueprint.hoist,
         mentionable: false,
@@ -574,5 +575,36 @@ export class GuildSetupService {
     }
 
     return overwrites;
+  }
+
+  private roleColorsMatch(
+    role: Role,
+    expected: {
+      readonly primaryColor: number;
+      readonly secondaryColor: number | null;
+      readonly tertiaryColor: number | null;
+    },
+  ): boolean {
+    return (
+      role.colors.primaryColor === expected.primaryColor &&
+      role.colors.secondaryColor === expected.secondaryColor &&
+      role.colors.tertiaryColor === expected.tertiaryColor
+    );
+  }
+
+  private createRoleColors(colors: {
+    readonly primaryColor: number;
+    readonly secondaryColor: number | null;
+    readonly tertiaryColor: number | null;
+  }): RoleColorsResolvable {
+    return {
+      primaryColor: colors.primaryColor,
+      ...(colors.secondaryColor === null
+        ? {}
+        : { secondaryColor: colors.secondaryColor }),
+      ...(colors.tertiaryColor === null
+        ? {}
+        : { tertiaryColor: colors.tertiaryColor }),
+    };
   }
 }

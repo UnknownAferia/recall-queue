@@ -16,6 +16,15 @@ import { CommunityReportService } from "./services/CommunityReportService.js";
 import { SeasonRepository } from "../repositories/SeasonRepository.js";
 import { SeasonService } from "../services/SeasonService.js";
 import { MongoTransactionRunner } from "../database/MongoTransactionRunner.js";
+import { PlayerRepository } from "../repositories/PlayerRepository.js";
+import { PlayerVerificationRepository } from "../repositories/PlayerVerificationRepository.js";
+import { MemberOnboardingRepository } from "../repositories/MemberOnboardingRepository.js";
+import { OperationalControlService } from "../services/OperationalControlService.js";
+import { PlayerService } from "../services/PlayerService.js";
+import { PlayerVerificationEvidenceService } from "../services/PlayerVerificationEvidenceService.js";
+import { PlayerVerificationService } from "../services/PlayerVerificationService.js";
+import { GuildAccessService } from "../services/GuildAccessService.js";
+import { CommunityOnboardingService } from "./services/CommunityOnboardingService.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -24,6 +33,10 @@ export class CommunityClient extends Client {
   public readonly moderation: CommunityModerationService;
   public readonly reports: CommunityReportService;
   public readonly automod: CommunityAutomodService;
+  public readonly player: PlayerService;
+  public readonly playerVerification: PlayerVerificationService;
+  public readonly guildAccess: GuildAccessService;
+  public readonly onboarding: CommunityOnboardingService;
 
   public constructor() {
     super({
@@ -40,6 +53,25 @@ export class CommunityClient extends Client {
     const panelRepository = new CommunityPanelRepository();
     const panelPublisher = new CommunityPanelPublisher(panelRepository);
     const moderationRepository = new CommunityModerationRepository();
+    const playerRepository = new PlayerRepository();
+    const transactionRunner = new MongoTransactionRunner();
+
+    this.player = new PlayerService(
+      playerRepository,
+      new OperationalControlService(),
+    );
+    this.playerVerification = new PlayerVerificationService(
+      new PlayerVerificationRepository(),
+      playerRepository,
+      transactionRunner,
+      new PlayerVerificationEvidenceService(),
+    );
+    this.guildAccess = new GuildAccessService();
+    this.onboarding = new CommunityOnboardingService(
+      new MemberOnboardingRepository(),
+      this.player,
+      channels,
+    );
 
     this.panels = new CommunityPanelService(
       new CommunityDataRepository({
@@ -47,7 +79,7 @@ export class CommunityClient extends Client {
       }),
       panelPublisher,
       channels,
-      new SeasonService(new SeasonRepository(), new MongoTransactionRunner()),
+      new SeasonService(new SeasonRepository(), transactionRunner),
     );
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.moderation = new CommunityModerationService(

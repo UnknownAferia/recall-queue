@@ -13,7 +13,7 @@ export const PublishAnnouncementCommandName = "publish-announcement";
 
 export const publishAnnouncementCommandData = new SlashCommandBuilder()
   .setName(PublishAnnouncementCommandName)
-  .setDescription("Publish or refresh Vora's private-alpha announcement")
+  .setDescription("Publish or refresh Vora's official release announcement")
   .setContexts(InteractionContextType.Guild)
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
@@ -44,13 +44,13 @@ export async function executePublishAnnouncementCommand(
       createAlertView(
         "information",
         "Publishing Announcement",
-        "Vora Community is preparing the private-alpha milestone post.",
+        "Vora Community is preparing the official release post.",
       ),
     ],
     flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
   });
 
-  const result = await client.panels.publishAlphaLaunchAnnouncement(
+  const result = await client.panels.publishLaunchAnnouncement(
     interaction.guild,
   );
 
@@ -60,7 +60,7 @@ export async function executePublishAnnouncementCommand(
         ? createAlertView(
             "success",
             "Announcement Published",
-            `The private-alpha milestone was published or refreshed in <#${result.channelId}>. Reusing this command updates the same post.`,
+            `The official release announcement was published or refreshed in <#${result.channelId}>. Reusing this command updates the same post.`,
           )
         : createAlertView(
             "warning",

@@ -20,6 +20,7 @@ import {
   reportMessageCommandData,
   reportUserCommandData,
 } from "../commands/reportContext.js";
+import { onboardingCommandData } from "../commands/onboarding.js";
 
 async function deployCommunityCommands(): Promise<void> {
   const commandData = [
@@ -34,6 +35,7 @@ async function deployCommunityCommands(): Promise<void> {
     channelControlCommandData.toJSON(),
     reportMessageCommandData.toJSON(),
     reportUserCommandData.toJSON(),
+    onboardingCommandData.toJSON(),
   ];
   const rest = new REST({ version: "10" }).setToken(communityEnv.discordToken);
 

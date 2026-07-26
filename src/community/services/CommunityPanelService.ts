@@ -10,7 +10,7 @@ import {
 import { PlayerMapper } from "../../mappers/PlayerMapper.js";
 import type { CommunityDataRepository } from "../../repositories/CommunityDataRepository.js";
 import { createAnnouncementsView } from "../ui/createAnnouncementsView.js";
-import { createAlphaLaunchAnnouncementView } from "../ui/createAlphaLaunchAnnouncementView.js";
+import { createLaunchAnnouncementView } from "../ui/createLaunchAnnouncementView.js";
 import { createHelpView } from "../ui/createHelpView.js";
 import { createHowVoraWorksView } from "../ui/createHowVoraWorksView.js";
 import { createMatchmakingStatusView } from "../ui/createMatchmakingStatusView.js";
@@ -174,7 +174,7 @@ export class CommunityPanelService {
     );
   }
 
-  public async publishAlphaLaunchAnnouncement(
+  public async publishLaunchAnnouncement(
     guild: Guild,
   ): Promise<AnnouncementPublicationResult | null> {
     const channel = await this.channels.resolveTextChannel(
@@ -186,14 +186,15 @@ export class CommunityPanelService {
       return null;
     }
 
-    const asset = existsSync(BrandAssets.alphaBanner.filePath)
-      ? BrandAssets.alphaBanner
+    const asset = existsSync(BrandAssets.launchBanner.filePath)
+      ? BrandAssets.launchBanner
       : undefined;
     const messageId = await this.publisher.publish(
       channel,
-      "alpha_launch_announcement",
-      createAlphaLaunchAnnouncementView(asset?.attachmentName),
+      "release_announcement",
+      createLaunchAnnouncementView(asset?.attachmentName),
       asset,
+      ["alpha_launch_announcement"],
     );
 
     return { channelId: channel.id, messageId };
@@ -211,9 +212,7 @@ export class CommunityPanelService {
 
     const status = await this.data.getMatchmakingStatus(guild.id);
 
-    const asset = existsSync(
-      BrandAssets.panelIcons.matchmakingStatus.filePath,
-    )
+    const asset = existsSync(BrandAssets.panelIcons.matchmakingStatus.filePath)
       ? BrandAssets.panelIcons.matchmakingStatus
       : undefined;
 

@@ -12,7 +12,7 @@ applications and tokens.
   They power hierarchy-safe staff actions, report evidence, conservative spam
   protection and private ticket transcripts.
 - Give both bots only the permissions produced by `/server-setup`. During the
-  private alpha, Administrator permission remains acceptable for the managed
+  During initial operations, Administrator permission remains acceptable for the managed
   server-setup workflow.
 - Use a MongoDB deployment with replica-set transactions and automated backups.
 - Never commit `.env`, logs, backup archives or Discord tokens.

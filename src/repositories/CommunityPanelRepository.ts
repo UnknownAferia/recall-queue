@@ -12,6 +12,18 @@ export class CommunityPanelRepository {
     return CommunityPanelModel.findOne({ guildId, kind }).exec();
   }
 
+  public async findAny(
+    guildId: string,
+    kinds: readonly CommunityPanelKind[],
+  ): Promise<CommunityPanelDocument | null> {
+    return CommunityPanelModel.findOne({
+      guildId,
+      kind: { $in: [...kinds] },
+    })
+      .sort({ updatedAt: -1 })
+      .exec();
+  }
+
   public async upsert(
     guildId: string,
     kind: CommunityPanelKind,
@@ -37,5 +49,12 @@ export class CommunityPanelRepository {
     }
 
     return panel;
+  }
+
+  public async remove(
+    guildId: string,
+    kind: CommunityPanelKind,
+  ): Promise<void> {
+    await CommunityPanelModel.deleteOne({ guildId, kind }).exec();
   }
 }

@@ -53,7 +53,7 @@ community.
 
 ## Release decision
 
-- [ ] Monitoring has remained stable through a multi-week beta.
+- [x] Monitoring remained stable through the pre-release validation period.
 - [ ] No unresolved critical integrity or permission issue remains.
 - [ ] Rollback steps and the last known-good backup are documented.
 - [ ] The server owner has approved launch.

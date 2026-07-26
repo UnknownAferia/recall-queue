@@ -4,7 +4,7 @@
   <img src="./assets/Vora_Banner.png" alt="Vora — Built for Better Teams" width="100%" />
 </p>
 
-[![Status](https://img.shields.io/badge/status-private%20alpha-5865F2)](#project-status)
+[![Status](https://img.shields.io/badge/status-live-10B981)](#project-status)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/database-MongoDB-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
@@ -99,12 +99,10 @@ development and planned releases.
 
 ## Project status
 
-Vora is in **private alpha**. The player, queue, squad, voice, result, rating,
-moderation, season and operational workflows are implemented and covered by
-automated tests. The remaining release gate is a successful multi-week beta
-without critical data-integrity incidents.
-
-The data model and commands may change before the first stable release.
+Vora is **officially released**. The player, queue, squad, voice, result,
+rating, moderation, season and operational workflows are implemented, deployed
+and covered by automated tests. Development continues through versioned,
+backward-compatible improvements.
 
 Production procedures are documented in
 [Operations](docs/OPERATIONS.md),
@@ -169,10 +167,11 @@ from spreading into the core.
 - A MongoDB deployment with transaction support, such as MongoDB Atlas
 - A Discord test server where the bot has Administrator permission
 
-Enable the **Server Members Intent** for Vora Core and the **Message Content
-Intent** for Vora Community in the Discord Developer Portal. Message Content is
-required solely to export complete support-ticket transcripts. Add both bots to
-every server configured in `DISCORD_GUILD_IDS`.
+Enable the **Server Members Intent** for both Vora Core and Vora Community, and
+the **Message Content Intent** for Vora Community in the Discord Developer
+Portal. Community needs member access for welcome messages and onboarding
+reminders. Message Content is required solely to export complete support-ticket
+transcripts. Add both bots to every server configured in `DISCORD_GUILD_IDS`.
 
 ### Installation
 
@@ -238,7 +237,8 @@ npm start
 2. Review the proposed Vora server blueprint.
 3. Apply the setup to create or repair managed roles, categories, channels and
    permission overwrites.
-4. Run `/register`, then `/verify-account` and upload a clear MLBB profile screenshot.
+4. Open the managed `register` channel, click **Register Now**, then submit a
+   clear MLBB profile screenshot with **Submit Verification**.
 5. Wait for Operations approval, configure role preferences and open `/vora`.
 6. Join the managed `queue-lobby` voice channel before entering matchmaking.
 

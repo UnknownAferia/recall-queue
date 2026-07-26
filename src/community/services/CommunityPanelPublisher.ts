@@ -17,8 +17,13 @@ export class CommunityPanelPublisher {
     kind: CommunityPanelKind,
     view: ContainerBuilder,
     asset?: BrandAsset,
+    legacyKinds: readonly CommunityPanelKind[] = [],
   ): Promise<string> {
-    const stored = await this.repository.find(channel.guild.id, kind);
+    const stored =
+      (await this.repository.find(channel.guild.id, kind)) ??
+      (legacyKinds.length > 0
+        ? await this.repository.findAny(channel.guild.id, legacyKinds)
+        : null);
     const existingMessage =
       stored?.channelId === channel.id
         ? await channel.messages.fetch(stored.messageId).catch(() => null)
@@ -43,6 +48,13 @@ export class CommunityPanelPublisher {
               ]
             : [],
       });
+      await this.migrateLegacyKind(
+        channel.guild.id,
+        stored!.kind,
+        kind,
+        channel.id,
+        existingMessage.id,
+      );
       return existingMessage.id;
     }
 
@@ -67,5 +79,20 @@ export class CommunityPanelPublisher {
     );
 
     return message.id;
+  }
+
+  private async migrateLegacyKind(
+    guildId: string,
+    storedKind: CommunityPanelKind,
+    currentKind: CommunityPanelKind,
+    channelId: string,
+    messageId: string,
+  ): Promise<void> {
+    if (storedKind === currentKind) {
+      return;
+    }
+
+    await this.repository.upsert(guildId, currentKind, channelId, messageId);
+    await this.repository.remove(guildId, storedKind);
   }
 }

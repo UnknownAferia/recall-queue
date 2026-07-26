@@ -21,7 +21,14 @@ export interface GuildSetupPlan {
   readonly channelsToCreate: Blueprint["channels"];
   readonly renamesRequired: readonly GuildSetupRename[];
   readonly repairsRequired: readonly GuildSetupRepair[];
+  readonly externalRoles: readonly GuildSetupExternalRole[];
   readonly isComplete: boolean;
+}
+
+export interface GuildSetupExternalRole {
+  readonly name: string;
+  readonly present: boolean;
+  readonly description: string;
 }
 
 export interface GuildSetupRename {
@@ -47,9 +54,7 @@ export class GuildSetupPlanner {
 
     const categoriesToCreate = this.blueprint.categories.filter(
       (category) =>
-        !this.namesFor(category).some((name) =>
-          inventory.categories.has(name),
-        ),
+        !this.namesFor(category).some((name) => inventory.categories.has(name)),
     );
 
     const channelsToCreate = this.blueprint.channels.filter((channel) => {
@@ -105,9 +110,7 @@ export class GuildSetupPlanner {
       const parentBlueprint = this.blueprint.categories.find(
         (category) => category.key === channel.categoryKey,
       );
-      const parentNames = parentBlueprint
-        ? this.namesFor(parentBlueprint)
-        : [];
+      const parentNames = parentBlueprint ? this.namesFor(parentBlueprint) : [];
       const currentName = channel.legacyNames?.find((name) =>
         inventory.channels.some(
           (existingChannel) =>
@@ -142,6 +145,11 @@ export class GuildSetupPlanner {
       channelsToCreate,
       renamesRequired,
       repairsRequired: [],
+      externalRoles: this.blueprint.externalRoles.map((role) => ({
+        name: role.name,
+        present: inventory.roleNames.has(role.name),
+        description: role.description,
+      })),
       isComplete:
         rolesToCreate.length === 0 &&
         categoriesToCreate.length === 0 &&

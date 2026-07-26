@@ -5,11 +5,16 @@ import { OperationalControlService } from "../src/services/OperationalControlSer
 import { PlayerService } from "../src/services/PlayerService.js";
 import { QueueService } from "../src/services/QueueService.js";
 import { SystemMaintenanceError } from "../src/services/errors/SystemMaintenanceError.js";
-import { createLaunchAuditView, createSystemStatusView } from "../src/ui/createSystemOperationsView.js";
+import {
+  createLaunchAuditView,
+  createSystemStatusView,
+} from "../src/ui/createSystemOperationsView.js";
 
 describe("Operational control", () => {
   it("persists scoped maintenance changes", async () => {
-    const document = (value: Record<string, unknown>) => ({ toObject: () => value });
+    const document = (value: Record<string, unknown>) => ({
+      toObject: () => value,
+    });
     let state = {
       key: "global" as const,
       registrationOpen: true,
@@ -31,9 +36,13 @@ describe("Operational control", () => {
         state = {
           ...state,
           registrationOpen:
-            scope === "all" || scope === "registration" ? open : state.registrationOpen,
+            scope === "all" || scope === "registration"
+              ? open
+              : state.registrationOpen,
           matchmakingOpen:
-            scope === "all" || scope === "matchmaking" ? open : state.matchmakingOpen,
+            scope === "all" || scope === "matchmaking"
+              ? open
+              : state.matchmakingOpen,
           reason,
           changedByDiscordId: actorDiscordId,
         };
@@ -49,7 +58,10 @@ describe("Operational control", () => {
     );
     assert.equal(updated.registrationOpen, true);
     assert.equal(updated.matchmakingOpen, false);
-    await assert.rejects(() => service.assertMatchmakingOpen(), SystemMaintenanceError);
+    await assert.rejects(
+      () => service.assertMatchmakingOpen(),
+      SystemMaintenanceError,
+    );
   });
 
   it("blocks registration and queue entry before repository mutation", async () => {
@@ -83,7 +95,10 @@ describe("Operational control", () => {
         },
       } as never,
     );
-    await assert.rejects(() => queue.joinQueue("guild", "player"), SystemMaintenanceError);
+    await assert.rejects(
+      () => queue.joinQueue("guild", "player"),
+      SystemMaintenanceError,
+    );
     assert.equal(mutations, 0);
   });
 
@@ -118,6 +133,6 @@ describe("Operational control", () => {
       checks: [{ name: "Database", level: "pass", detail: "Healthy" }],
     }).toJSON();
     assert.match(JSON.stringify(status), /Matchmaking.*Maintenance/);
-    assert.match(JSON.stringify(audit), /Ready for Alpha/);
+    assert.match(JSON.stringify(audit), /Production Ready/);
   });
 });

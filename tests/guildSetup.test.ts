@@ -77,6 +77,40 @@ describe("Guild setup", () => {
     );
   });
 
+  it("declares the five live role styles without managing Discord's booster role", () => {
+    const role = (key: (typeof GuildBlueprint.roles)[number]["key"]) =>
+      GuildBlueprint.roles.find((candidate) => candidate.key === key)!;
+
+    assert.deepEqual(role("administrator").colors, {
+      primaryColor: 11_127_295,
+      secondaryColor: 16_759_788,
+      tertiaryColor: 16_761_760,
+    });
+    assert.deepEqual(role("moderator").colors, {
+      primaryColor: 0x6147f5,
+      secondaryColor: 0x9fc1ff,
+      tertiaryColor: null,
+    });
+    assert.deepEqual(role("developer").colors, {
+      primaryColor: 0x6d02ba,
+      secondaryColor: 0x8e27cc,
+      tertiaryColor: null,
+    });
+    assert.deepEqual(role("seasonChampion").colors, {
+      primaryColor: 0xffd900,
+      secondaryColor: 0xfcff9f,
+      tertiaryColor: null,
+    });
+    assert.equal(
+      GuildBlueprint.externalRoles.some(
+        (candidate) =>
+          candidate.name === "Server Booster" &&
+          candidate.managedBy === "discord",
+      ),
+      true,
+    );
+  });
+
   it("plans every blueprint resource for an empty server", () => {
     const plan = planner.createPlan(createEmptyInventory());
 
@@ -87,6 +121,14 @@ describe("Guild setup", () => {
     );
     assert.equal(plan.channelsToCreate.length, GuildBlueprint.channels.length);
     assert.equal(plan.renamesRequired.length, 0);
+    assert.deepEqual(plan.externalRoles, [
+      {
+        name: "Server Booster",
+        present: false,
+        description:
+          "Created and styled by Discord when Server Boosting is available.",
+      },
+    ]);
     assert.equal(plan.isComplete, false);
     assert.doesNotThrow(() =>
       createServerSetupView("Vora Test", plan).toJSON(),
@@ -100,9 +142,28 @@ describe("Guild setup", () => {
     assert.equal(plan.categoriesToCreate.length, 0);
     assert.equal(plan.channelsToCreate.length, 0);
     assert.equal(plan.renamesRequired.length, 0);
+    assert.equal(plan.externalRoles[0]?.present, false);
     assert.equal(plan.isComplete, true);
     assert.doesNotThrow(() =>
       createServerSetupView("Vora Test", plan, true).toJSON(),
+    );
+  });
+
+  it("recognizes Discord-managed roles without trying to create them", () => {
+    const inventory = createCompleteInventory();
+    const plan = planner.createPlan({
+      ...inventory,
+      roleNames: new Set([...inventory.roleNames, "Server Booster"]),
+    });
+
+    assert.equal(
+      plan.rolesToCreate.some((role) => role.name === "Server Booster"),
+      false,
+    );
+    assert.equal(plan.externalRoles[0]?.present, true);
+    assert.match(
+      JSON.stringify(createServerSetupView("Vora Test", plan).toJSON()),
+      /Discord-managed Roles/,
     );
   });
 

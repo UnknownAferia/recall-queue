@@ -6,15 +6,16 @@ of scattering file names or colors throughout the application.
 
 ## Asset roles
 
-| File                      | Intended use                                     |
-| ------------------------- | ------------------------------------------------ |
-| `Vora.png`                | Discord application avatar and server icon       |
-| `Vora_Banner.png`         | Main server, repository and welcome-panel banner |
-| `Vora_Alpha_Banner.png`   | Private-alpha recruitment announcements          |
-| `Vora_AD.png`             | External promotional artwork                     |
-| `Vora_Icons.png`          | Brand and icon-system overview                   |
-| `Vora_Single_Icons.png`   | Detailed icon reference sheet                    |
-| `Vora_Design_Concept.png` | Internal brand guideline and design rationale    |
+| File                         | Intended use                                     |
+| ---------------------------- | ------------------------------------------------ |
+| `Vora.png`                   | Discord application avatar and server icon       |
+| `Vora_Banner.png`            | Main server, repository and welcome-panel banner |
+| `Vora_Alpha_Banner.png`      | Archived pre-release campaign artwork            |
+| `Vora_Server_Banner_New.png` | Official release announcement and server banner  |
+| `Vora_AD.png`                | External promotional artwork                     |
+| `Vora_Icons.png`             | Brand and icon-system overview                   |
+| `Vora_Single_Icons.png`      | Detailed icon reference sheet                    |
+| `Vora_Design_Concept.png`    | Internal brand guideline and design rationale    |
 
 The two icon overview files are reference sheets, not individual Discord emoji
 files. Individual transparent exports should be added separately before custom

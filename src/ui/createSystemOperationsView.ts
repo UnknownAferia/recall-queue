@@ -62,46 +62,69 @@ export function createRecoveryView(summary: RecoverySummary): ContainerBuilder {
     "Lifecycle Reconciliation",
     "Vora reconciled persisted state with Discord after a restart or failure.",
   );
-  return view.addSeparatorComponents(ViewFactory.separator()).addTextDisplayComponents(
-    ViewFactory.text(
-      [
-        `**Expired ready checks:** ${summary.expiredReadyChecks}`,
-        `**Expired result cases:** ${summary.expiredResultCases}`,
-        `**Penalized unavailable players:** ${summary.penalizedPlayers}`,
-        `**Removed stale queue entries:** ${summary.staleQueueEntries}`,
-        `**Voice channels restored / removed:** ${summary.restoredVoiceChannels} / ${summary.removedVoiceChannels}`,
-        summary.warnings.length ? "\n### Warnings" : null,
-        ...summary.warnings.map((warning) => `- ${warning}`),
-      ]
-        .filter((line): line is string => line !== null)
-        .join("\n"),
-    ),
-  );
+  return view
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
+      ViewFactory.text(
+        [
+          `**Expired ready checks:** ${summary.expiredReadyChecks}`,
+          `**Expired result cases:** ${summary.expiredResultCases}`,
+          `**Penalized unavailable players:** ${summary.penalizedPlayers}`,
+          `**Removed stale queue entries:** ${summary.staleQueueEntries}`,
+          `**Voice channels restored / removed:** ${summary.restoredVoiceChannels} / ${summary.removedVoiceChannels}`,
+          summary.warnings.length ? "\n### Warnings" : null,
+          ...summary.warnings.map((warning) => `- ${warning}`),
+        ]
+          .filter((line): line is string => line !== null)
+          .join("\n"),
+      ),
+    );
 }
 
-export function createLaunchAuditView(result: LaunchAuditResult): ContainerBuilder {
-  const failures = result.checks.filter((check) => check.level === "failure").length;
-  const warnings = result.checks.filter((check) => check.level === "warning").length;
-  const view = ViewFactory.createContainer(failures ? 0xed4245 : warnings ? 0xf59e0b : 0x10b981);
+export function createLaunchAuditView(
+  result: LaunchAuditResult,
+): ContainerBuilder {
+  const failures = result.checks.filter(
+    (check) => check.level === "failure",
+  ).length;
+  const warnings = result.checks.filter(
+    (check) => check.level === "warning",
+  ).length;
+  const view = ViewFactory.createContainer(
+    failures ? 0xed4245 : warnings ? 0xf59e0b : 0x10b981,
+  );
   ViewFactory.addHeading(
     view,
     "Launch Readiness",
-    failures ? "Launch Blocked" : warnings ? "Review Recommended" : "Ready for Alpha",
+    failures
+      ? "Production Blocked"
+      : warnings
+        ? "Review Recommended"
+        : "Production Ready",
     `${result.checks.length} automated environment, access and lifecycle checks completed.`,
   );
-  return view.addSeparatorComponents(ViewFactory.separator()).addTextDisplayComponents(
-    ViewFactory.text(
-      result.checks
-        .map((check) => {
-          const icon = check.level === "pass" ? "✅" : check.level === "warning" ? "⚠️" : "❌";
-          return `${icon} **${check.name}**\n> ${check.detail}`;
-        })
-        .join("\n\n"),
-    ),
-  );
+  return view
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
+      ViewFactory.text(
+        result.checks
+          .map((check) => {
+            const icon =
+              check.level === "pass"
+                ? "✅"
+                : check.level === "warning"
+                  ? "⚠️"
+                  : "❌";
+            return `${icon} **${check.name}**\n> ${check.detail}`;
+          })
+          .join("\n\n"),
+      ),
+    );
 }
 
-export function createMaintenanceView(state: OperationalState): ContainerBuilder {
+export function createMaintenanceView(
+  state: OperationalState,
+): ContainerBuilder {
   const view = ViewFactory.createContainer(
     state.registrationOpen && state.matchmakingOpen ? 0x10b981 : 0xf59e0b,
   );
@@ -111,16 +134,18 @@ export function createMaintenanceView(state: OperationalState): ContainerBuilder
     "Maintenance State Saved",
     "The persistent state is shared by Vora Core and Vora Community.",
   );
-  return view.addSeparatorComponents(ViewFactory.separator()).addTextDisplayComponents(
-    ViewFactory.text(
-      [
-        `**Registration:** ${state.registrationOpen ? "Open" : "Maintenance"}`,
-        `**Matchmaking:** ${state.matchmakingOpen ? "Open" : "Maintenance"}`,
-        state.reason ? `**Reason:** ${state.reason}` : null,
-        `**Changed by:** ${state.changedByDiscordId ? `<@${state.changedByDiscordId}>` : "System"}`,
-      ]
-        .filter((line): line is string => line !== null)
-        .join("\n"),
-    ),
-  );
+  return view
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
+      ViewFactory.text(
+        [
+          `**Registration:** ${state.registrationOpen ? "Open" : "Maintenance"}`,
+          `**Matchmaking:** ${state.matchmakingOpen ? "Open" : "Maintenance"}`,
+          state.reason ? `**Reason:** ${state.reason}` : null,
+          `**Changed by:** ${state.changedByDiscordId ? `<@${state.changedByDiscordId}>` : "System"}`,
+        ]
+          .filter((line): line is string => line !== null)
+          .join("\n"),
+      ),
+    );
 }

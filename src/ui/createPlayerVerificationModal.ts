@@ -2,9 +2,21 @@ import { FileUploadBuilder, LabelBuilder, ModalBuilder } from "discord.js";
 
 import { CustomIds } from "../constants/customIds.js";
 
-export function createPlayerVerificationModal(): ModalBuilder {
+export interface PlayerVerificationModalIds {
+  readonly modal: string;
+  readonly screenshot: string;
+}
+
+const DefaultIds: PlayerVerificationModalIds = Object.freeze({
+  modal: CustomIds.modals.playerVerificationEvidence,
+  screenshot: CustomIds.inputs.playerVerification.screenshot,
+});
+
+export function createPlayerVerificationModal(
+  ids: PlayerVerificationModalIds = DefaultIds,
+): ModalBuilder {
   return new ModalBuilder()
-    .setCustomId(CustomIds.modals.playerVerificationEvidence)
+    .setCustomId(ids.modal)
     .setTitle("Verify Mobile Legends Account")
     .addLabelComponents(
       new LabelBuilder()
@@ -14,7 +26,7 @@ export function createPlayerVerificationModal(): ModalBuilder {
         )
         .setFileUploadComponent(
           new FileUploadBuilder()
-            .setCustomId(CustomIds.inputs.playerVerification.screenshot)
+            .setCustomId(ids.screenshot)
             .setMinValues(1)
             .setMaxValues(1)
             .setRequired(true),

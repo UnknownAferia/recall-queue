@@ -15,6 +15,7 @@ import { CommunityReportModel } from "../models/CommunityReportModel.js";
 import { PlayerVerificationModel } from "../models/PlayerVerificationModel.js";
 import { PlayerAdministrationOperationModel } from "../models/PlayerAdministrationOperationModel.js";
 import { OperationalStateModel } from "../models/OperationalStateModel.js";
+import { MemberOnboardingModel } from "../models/MemberOnboardingModel.js";
 
 const ManagedModels = [
   CommunityPanelModel,
@@ -33,6 +34,7 @@ const ManagedModels = [
   PlayerVerificationModel,
   PlayerAdministrationOperationModel,
   OperationalStateModel,
+  MemberOnboardingModel,
 ] as const;
 
 export interface DatabaseIndexAudit {

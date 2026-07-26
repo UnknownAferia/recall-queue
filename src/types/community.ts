@@ -75,3 +75,14 @@ export interface MatchmakingStatusSnapshot {
   disputedResults: number;
   capturedAt: Date;
 }
+
+export interface MemberOnboardingContact {
+  guildId: string;
+  memberDiscordId: string;
+  reminderCount: number;
+  lastReminderAt: Date;
+  lastDeliverySucceeded: boolean;
+  lastFailureReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

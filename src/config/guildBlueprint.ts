@@ -18,6 +18,8 @@ export type GuildRoleKey =
   | "seasonElite"
   | "seasonVeteran";
 
+export type GuildExternalRoleKey = "serverBooster";
+
 export type GuildCategoryKey =
   "information" | "vora" | "community" | "support" | "squadVoice" | "staff";
 
@@ -31,10 +33,23 @@ export type GuildChannelAccess =
 export interface GuildRoleBlueprint {
   readonly key: GuildRoleKey;
   readonly name: string;
-  readonly color: number;
+  readonly colors: GuildRoleColorsBlueprint;
   readonly permissions: readonly bigint[];
   readonly hoist: boolean;
   readonly legacyNames?: readonly string[];
+}
+
+export interface GuildRoleColorsBlueprint {
+  readonly primaryColor: number;
+  readonly secondaryColor: number | null;
+  readonly tertiaryColor: number | null;
+}
+
+export interface GuildExternalRoleBlueprint {
+  readonly key: GuildExternalRoleKey;
+  readonly name: string;
+  readonly managedBy: "discord";
+  readonly description: string;
 }
 
 export interface GuildCategoryBlueprint {
@@ -54,15 +69,40 @@ export interface GuildChannelBlueprint {
   readonly legacyNames?: readonly string[];
 }
 
+function solidRoleColor(primaryColor: number): GuildRoleColorsBlueprint {
+  return Object.freeze({
+    primaryColor,
+    secondaryColor: null,
+    tertiaryColor: null,
+  });
+}
+
+function gradientRoleColor(
+  primaryColor: number,
+  secondaryColor: number,
+): GuildRoleColorsBlueprint {
+  return Object.freeze({
+    primaryColor,
+    secondaryColor,
+    tertiaryColor: null,
+  });
+}
+
+const HolographicRoleColor: GuildRoleColorsBlueprint = Object.freeze({
+  primaryColor: 11_127_295,
+  secondaryColor: 16_759_788,
+  tertiaryColor: 16_761_760,
+});
+
 export const GuildBlueprint = Object.freeze({
-  version: 6,
+  version: 7,
 
   roles: [
     {
       key: "administrator",
       name: "Core",
       legacyNames: ["RecallQ Admin", "Vora Admin"],
-      color: 0xed4245,
+      colors: HolographicRoleColor,
       permissions: [PermissionFlagsBits.Administrator],
       hoist: true,
     },
@@ -70,7 +110,7 @@ export const GuildBlueprint = Object.freeze({
       key: "moderator",
       name: "Operations",
       legacyNames: ["Moderator"],
-      color: 0x5865f2,
+      colors: gradientRoleColor(0x6147f5, 0x9fc1ff),
       permissions: [
         PermissionFlagsBits.ViewAuditLog,
         PermissionFlagsBits.KickMembers,
@@ -83,102 +123,112 @@ export const GuildBlueprint = Object.freeze({
     {
       key: "developer",
       name: "Developer",
-      color: 0x9b59b6,
+      colors: gradientRoleColor(0x6d02ba, 0x8e27cc),
       permissions: [],
       hoist: true,
     },
     {
       key: "verifiedPlayer",
       name: "Verified Player",
-      color: 0xf1c40f,
+      colors: solidRoleColor(0xf1c40f),
       permissions: [],
       hoist: true,
     },
     {
       key: "announcementNotifications",
       name: "Announcement Notifications",
-      color: 0x3498db,
+      colors: solidRoleColor(0x3498db),
       permissions: [],
       hoist: false,
     },
     {
       key: "updateNotifications",
       name: "Update Notifications",
-      color: 0x1abc9c,
+      colors: solidRoleColor(0x1abc9c),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionBronze",
       name: "Vora Bronze",
-      color: 0xcd7f32,
+      colors: solidRoleColor(0xcd7f32),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionSilver",
       name: "Vora Silver",
-      color: 0xc0c0c0,
+      colors: solidRoleColor(0xc0c0c0),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionGold",
       name: "Vora Gold",
-      color: 0xffd700,
+      colors: solidRoleColor(0xffd700),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionPlatinum",
       name: "Vora Platinum",
-      color: 0x4fd1c5,
+      colors: solidRoleColor(0x4fd1c5),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionDiamond",
       name: "Vora Diamond",
-      color: 0x45b6fe,
+      colors: solidRoleColor(0x45b6fe),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionMaster",
       name: "Vora Master",
-      color: 0x8b5cf6,
+      colors: solidRoleColor(0x8b5cf6),
       permissions: [],
       hoist: false,
     },
     {
       key: "divisionApex",
       name: "Vora Apex",
-      color: 0x1fc8ff,
+      colors: solidRoleColor(0x1fc8ff),
       permissions: [],
       hoist: false,
     },
     {
       key: "seasonChampion",
       name: "Season Champion",
-      color: 0xffd700,
+      colors: gradientRoleColor(0xffd900, 0xfcff9f),
       permissions: [],
       hoist: true,
     },
     {
       key: "seasonElite",
       name: "Season Top 10",
-      color: 0x1fc8ff,
+      colors: solidRoleColor(0x1fc8ff),
       permissions: [],
       hoist: false,
     },
     {
       key: "seasonVeteran",
       name: "Season Veteran",
-      color: 0x10b981,
+      colors: solidRoleColor(0x10b981),
       permissions: [],
       hoist: false,
     },
   ] satisfies readonly GuildRoleBlueprint[],
+
+  externalRoles: [
+    {
+      key: "serverBooster",
+      name: "Server Booster",
+      managedBy: "discord",
+      description:
+        "Created and styled by Discord when Server Boosting is available.",
+    },
+  ] satisfies readonly GuildExternalRoleBlueprint[],
 
   categories: [
     { key: "information", name: "📌｜START HERE", access: "publicReadOnly" },

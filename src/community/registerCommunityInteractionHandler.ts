@@ -56,6 +56,7 @@ import {
 } from "../constants/communityModeration.js";
 import { createClosedTicketView } from "./ui/createClosedTicketView.js";
 import { createTicketModal } from "./ui/createTicketModal.js";
+import { handleCommunityOnboardingInteraction } from "./handleCommunityOnboardingInteraction.js";
 
 function createErrorResponse(title: string, description: string) {
   return {
@@ -112,6 +113,10 @@ export function registerCommunityInteractionHandler(
 ): void {
   client.on(Events.InteractionCreate, async (interaction) => {
     try {
+      if (await handleCommunityOnboardingInteraction(client, interaction)) {
+        return;
+      }
+
       if (
         interaction.isMessageContextMenuCommand?.() &&
         interaction.commandName === ReportMessageCommandName

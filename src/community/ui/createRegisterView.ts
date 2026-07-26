@@ -1,6 +1,12 @@
-import type { ContainerBuilder } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  type ContainerBuilder,
+} from "discord.js";
 
 import { BrandColors } from "../../config/brand.js";
+import { CommunityCustomIds } from "../../constants/community.js";
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
 export function createRegisterView(
@@ -17,13 +23,26 @@ export function createRegisterView(
     "Vora account verification",
   );
 
+  const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(CommunityCustomIds.onboarding.register)
+      .setLabel("Register Now")
+      .setEmoji("📝")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(CommunityCustomIds.onboarding.verify)
+      .setLabel("Submit Verification")
+      .setEmoji("🛡️")
+      .setStyle(ButtonStyle.Success),
+  );
+
   return view
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(
         [
           "### 1 · Create your player profile",
-          "Run `/register` and enter your current Mobile Legends information:",
+          "Click **Register Now** below and enter your current Mobile Legends information:",
           "- In-game name (IGN)",
           "- Player ID",
           "- Server ID",
@@ -31,7 +50,7 @@ export function createRegisterView(
           "Your Discord account can be connected to one MLBB account.",
           "",
           "### 2 · Verify your MLBB account",
-          "After registering, run `/verify-account` and upload a current screenshot of your Mobile Legends profile.",
+          "Click **Submit Verification** and upload a current screenshot of your Mobile Legends profile.",
           "",
           "The screenshot must clearly show the **IGN, Player ID and Server ID** entered during registration. Vora Operations reviews the evidence privately.",
           "",
@@ -42,6 +61,7 @@ export function createRegisterView(
         ].join("\n"),
       ),
     )
+    .addActionRowComponents(actions)
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
       ViewFactory.text(

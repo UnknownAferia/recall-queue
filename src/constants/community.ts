@@ -2,6 +2,7 @@ export const CommunityPanelKinds = [
   "welcome",
   "rules",
   "announcements",
+  "release_announcement",
   "alpha_launch_announcement",
   "how_vora_works",
   "vora_commands",
@@ -35,6 +36,8 @@ export const CommunityConfig = Object.freeze({
   ticketClosedChannelRetentionMs: 7 * 24 * 60 * 60 * 1_000,
   ticketTranscriptRetentionMs: 365 * 24 * 60 * 60 * 1_000,
   ticketRetentionSweepIntervalMs: 6 * 60 * 60 * 1_000,
+  onboardingReminderCooldownMs: 7 * 24 * 60 * 60 * 1_000,
+  onboardingReminderBatchSize: 25,
 });
 
 export const CommunityCustomIds = Object.freeze({
@@ -44,5 +47,17 @@ export const CommunityCustomIds = Object.freeze({
     close: "community:ticket:close",
     subject: "community:ticket:subject",
     description: "community:ticket:description",
+  },
+  onboarding: {
+    register: "community:onboarding:register",
+    verify: "community:onboarding:verify",
+    refresh: "community:onboarding:refresh",
+    nudge: "community:onboarding:nudge",
+    registerModal: "community:onboarding:register:submit",
+    verificationModal: "community:onboarding:verification:submit",
+    ign: "community:onboarding:register:ign",
+    playerId: "community:onboarding:register:player-id",
+    serverId: "community:onboarding:register:server-id",
+    screenshot: "community:onboarding:verification:screenshot",
   },
 });

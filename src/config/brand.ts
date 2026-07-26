@@ -19,13 +19,7 @@ function iconAsset(
 ): BrandAsset {
   return Object.freeze({
     attachmentName,
-    filePath: resolve(
-      process.cwd(),
-      "assets",
-      "icons",
-      category,
-      fileName,
-    ),
+    filePath: resolve(process.cwd(), "assets", "icons", category, fileName),
   });
 }
 
@@ -43,7 +37,7 @@ export const BrandColors = Object.freeze({
 export const BrandAssets = Object.freeze({
   icon: asset("Vora.png"),
   banner: asset("Vora_Banner.png"),
-  alphaBanner: asset("Vora_Alpha_Banner.png"),
+  launchBanner: asset("Vora_Server_Banner_New.png"),
   advertisement: asset("Vora_AD.png"),
   iconOverview: asset("Vora_Icons.png"),
   individualIconOverview: asset("Vora_Single_Icons.png"),
@@ -60,26 +54,14 @@ export const BrandAssets = Object.freeze({
       "03-gaming-match",
       "matchmaking.png",
     ),
-    register: iconAsset(
-      "vora-verify.png",
-      "02-server-channels",
-      "verify.png",
-    ),
+    register: iconAsset("vora-verify.png", "02-server-channels", "verify.png"),
     commands: iconAsset(
       "vora-commands.png",
       "02-server-channels",
       "commands.png",
     ),
-    help: iconAsset(
-      "vora-support.png",
-      "02-server-channels",
-      "support.png",
-    ),
-    tickets: iconAsset(
-      "vora-tickets.png",
-      "02-server-channels",
-      "tickets.png",
-    ),
+    help: iconAsset("vora-support.png", "02-server-channels", "support.png"),
+    tickets: iconAsset("vora-tickets.png", "02-server-channels", "tickets.png"),
     leaderboard: iconAsset(
       "vora-victory.png",
       "03-gaming-match",

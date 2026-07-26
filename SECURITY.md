@@ -1,6 +1,6 @@
 # Security Policy
 
-Vora is currently in private alpha. Do not publish exploitable vulnerabilities,
+Vora is a live service. Do not publish exploitable vulnerabilities,
 Discord tokens, MongoDB credentials, private ticket transcripts or result
 evidence in a public issue.
 

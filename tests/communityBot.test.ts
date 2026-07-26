@@ -39,7 +39,7 @@ import { CommunityPanelService } from "../src/community/services/CommunityPanelS
 import type { ManagedCommunityChannelResolver } from "../src/community/services/ManagedCommunityChannelResolver.js";
 import { TicketService } from "../src/community/services/TicketService.js";
 import { createAnnouncementsView } from "../src/community/ui/createAnnouncementsView.js";
-import { createAlphaLaunchAnnouncementView } from "../src/community/ui/createAlphaLaunchAnnouncementView.js";
+import { createLaunchAnnouncementView } from "../src/community/ui/createLaunchAnnouncementView.js";
 import { createHelpView } from "../src/community/ui/createHelpView.js";
 import { createHowVoraWorksView } from "../src/community/ui/createHowVoraWorksView.js";
 import { createRegisterView } from "../src/community/ui/createRegisterView.js";
@@ -134,9 +134,9 @@ describe("Vora Community bot", () => {
     ]
       .map((view) => JSON.stringify(view.toJSON()))
       .join("\n");
-    const alphaAnnouncement = JSON.stringify(
-      createAlphaLaunchAnnouncementView(
-        BrandAssets.alphaBanner.attachmentName,
+    const launchAnnouncement = JSON.stringify(
+      createLaunchAnnouncementView(
+        BrandAssets.launchBanner.attachmentName,
       ).toJSON(),
     );
 
@@ -158,21 +158,25 @@ describe("Vora Community bot", () => {
     assert.match(onboarding, /How Vora Works/);
     assert.match(onboarding, /Register & Verify/);
     assert.match(onboarding, /Registration alone does not unlock matchmaking/);
-    assert.match(onboarding, /\/verify-account/);
+    assert.match(
+      onboarding,
+      new RegExp(CommunityCustomIds.onboarding.register),
+    );
+    assert.match(onboarding, new RegExp(CommunityCustomIds.onboarding.verify));
     assert.match(onboarding, /Matchmaking remains locked/);
     assert.match(onboarding, /Competitive Hub/);
     assert.match(onboarding, /attachment:\/\/Vora_Banner\.png/);
-    assert.match(alphaAnnouncement, /Vora Is Ready for Its First Players/);
-    assert.match(alphaAnnouncement, /Five-player teammate matchmaking/);
-    assert.match(alphaAnnouncement, /Competitive integrity/);
-    assert.match(alphaAnnouncement, /Rating and progression/);
+    assert.match(launchAnnouncement, /Vora Is Live/);
+    assert.match(launchAnnouncement, /Five-player teammate matchmaking/);
+    assert.match(launchAnnouncement, /Competitive integrity/);
+    assert.match(launchAnnouncement, /Rating and progression/);
     assert.match(
-      alphaAnnouncement,
-      /attachment:\/\/Vora_Alpha_Banner\.png/,
+      launchAnnouncement,
+      /attachment:\/\/Vora_Server_Banner_New\.png/,
     );
   });
 
-  it("publishes the alpha announcement as one managed message", async () => {
+  it("publishes the release announcement as one managed message", async () => {
     let publishedKind: CommunityPanelKind | null = null;
     let publishedAssetName: string | null = null;
     const publisher = {
@@ -200,14 +204,14 @@ describe("Vora Community bot", () => {
       channels,
     );
 
-    const result = await service.publishAlphaLaunchAnnouncement({} as Guild);
+    const result = await service.publishLaunchAnnouncement({} as Guild);
 
     assert.deepEqual(result, {
       channelId: channel.id,
       messageId: "announcement-message-id",
     });
-    assert.equal(publishedKind, "alpha_launch_announcement");
-    assert.equal(publishedAssetName, BrandAssets.alphaBanner.attachmentName);
+    assert.equal(publishedKind, "release_announcement");
+    assert.equal(publishedAssetName, BrandAssets.launchBanner.attachmentName);
   });
 
   it("publishes the milestone through an administrator-only command", async () => {
@@ -216,7 +220,7 @@ describe("Vora Community bot", () => {
     let publications = 0;
     const client = {
       panels: {
-        publishAlphaLaunchAnnouncement: async () => {
+        publishLaunchAnnouncement: async () => {
           publications += 1;
           return {
             channelId: "announcements-channel-id",
@@ -369,7 +373,11 @@ describe("Vora Community bot", () => {
     let editCount = 0;
     let sendCount = 0;
     const repository = {
-      find: async () => ({ channelId: "channel-id", messageId: "message-id" }),
+      find: async () => ({
+        kind: "help",
+        channelId: "channel-id",
+        messageId: "message-id",
+      }),
       upsert: async () => {
         throw new Error("Existing panels must not be inserted again.");
       },
@@ -407,7 +415,11 @@ describe("Vora Community bot", () => {
     const editedFiles: unknown[][] = [];
     let assetPresent = false;
     const repository = {
-      find: async () => ({ channelId: "channel-id", messageId: "message-id" }),
+      find: async () => ({
+        kind: "welcome",
+        channelId: "channel-id",
+        messageId: "message-id",
+      }),
     } as unknown as CommunityPanelRepository;
     const channel = {
       id: "channel-id",

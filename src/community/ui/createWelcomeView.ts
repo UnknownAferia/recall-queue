@@ -37,7 +37,7 @@ export function createWelcomeView(
       ViewFactory.text(
         [
           "### Start in four steps",
-          "**1. Register** — Use `/register` to connect your MLBB account.",
+          "**1. Register** — Open `register` and click **Register Now**.",
           "**2. Set your roles** — Open `/vora`, choose Preferences and select a primary and secondary role.",
           "**3. Enter the lobby** — Join the `queue-lobby` voice channel and enter the teammate pool from `/vora`.",
           "**4. Play together** — Accept the ready check, join your private squad voice channel and queue together in MLBB.",

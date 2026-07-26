@@ -1,4 +1,7 @@
-# Vora Private Alpha Launch Checklist
+# Vora Private Alpha Launch Checklist (Historical)
+
+> This checklist is retained as release history. Vora has completed private
+> alpha and community beta and is now officially released.
 
 Complete this checklist for the live database and every configured Discord server.
 

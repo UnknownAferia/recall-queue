@@ -156,17 +156,17 @@ they are not the primary matchmaking flow.
 - Language and playstyle preferences after sufficient player volume
 - Web-based read-only profiles if Discord presentation becomes limiting
 
-## Release gates
+## Release status
 
-### Private alpha
+### ✅ Private alpha
 
 Voice lifecycle, stable squad formation, verified results and safe staff tools.
 
-### Community beta
+### ✅ Community beta
 
 RSR v1, placements, penalties, moderation workflows and production monitoring.
 
-### Version 2.0 launch
+### ✅ Version 2.0 launch
 
-Season progression, polished onboarding, operational documentation and a
-successful multi-week beta without critical data-integrity incidents.
+Season progression, polished onboarding, operational documentation and
+production deployment are complete. Vora is officially released.

@@ -35,9 +35,17 @@ function formatRenames(
 
   return [
     `### Brand Migration  ·  ${items.length}`,
-    items
-      .map((item) => `> ${item.currentName}  →  ${item.name}`)
-      .join("\n"),
+    items.map((item) => `> ${item.currentName}  →  ${item.name}`).join("\n"),
+  ].join("\n");
+}
+
+function formatExternalRoles(items: GuildSetupPlan["externalRoles"]): string {
+  return [
+    "### Discord-managed Roles",
+    ...items.map(
+      (item) =>
+        `> ${item.present ? "✅" : "ℹ️"} **${item.name}** — ${item.description}`,
+    ),
   ].join("\n");
 }
 
@@ -84,6 +92,7 @@ export function createServerSetupView(
           formatItems("Channels", plan.channelsToCreate),
           formatRenames(plan.renamesRequired),
           formatItems("Permissions & Role Settings", plan.repairsRequired),
+          formatExternalRoles(plan.externalRoles),
         ]
           .filter((entry): entry is string => Boolean(entry))
           .join("\n\n"),

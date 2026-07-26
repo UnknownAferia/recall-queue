@@ -7,7 +7,7 @@ import {
 import { BrandColors } from "../../config/brand.js";
 import { ViewFactory } from "../../ui/ViewFactory.js";
 
-export function createAlphaLaunchAnnouncementView(
+export function createLaunchAnnouncementView(
   bannerAttachmentName?: string,
 ): ContainerBuilder {
   const view = ViewFactory.createContainer(BrandColors.voraCyan);
@@ -18,7 +18,7 @@ export function createAlphaLaunchAnnouncementView(
         new MediaGalleryItemBuilder()
           .setURL(`attachment://${bannerAttachmentName}`)
           .setDescription(
-            "Vora Private Alpha — find your five and play as one.",
+            "Vora — officially released. Find your five and play as one.",
           ),
       ),
     );
@@ -27,9 +27,9 @@ export function createAlphaLaunchAnnouncementView(
   return view
     .addTextDisplayComponents(
       ViewFactory.heading(
-        "Private Alpha Milestone",
-        "Vora Is Ready for Its First Players",
-        "The foundation is complete. Vora can now form compatible five-player Mobile Legends squads and support their full competitive journey inside Discord.",
+        "Official Release",
+        "Vora Is Live",
+        "Vora is now officially available: a complete Discord-first platform for forming compatible five-player Mobile Legends squads.",
       ),
     )
     .addSeparatorComponents(ViewFactory.separator())
@@ -68,20 +68,18 @@ export function createAlphaLaunchAnnouncementView(
     .addTextDisplayComponents(
       ViewFactory.text(
         [
-          "## Join the alpha",
+          "## Start playing with Vora",
           "**1.** Read the rules and `how-vora-works`.",
           "**2.** Use `/register` to connect your MLBB account.",
           "**3.** Open `/vora` and configure your preferred roles.",
           "**4.** Join `queue-lobby`, enter the teammate pool and accept your ready check.",
           "**5.** Queue in Mobile Legends with your completed squad.",
           "",
-          "> Vora is entering a controlled alpha. Real matches, honest feedback and responsible testing will shape every improvement from here.",
+          "> Vora is live and will continue improving through real matches, honest feedback and responsible competition.",
         ].join("\n"),
       ),
     )
     .addTextDisplayComponents(
-      ViewFactory.footer(
-        "Find your five. Queue together. Play as one.",
-      ),
+      ViewFactory.footer("Find your five. Queue together. Play as one."),
     );
 }

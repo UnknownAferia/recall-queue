@@ -22,7 +22,9 @@ const command: Command = {
     .setContexts(InteractionContextType.Guild)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((subcommand) =>
-      subcommand.setName("status").setDescription("Inspect live service and lifecycle health"),
+      subcommand
+        .setName("status")
+        .setDescription("Inspect live service and lifecycle health"),
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -59,16 +61,31 @@ const command: Command = {
         ),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("reconcile").setDescription("Recover queues, lifecycle timers and squad voice state"),
+      subcommand
+        .setName("reconcile")
+        .setDescription(
+          "Recover queues, lifecycle timers and squad voice state",
+        ),
     )
     .addSubcommand((subcommand) =>
-      subcommand.setName("launch-audit").setDescription("Run the automated private-alpha readiness audit"),
+      subcommand
+        .setName("launch-audit")
+        .setDescription("Run the automated production-readiness audit"),
     ),
 
   async execute(client, interaction): Promise<void> {
-    if (!interaction.inCachedGuild() || interaction.guild.ownerId !== interaction.user.id) {
+    if (
+      !interaction.inCachedGuild() ||
+      interaction.guild.ownerId !== interaction.user.id
+    ) {
       await interaction.reply({
-        components: [createAlertView("warning", "Server Owner Required", "Only the Discord server owner can control Vora's production state.")],
+        components: [
+          createAlertView(
+            "warning",
+            "Server Owner Required",
+            "Only the Discord server owner can control Vora's production state.",
+          ),
+        ],
         flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
       });
       return;
@@ -77,19 +94,32 @@ const command: Command = {
     const subcommand = interaction.options.getSubcommand();
     if (subcommand === "status") {
       await interaction.reply({
-        components: [createSystemStatusView(await client.services.systemOperations.getStatus())],
+        components: [
+          createSystemStatusView(
+            await client.services.systemOperations.getStatus(),
+          ),
+        ],
         flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
       });
       return;
     }
 
     await interaction.reply({
-      components: [createAlertView("information", "Operation in Progress", "Vora is validating and reconciling production state.")],
+      components: [
+        createAlertView(
+          "information",
+          "Operation in Progress",
+          "Vora is validating and reconciling production state.",
+        ),
+      ],
       flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
 
     if (subcommand === "maintenance") {
-      const scope = interaction.options.getString("scope", true) as MaintenanceScope;
+      const scope = interaction.options.getString(
+        "scope",
+        true,
+      ) as MaintenanceScope;
       const open = interaction.options.getString("access", true) === "open";
       const state = await client.services.operationalControl.setAccess(
         scope,
@@ -107,7 +137,9 @@ const command: Command = {
           reason: interaction.options.getString("reason", true),
         },
       );
-      await interaction.editReply({ components: [createMaintenanceView(state)] });
+      await interaction.editReply({
+        components: [createMaintenanceView(state)],
+      });
       return;
     }
 
@@ -124,7 +156,9 @@ const command: Command = {
           warnings: summary.warnings.length,
         },
       );
-      await interaction.editReply({ components: [createRecoveryView(summary)] });
+      await interaction.editReply({
+        components: [createRecoveryView(summary)],
+      });
       if (summary.warnings.length) {
         await client.services.systemOperations.publishCriticalAlert(
           interaction.guild,
@@ -141,8 +175,10 @@ const command: Command = {
       interaction.user.id,
       "launch_audit_run",
       {
-        failures: audit.checks.filter((check) => check.level === "failure").length,
-        warnings: audit.checks.filter((check) => check.level === "warning").length,
+        failures: audit.checks.filter((check) => check.level === "failure")
+          .length,
+        warnings: audit.checks.filter((check) => check.level === "warning")
+          .length,
       },
     );
     await interaction.editReply({ components: [createLaunchAuditView(audit)] });
@@ -150,7 +186,7 @@ const command: Command = {
     if (failures.length) {
       await client.services.systemOperations.publishCriticalAlert(
         interaction.guild,
-        "Alpha Launch Audit Failed",
+        "Production Readiness Audit Failed",
         failures.map((check) => `${check.name}: ${check.detail}`).join("\n"),
       );
     }

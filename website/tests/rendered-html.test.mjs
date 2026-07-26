@@ -15,5 +15,18 @@ test("builds the complete Vora launch page", async () => {
   assert.match(pageSource, /https:\/\/discord\.gg\/voramlbb/);
   assert.match(pageSource, /A lineup with intention/);
   assert.match(pageSource, /Real results\. Clear rules\. Human review/);
+  for (const assetPath of [
+    "/graphics/roles/exp.webp",
+    "/graphics/roles/jungle.webp",
+    "/graphics/roles/mid.webp",
+    "/graphics/roles/gold.webp",
+    "/graphics/roles/roam.webp",
+    "/graphics/steps/player-identity.webp",
+    "/graphics/steps/teammate-pool.webp",
+    "/graphics/steps/ready-check.webp",
+    "/graphics/steps/queue-together.webp",
+  ]) {
+    assert.match(pageSource, new RegExp(assetPath));
+  }
   assert.doesNotMatch(pageSource, /codex-preview|react-loading-skeleton/i);
 });

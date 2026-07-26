@@ -1,11 +1,31 @@
 const discordInvite = "https://discord.gg/voramlbb";
 
 const roles = [
-  { name: "EXP", marker: "E", accent: "cyan" },
-  { name: "Jungle", marker: "J", accent: "blue" },
-  { name: "Mid", marker: "M", accent: "violet" },
-  { name: "Gold", marker: "G", accent: "gold" },
-  { name: "Roam", marker: "R", accent: "emerald" },
+  {
+    name: "EXP",
+    accent: "cyan",
+    image: "/graphics/roles/exp.webp",
+  },
+  {
+    name: "Jungle",
+    accent: "blue",
+    image: "/graphics/roles/jungle.webp",
+  },
+  {
+    name: "Mid",
+    accent: "violet",
+    image: "/graphics/roles/mid.webp",
+  },
+  {
+    name: "Gold",
+    accent: "gold",
+    image: "/graphics/roles/gold.webp",
+  },
+  {
+    name: "Roam",
+    accent: "emerald",
+    image: "/graphics/roles/roam.webp",
+  },
 ] as const;
 
 const steps = [
@@ -14,24 +34,32 @@ const steps = [
     title: "Build your player identity",
     description:
       "Register your MLBB account, verify it once and choose the roles you actually want to play.",
+    image: "/graphics/steps/player-identity.webp",
+    alt: "A Vora player profile forming from verified identity and role signals",
   },
   {
     number: "02",
     title: "Enter the teammate pool",
     description:
       "Join the Discord voice lobby when you are ready. Vora looks for four compatible players.",
+    image: "/graphics/steps/teammate-pool.webp",
+    alt: "Five players gathering in Vora's teammate pool",
   },
   {
     number: "03",
     title: "Accept your squad",
     description:
       "A ready check confirms everyone is present before roles and a private squad room are revealed.",
+    image: "/graphics/steps/ready-check.webp",
+    alt: "Five squad members completing a Vora ready check",
   },
   {
     number: "04",
     title: "Queue together in MLBB",
     description:
       "Your five-player squad enters Mobile Legends together and plays against opponents found by the game.",
+    image: "/graphics/steps/queue-together.webp",
+    alt: "A five-player squad preparing to enter a competitive arena together",
   },
 ] as const;
 
@@ -148,6 +176,15 @@ export default function Home() {
         <ol className="steps">
           {steps.map((step) => (
             <li key={step.number}>
+              <div className="step-art">
+                <img
+                  src={step.image}
+                  alt={step.alt}
+                  width="960"
+                  height="640"
+                  loading="lazy"
+                />
+              </div>
               <span className="step-number">{step.number}</span>
               <div>
                 <h3>{step.title}</h3>
@@ -183,7 +220,15 @@ export default function Home() {
             <div className="role-grid">
               {roles.map((role) => (
                 <div className={`role-card ${role.accent}`} key={role.name}>
-                  <span aria-hidden="true">{role.marker}</span>
+                  <div className="role-art" aria-hidden="true">
+                    <img
+                      src={role.image}
+                      alt=""
+                      width="640"
+                      height="640"
+                      loading="lazy"
+                    />
+                  </div>
                   <strong>{role.name}</strong>
                 </div>
               ))}

@@ -40,9 +40,17 @@ export async function executeOnboardingCommand(
     return;
   }
 
-  await interaction.deferReply({
+  await interaction.reply({
+    components: [
+      createAlertView(
+        "information",
+        "Loading Onboarding",
+        "Vora Community is reviewing registration and verification progress.",
+      ),
+    ],
     flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
   });
+
   const snapshot = await client.onboarding.getSnapshot(interaction.guild);
 
   await interaction.editReply({

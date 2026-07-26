@@ -19,6 +19,7 @@ import {
   executePublishCommunityCommand,
   PublishCommunityCommandName,
 } from "./commands/publishCommunity.js";
+import { OnboardingCommandName } from "./commands/onboarding.js";
 import { TicketAlreadyOpenError } from "./errors/TicketAlreadyOpenError.js";
 import { TicketOperationError } from "./errors/TicketOperationError.js";
 import { CommunityModerationError } from "./errors/CommunityModerationError.js";
@@ -83,6 +84,7 @@ async function respondWithError(
     (interaction.isChatInputCommand() &&
       (interaction.commandName === PublishCommunityCommandName ||
         interaction.commandName === PublishAnnouncementCommandName ||
+        interaction.commandName === OnboardingCommandName ||
         interaction.commandName === purgeCommandData.name));
 
   try {

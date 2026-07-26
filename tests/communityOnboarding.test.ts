@@ -5,6 +5,7 @@ import {
   Collection,
   PermissionFlagsBits,
   type ButtonInteraction,
+  type ChatInputCommandInteraction,
   type Guild,
   type GuildMember,
   type TextChannel,
@@ -22,6 +23,7 @@ import { createOnboardingDashboardView } from "../src/community/ui/createOnboard
 import type { CommunityClient } from "../src/community/CommunityClient.js";
 import { handleCommunityOnboardingInteraction } from "../src/community/handleCommunityOnboardingInteraction.js";
 import { CustomIds } from "../src/constants/customIds.js";
+import { executeOnboardingCommand } from "../src/community/commands/onboarding.js";
 
 function player(discordId: string, status: "pending" | "verified"): PlayerDto {
   return {
@@ -45,6 +47,44 @@ function member(
 }
 
 describe("Community onboarding", () => {
+  it("starts with a Components V2 response before rendering the dashboard", async () => {
+    const replies: unknown[] = [];
+    const edits: unknown[] = [];
+    const client = {
+      onboarding: {
+        getSnapshot: async () => ({
+          members: 10,
+          registered: 4,
+          verified: 2,
+          unregistered: 6,
+          awaitingVerification: 2,
+          reminderEligible: 6,
+        }),
+      },
+    } as unknown as CommunityClient;
+    const interaction = {
+      inCachedGuild: () => true,
+      memberPermissions: {
+        has: (permission: bigint) =>
+          permission === PermissionFlagsBits.ManageMessages,
+      },
+      guild: {},
+      reply: async (options: unknown) => {
+        replies.push(options);
+      },
+      editReply: async (options: unknown) => {
+        edits.push(options);
+      },
+    } as unknown as ChatInputCommandInteraction<"cached">;
+
+    await executeOnboardingCommand(client, interaction);
+
+    assert.equal(replies.length, 1);
+    assert.match(JSON.stringify(replies[0]), /Loading Onboarding/);
+    assert.equal(edits.length, 1);
+    assert.match(JSON.stringify(edits[0]), /Player Onboarding/);
+  });
+
   it("serializes direct registration controls and the Operations dashboard", () => {
     const prompt = JSON.stringify(
       createMemberOnboardingView(

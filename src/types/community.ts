@@ -86,3 +86,15 @@ export interface MemberOnboardingContact {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface OnboardingAudienceExclusion {
+  guildId: string;
+  memberDiscordId: string;
+  active: boolean;
+  reason: string;
+  changedByDiscordId: string;
+  excludedAt: Date;
+  restoredAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

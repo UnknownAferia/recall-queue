@@ -20,6 +20,10 @@ import {
   PublishCommunityCommandName,
 } from "./commands/publishCommunity.js";
 import { OnboardingCommandName } from "./commands/onboarding.js";
+import {
+  executeOnboardingAudienceCommand,
+  OnboardingAudienceCommandName,
+} from "./commands/onboardingAudience.js";
 import { TicketAlreadyOpenError } from "./errors/TicketAlreadyOpenError.js";
 import { TicketOperationError } from "./errors/TicketOperationError.js";
 import { CommunityModerationError } from "./errors/CommunityModerationError.js";
@@ -85,6 +89,7 @@ async function respondWithError(
       (interaction.commandName === PublishCommunityCommandName ||
         interaction.commandName === PublishAnnouncementCommandName ||
         interaction.commandName === OnboardingCommandName ||
+        interaction.commandName === OnboardingAudienceCommandName ||
         interaction.commandName === purgeCommandData.name)) ||
     (interaction.isButton() &&
       (interaction.customId === CommunityCustomIds.onboarding.refresh ||
@@ -161,6 +166,14 @@ export function registerCommunityInteractionHandler(
           await execute(client, interaction);
           return;
         }
+      }
+
+      if (
+        interaction.isChatInputCommand() &&
+        interaction.commandName === OnboardingAudienceCommandName
+      ) {
+        await executeOnboardingAudienceCommand(client, interaction);
+        return;
       }
 
       if (

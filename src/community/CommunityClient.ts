@@ -19,6 +19,7 @@ import { MongoTransactionRunner } from "../database/MongoTransactionRunner.js";
 import { PlayerRepository } from "../repositories/PlayerRepository.js";
 import { PlayerVerificationRepository } from "../repositories/PlayerVerificationRepository.js";
 import { MemberOnboardingRepository } from "../repositories/MemberOnboardingRepository.js";
+import { OnboardingAudienceExclusionRepository } from "../repositories/OnboardingAudienceExclusionRepository.js";
 import { OperationalControlService } from "../services/OperationalControlService.js";
 import { PlayerService } from "../services/PlayerService.js";
 import { PlayerVerificationEvidenceService } from "../services/PlayerVerificationEvidenceService.js";
@@ -72,6 +73,7 @@ export class CommunityClient extends Client {
       new MemberOnboardingRepository(),
       this.player,
       playerVerificationRepository,
+      new OnboardingAudienceExclusionRepository(),
       channels,
     );
 

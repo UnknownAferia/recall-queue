@@ -4,8 +4,10 @@ import { CommunityConfig } from "../../constants/community.js";
 import { isPlayerVerificationApproved } from "../../constants/playerVerification.js";
 import type { PlayerDto } from "../../dto/PlayerDto.js";
 import type { MemberOnboardingRepository } from "../../repositories/MemberOnboardingRepository.js";
+import type { OnboardingAudienceExclusionRepository } from "../../repositories/OnboardingAudienceExclusionRepository.js";
 import type { PlayerVerificationRepository } from "../../repositories/PlayerVerificationRepository.js";
 import type { PlayerService } from "../../services/PlayerService.js";
+import { OnboardingAudienceError } from "../errors/OnboardingAudienceError.js";
 import { createMemberOnboardingView } from "../ui/createMemberOnboardingView.js";
 import type { OnboardingSnapshot } from "../ui/createOnboardingDashboardView.js";
 import type { ManagedCommunityChannelResolver } from "./ManagedCommunityChannelResolver.js";
@@ -18,8 +20,11 @@ export interface OnboardingReminderResult {
 }
 
 interface OnboardingAudience {
+  readonly humanMembers: readonly GuildMember[];
   readonly members: readonly GuildMember[];
+  readonly excludedMemberIds: ReadonlySet<string>;
   readonly playersByDiscordId: ReadonlyMap<string, PlayerDto>;
+  readonly pendingVerificationIds: ReadonlySet<string>;
   readonly reminderEligibleIds: ReadonlySet<string>;
 }
 
@@ -38,6 +43,10 @@ export class CommunityOnboardingService {
       PlayerVerificationRepository,
       "findPendingPlayerDiscordIds"
     >,
+    private readonly exclusions: Pick<
+      OnboardingAudienceExclusionRepository,
+      "findActiveByGuild" | "isActive" | "excludeMany" | "restore"
+    >,
     private readonly channels: ManagedCommunityChannelResolver,
     private readonly now: () => Date = () => new Date(),
   ) {}
@@ -52,21 +61,19 @@ export class CommunityOnboardingService {
     ).length;
     const unverifiedPlayerDiscordIds = registeredPlayers
       .filter(
-        (player) =>
-          !isPlayerVerificationApproved(player.verification.status),
+        (player) => !isPlayerVerificationApproved(player.verification.status),
       )
       .map((player) => player.discord.id);
-    const pendingPlayerDiscordIds =
-      await this.verifications.findPendingPlayerDiscordIds(
-        guild.id,
-        unverifiedPlayerDiscordIds,
-      );
-    const awaitingOperationsReview = pendingPlayerDiscordIds.length;
+    const awaitingOperationsReview = unverifiedPlayerDiscordIds.filter(
+      (playerDiscordId) => audience.pendingVerificationIds.has(playerDiscordId),
+    ).length;
     const verificationRequired =
       unverifiedPlayerDiscordIds.length - awaitingOperationsReview;
 
     return {
-      members: audience.members.length,
+      members: audience.humanMembers.length,
+      excluded: audience.excludedMemberIds.size,
+      eligibleMembers: audience.members.length,
       registered: registeredPlayers.length,
       verified,
       unregistered: audience.members.length - registeredPlayers.length,
@@ -81,6 +88,10 @@ export class CommunityOnboardingService {
       return false;
     }
 
+    if (await this.exclusions.isActive(member.guild.id, member.id)) {
+      return false;
+    }
+
     const [player] = await this.players.getByDiscordIds([member.id]);
 
     if (player && isPlayerVerificationApproved(player.verification.status)) {
@@ -88,6 +99,82 @@ export class CommunityOnboardingService {
     }
 
     return this.deliver(member);
+  }
+
+  public async excludeRole(
+    guild: Guild,
+    roleId: string,
+    actorDiscordId: string,
+    reason?: string,
+  ): Promise<number> {
+    if (roleId === guild.id) {
+      throw new OnboardingAudienceError(
+        "The @everyone role cannot be excluded from onboarding.",
+      );
+    }
+
+    const role = await guild.roles.fetch(roleId);
+
+    if (!role) {
+      throw new OnboardingAudienceError(
+        "The selected Discord role is no longer available.",
+      );
+    }
+
+    const members = (await this.listHumanMembers(guild)).filter((member) =>
+      member.roles.cache.has(role.id),
+    );
+
+    if (members.length === 0) {
+      throw new OnboardingAudienceError(
+        "The selected role currently has no human members.",
+      );
+    }
+
+    return this.exclusions.excludeMany(
+      guild.id,
+      members.map((member) => member.id),
+      actorDiscordId,
+      this.normalizeExclusionReason(reason, `Snapshot of role ${role.name}`),
+      this.now(),
+    );
+  }
+
+  public async excludeMember(
+    member: GuildMember,
+    actorDiscordId: string,
+    reason?: string,
+  ): Promise<void> {
+    if (member.user.bot) {
+      throw new OnboardingAudienceError(
+        "Discord bots are already excluded automatically.",
+      );
+    }
+
+    await this.exclusions.excludeMany(
+      member.guild.id,
+      [member.id],
+      actorDiscordId,
+      this.normalizeExclusionReason(reason, "Manual Operations exclusion"),
+      this.now(),
+    );
+  }
+
+  public async restoreMember(
+    guildId: string,
+    memberDiscordId: string,
+    actorDiscordId: string,
+  ): Promise<boolean> {
+    return this.exclusions.restore(
+      guildId,
+      memberDiscordId,
+      actorDiscordId,
+      this.now(),
+    );
+  }
+
+  public async listExclusions(guildId: string) {
+    return this.exclusions.findActiveByGuild(guildId);
   }
 
   public async remindEligible(guild: Guild): Promise<OnboardingReminderResult> {
@@ -119,15 +206,40 @@ export class CommunityOnboardingService {
   }
 
   private async createAudience(guild: Guild): Promise<OnboardingAudience> {
-    const [members, contacts] = await Promise.all([
+    const [humanMembers, contacts, exclusions] = await Promise.all([
       this.listHumanMembers(guild),
       this.repository.findByGuild(guild.id),
+      this.exclusions.findActiveByGuild(guild.id),
     ]);
+    const currentHumanMemberIds = new Set(
+      humanMembers.map((member) => member.id),
+    );
+    const excludedMemberIds = new Set(
+      exclusions
+        .map((exclusion) => exclusion.memberDiscordId)
+        .filter((memberDiscordId) =>
+          currentHumanMemberIds.has(memberDiscordId),
+        ),
+    );
+    const members = humanMembers.filter(
+      (member) => !excludedMemberIds.has(member.id),
+    );
     const players = await this.players.getByDiscordIds(
       members.map((member) => member.id),
     );
     const playersByDiscordId = new Map(
       players.map((player) => [player.discord.id, player]),
+    );
+    const pendingVerificationIds = new Set(
+      await this.verifications.findPendingPlayerDiscordIds(
+        guild.id,
+        players
+          .filter(
+            (player) =>
+              !isPlayerVerificationApproved(player.verification.status),
+          )
+          .map((player) => player.discord.id),
+      ),
     );
     const contactsByDiscordId = new Map(
       contacts.map((contact) => [contact.memberDiscordId, contact]),
@@ -146,6 +258,10 @@ export class CommunityOnboardingService {
             return false;
           }
 
+          if (pendingVerificationIds.has(member.id)) {
+            return false;
+          }
+
           const contact = contactsByDiscordId.get(member.id);
           return !contact || contact.lastReminderAt <= dueBefore;
         })
@@ -153,13 +269,33 @@ export class CommunityOnboardingService {
     );
 
     return {
+      humanMembers,
       members,
+      excludedMemberIds,
       playersByDiscordId,
+      pendingVerificationIds,
       reminderEligibleIds,
     };
   }
 
-  private async listHumanMembers(guild: Guild): Promise<readonly GuildMember[]> {
+  private normalizeExclusionReason(
+    reason: string | undefined,
+    fallback: string,
+  ): string {
+    const normalized = reason?.trim().replace(/\s+/g, " ") || fallback;
+
+    if (normalized.length < 3 || normalized.length > 300) {
+      throw new OnboardingAudienceError(
+        "Provide an exclusion reason between 3 and 300 characters.",
+      );
+    }
+
+    return normalized;
+  }
+
+  private async listHumanMembers(
+    guild: Guild,
+  ): Promise<readonly GuildMember[]> {
     const now = this.now().getTime();
     const cached = this.membersByGuild.get(guild.id);
 
@@ -177,9 +313,7 @@ export class CommunityOnboardingService {
         cache: true,
       });
 
-      members.push(
-        ...[...page.values()].filter((member) => !member.user.bot),
-      );
+      members.push(...[...page.values()].filter((member) => !member.user.bot));
 
       if (page.size < 1_000) {
         break;

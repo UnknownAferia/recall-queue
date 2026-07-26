@@ -11,6 +11,8 @@ import { ViewFactory } from "../../ui/ViewFactory.js";
 
 export interface OnboardingSnapshot {
   readonly members: number;
+  readonly excluded: number;
+  readonly eligibleMembers: number;
   readonly registered: number;
   readonly verified: number;
   readonly unregistered: number;
@@ -24,13 +26,13 @@ export function createOnboardingDashboardView(
   resultMessage?: string,
 ): ContainerBuilder {
   const registrationRate =
-    snapshot.members === 0
+    snapshot.eligibleMembers === 0
       ? 0
-      : Math.round((snapshot.registered / snapshot.members) * 100);
+      : Math.round((snapshot.registered / snapshot.eligibleMembers) * 100);
   const verificationRate =
-    snapshot.members === 0
+    snapshot.eligibleMembers === 0
       ? 0
-      : Math.round((snapshot.verified / snapshot.members) * 100);
+      : Math.round((snapshot.verified / snapshot.eligibleMembers) * 100);
   const actions = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(CommunityCustomIds.onboarding.refresh)
@@ -59,6 +61,8 @@ export function createOnboardingDashboardView(
         [
           "### Conversion overview",
           `**Human members:** ${snapshot.members}`,
+          `**Excluded from onboarding:** ${snapshot.excluded}`,
+          `**Eligible players:** ${snapshot.eligibleMembers}`,
           `**Registered:** ${snapshot.registered} · ${registrationRate}%`,
           `**Verified:** ${snapshot.verified} · ${verificationRate}%`,
           `**Not registered:** ${snapshot.unregistered}`,

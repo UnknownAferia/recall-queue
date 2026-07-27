@@ -70,6 +70,22 @@ describe("Queue activation", () => {
         .indexes()
         .find(([, options]) => options.name === "queue_session_schedule"),
     );
+    assert.ok(
+      QueueSessionModel.schema
+        .indexes()
+        .find(
+          ([, options]) =>
+            options.name === "queue_session_notification_finalization",
+        ),
+    );
+    assert.ok(
+      QueueSessionModel.schema
+        .indexes()
+        .find(
+          ([, options]) =>
+            options.name === "queue_session_notification_cleanup",
+        ),
+    );
   });
 
   it("adds and removes the voluntary Squad Alerts role", async () => {
@@ -128,12 +144,15 @@ describe("Queue activation", () => {
       findUpcomingSessions: async () => [],
       claimDueNotifications: async () => [],
       advanceSessions: async () => undefined,
+      findNotificationsAwaitingFinalization: async () => [],
+      findNotificationsAwaitingCleanup: async () => [],
     } as unknown as QueueActivationRepository;
     const channels = {
       resolveTextChannel: async () =>
         ({
           send: async (options: unknown) => {
             sent.push(options);
+            return { id: "queue-message-id" };
           },
         }) as TextChannel,
     } as ManagedCommunityChannelResolver;
@@ -174,13 +193,17 @@ describe("Queue activation", () => {
       releaseNotification: async () => undefined,
       advanceSessions: async () => undefined,
       getQueuedPlayerCount: async () => 0,
+      getQueueState: async () => null,
       observeQueue: async () => undefined,
+      findNotificationsAwaitingFinalization: async () => [],
+      findNotificationsAwaitingCleanup: async () => [],
     } as unknown as QueueActivationRepository;
     const channels = {
       resolveTextChannel: async () =>
         ({
           send: async (options: unknown) => {
             sent.push(options);
+            return { id: "session-message-id" };
           },
         }) as TextChannel,
     } as ManagedCommunityChannelResolver;
@@ -196,6 +219,179 @@ describe("Queue activation", () => {
     assert.deepEqual(completed, [session.id]);
     assert.match(JSON.stringify(sent[0]), /Friday Night Queue/);
     assert.match(JSON.stringify(sent[0]), /squad-alert-role/);
+  });
+
+  it("updates one managed queue alert and removes it when the pool empties", async () => {
+    const now = new Date("2026-07-26T18:00:00.000Z");
+    const role = roleWithSubscribers(2);
+    const guild = guildWithRole(role);
+    const queueCounts = [1, 2, 0];
+    const edits: unknown[] = [];
+    let sends = 0;
+    let deletes = 0;
+    let state: {
+      lastObservedPlayers: number;
+      lastNotifiedMilestone: number;
+      lastNotifiedAt: Date | null;
+      notificationChannelId: string | null;
+      notificationMessageId: string | null;
+    } | null = null;
+    const message = {
+      id: "queue-message-id",
+      edit: async (options: unknown) => {
+        edits.push(options);
+      },
+      delete: async () => {
+        deletes += 1;
+      },
+    };
+    const repository = {
+      getQueuedPlayerCount: async () => queueCounts.shift() ?? 0,
+      getQueueState: async () => state,
+      observeQueue: async (_guildId: string, queuedPlayers: number) => {
+        if (state) {
+          state.lastObservedPlayers = queuedPlayers;
+          if (queuedPlayers === 0) {
+            state.lastNotifiedMilestone = 0;
+          }
+        }
+      },
+      recordQueueNotification: async (
+        _guildId: string,
+        queuedPlayers: number,
+        milestone: number,
+        notifiedAt: Date,
+        channelId: string,
+        messageId: string,
+      ) => {
+        state = {
+          lastObservedPlayers: queuedPlayers,
+          lastNotifiedMilestone: milestone,
+          lastNotifiedAt: notifiedAt,
+          notificationChannelId: channelId,
+          notificationMessageId: messageId,
+        };
+      },
+      clearQueueNotification: async () => {
+        if (state) {
+          state.notificationChannelId = null;
+          state.notificationMessageId = null;
+        }
+      },
+      findUpcomingSessions: async () => [],
+      claimDueNotifications: async () => [],
+      advanceSessions: async () => undefined,
+      findNotificationsAwaitingFinalization: async () => [],
+      findNotificationsAwaitingCleanup: async () => [],
+    } as unknown as QueueActivationRepository;
+    const channels = {
+      resolveTextChannel: async () =>
+        ({
+          id: "matchmaking-status-id",
+          messages: {
+            fetch: async () => message,
+          },
+          send: async () => {
+            sends += 1;
+            return message;
+          },
+        }) as unknown as TextChannel,
+    } as ManagedCommunityChannelResolver;
+    const service = new QueueActivationService(
+      repository,
+      channels,
+      () => now,
+    );
+
+    await service.tick(guild);
+    await service.tick(guild);
+    await service.tick(guild);
+
+    assert.equal(sends, 1);
+    assert.equal(edits.length, 1);
+    assert.match(JSON.stringify(edits[0]), /2\/5/);
+    assert.equal(deletes, 1);
+    assert.equal(state?.notificationMessageId, null);
+  });
+
+  it("finalizes and later removes completed session notifications", async () => {
+    let now = new Date("2026-07-26T20:20:01.000Z");
+    let finalizedAt: Date | null = null;
+    let deletedAt: Date | null = null;
+    const session = {
+      id: "507f1f77bcf86cd799439011",
+      title: "Friday Night Queue",
+      startsAt: new Date("2026-07-26T18:20:00.000Z"),
+      endsAt: new Date("2026-07-26T20:20:00.000Z"),
+      status: "completed" as const,
+      notificationChannelId: "matchmaking-status-id",
+      notificationMessageId: "session-message-id",
+      notificationFinalizedAt: null,
+    };
+    const role = roleWithSubscribers(0);
+    const guild = guildWithRole(role);
+    const edits: unknown[] = [];
+    let deletes = 0;
+    const message = {
+      edit: async (options: unknown) => {
+        edits.push(options);
+      },
+      delete: async () => {
+        deletes += 1;
+      },
+    };
+    const repository = {
+      findUpcomingSessions: async () => [],
+      claimDueNotifications: async () => [],
+      advanceSessions: async () => undefined,
+      findNotificationsAwaitingFinalization: async () =>
+        finalizedAt || deletedAt ? [] : [session],
+      findNotificationsAwaitingCleanup: async (
+        _guildId: string,
+        finalizedBefore: Date,
+      ) =>
+        finalizedAt && !deletedAt && finalizedAt <= finalizedBefore
+          ? [{ ...session, notificationFinalizedAt: finalizedAt }]
+          : [],
+      recordNotificationFinalized: async (
+        _sessionId: string,
+        value: Date,
+      ) => {
+        finalizedAt = value;
+      },
+      recordNotificationDeleted: async (
+        _sessionId: string,
+        value: Date,
+      ) => {
+        deletedAt = value;
+      },
+      getQueuedPlayerCount: async () => 0,
+      getQueueState: async () => null,
+      observeQueue: async () => undefined,
+    } as unknown as QueueActivationRepository;
+    const channels = {
+      resolveTextChannel: async () =>
+        ({
+          id: "matchmaking-status-id",
+          messages: {
+            fetch: async () => message,
+          },
+        }) as unknown as TextChannel,
+    } as ManagedCommunityChannelResolver;
+    const service = new QueueActivationService(
+      repository,
+      channels,
+      () => now,
+    );
+
+    await service.tick(guild);
+    now = new Date("2026-07-26T20:36:01.000Z");
+    await service.tick(guild);
+
+    assert.equal(edits.length, 1);
+    assert.match(JSON.stringify(edits[0]), /SESSION COMPLETE/);
+    assert.equal(deletes, 1);
+    assert.ok(deletedAt);
   });
 
   it("validates, schedules and cancels persistent community sessions", async () => {

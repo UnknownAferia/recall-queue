@@ -18,6 +18,7 @@ import type {
 } from "../../types/queueActivation.js";
 import {
   createQueueNeedPlayersView,
+  createQueueSessionClosedView,
   createQueueSessionReminderView,
 } from "../ui/createQueueActivationView.js";
 import { QueueActivationError } from "../errors/QueueActivationError.js";
@@ -155,16 +156,23 @@ export class QueueActivationService {
 
     await this.notifyDueSessions(guild, now);
     await this.repository.advanceSessions(guild.id, now);
+    await this.synchronizeSessionNotifications(guild, now);
     await this.notifyQueueMilestone(guild, now);
   }
 
   private async notifyQueueMilestone(guild: Guild, now: Date): Promise<void> {
     const queuedPlayers = await this.repository.getQueuedPlayerCount(guild.id);
+    const state = await this.repository.getQueueState(guild.id);
 
     if (
       queuedPlayers === 0 ||
       queuedPlayers >= MatchmakingConfig.playersPerTeam
     ) {
+      await this.deleteQueueNotification(
+        guild,
+        state?.notificationChannelId ?? null,
+        state?.notificationMessageId ?? null,
+      );
       await this.repository.observeQueue(guild.id, queuedPlayers);
       return;
     }
@@ -173,7 +181,6 @@ export class QueueActivationService {
       [...QueueActivationConfig.notificationMilestones]
         .reverse()
         .find((candidate) => queuedPlayers >= candidate) ?? 0;
-    const state = await this.repository.getQueueState(guild.id);
     const lastNotifiedAt = state?.lastNotifiedAt
       ? new Date(state.lastNotifiedAt)
       : null;
@@ -182,14 +189,12 @@ export class QueueActivationService {
       now.getTime() - lastNotifiedAt.getTime() >=
         QueueActivationConfig.notificationCooldownMs;
 
-    if (
-      milestone === 0 ||
-      milestone <= (state?.lastNotifiedMilestone ?? 0) ||
-      !cooldownElapsed
-    ) {
-      await this.repository.observeQueue(guild.id, queuedPlayers);
-      return;
-    }
+    const notificationDue =
+      milestone > 0 &&
+      milestone > (state?.lastNotifiedMilestone ?? 0) &&
+      cooldownElapsed;
+    const queueChanged =
+      queuedPlayers !== (state?.lastObservedPlayers ?? 0);
 
     const [role, channel] = await Promise.all([
       this.resolveAlertRole(guild),
@@ -197,11 +202,58 @@ export class QueueActivationService {
     ]);
 
     if (!channel || role.members.size === 0) {
+      await this.deleteQueueNotification(
+        guild,
+        state?.notificationChannelId ?? null,
+        state?.notificationMessageId ?? null,
+      );
       await this.repository.observeQueue(guild.id, queuedPlayers);
       return;
     }
 
-    await channel.send({
+    const storedMessage =
+      state?.notificationChannelId === channel.id &&
+      state?.notificationMessageId
+        ? await channel.messages
+            .fetch(state.notificationMessageId)
+            .catch(() => null)
+        : null;
+
+    if (storedMessage && (queueChanged || notificationDue)) {
+      await storedMessage.edit({
+        components: [
+          createQueueNeedPlayersView(
+            role.id,
+            queuedPlayers,
+            MatchmakingConfig.playersPerTeam,
+          ),
+        ],
+        allowedMentions: notificationDue
+          ? { roles: [role.id] }
+          : { parse: [] },
+      });
+
+      if (notificationDue) {
+        await this.repository.recordQueueNotification(
+          guild.id,
+          queuedPlayers,
+          milestone,
+          now,
+          channel.id,
+          storedMessage.id,
+        );
+      } else {
+        await this.repository.observeQueue(guild.id, queuedPlayers);
+      }
+      return;
+    }
+
+    if (storedMessage || !notificationDue) {
+      await this.repository.observeQueue(guild.id, queuedPlayers);
+      return;
+    }
+
+    const message = await channel.send({
       components: [
         createQueueNeedPlayersView(
           role.id,
@@ -217,6 +269,8 @@ export class QueueActivationService {
       queuedPlayers,
       milestone,
       now,
+      channel.id,
+      message.id,
     );
   }
 
@@ -256,12 +310,17 @@ export class QueueActivationService {
 
     for (const session of sessions) {
       try {
-        await channel.send({
+        const message = await channel.send({
           components: [createQueueSessionReminderView(role.id, session)],
           flags: MessageFlags.IsComponentsV2,
           allowedMentions: { roles: [role.id] },
         });
-        await this.repository.finishNotification(session.id, now);
+        await this.repository.finishNotification(
+          session.id,
+          now,
+          channel.id,
+          message.id,
+        );
       } catch (error: unknown) {
         await this.repository.releaseNotification(session.id);
         logger.warn(
@@ -269,6 +328,100 @@ export class QueueActivationService {
         );
       }
     }
+  }
+
+  private async synchronizeSessionNotifications(
+    guild: Guild,
+    now: Date,
+  ): Promise<void> {
+    const cleanupBefore = new Date(
+      now.getTime() - QueueActivationConfig.notificationCleanupDelayMs,
+    );
+    const [toFinalize, toDelete] = await Promise.all([
+      this.repository.findNotificationsAwaitingFinalization(
+        guild.id,
+        QueueActivationConfig.maximumUpcomingSessions,
+      ),
+      this.repository.findNotificationsAwaitingCleanup(
+        guild.id,
+        cleanupBefore,
+        QueueActivationConfig.maximumUpcomingSessions,
+      ),
+    ]);
+
+    if (toFinalize.length === 0 && toDelete.length === 0) {
+      return;
+    }
+
+    const channel = await this.channels.resolveTextChannel(
+      guild,
+      "matchmakingStatus",
+    );
+
+    if (!channel) {
+      return;
+    }
+
+    for (const session of toFinalize) {
+      if (
+        session.notificationChannelId !== channel.id ||
+        !session.notificationMessageId
+      ) {
+        await this.repository.recordNotificationDeleted(session.id, now);
+        continue;
+      }
+
+      const message = await channel.messages
+        .fetch(session.notificationMessageId)
+        .catch(() => null);
+
+      if (!message) {
+        await this.repository.recordNotificationDeleted(session.id, now);
+        continue;
+      }
+
+      await message.edit({
+        components: [createQueueSessionClosedView(session, now)],
+        allowedMentions: { parse: [] },
+      });
+      await this.repository.recordNotificationFinalized(session.id, now);
+    }
+
+    for (const session of toDelete) {
+      if (
+        session.notificationChannelId === channel.id &&
+        session.notificationMessageId
+      ) {
+        const message = await channel.messages
+          .fetch(session.notificationMessageId)
+          .catch(() => null);
+        await message?.delete();
+      }
+
+      await this.repository.recordNotificationDeleted(session.id, now);
+    }
+  }
+
+  private async deleteQueueNotification(
+    guild: Guild,
+    channelId: string | null,
+    messageId: string | null,
+  ): Promise<void> {
+    if (!channelId || !messageId) {
+      return;
+    }
+
+    const channel = await this.channels.resolveTextChannel(
+      guild,
+      "matchmakingStatus",
+    );
+
+    if (channel?.id === channelId) {
+      const message = await channel.messages.fetch(messageId).catch(() => null);
+      await message?.delete();
+    }
+
+    await this.repository.clearQueueNotification(guild.id);
   }
 
   private async resolveAlertRole(guild: Guild): Promise<Role> {

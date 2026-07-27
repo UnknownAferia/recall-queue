@@ -18,6 +18,8 @@ const queueActivationStateSchema = new Schema<QueueActivationState>(
       default: 0,
     },
     lastNotifiedAt: { type: Date, default: null },
+    notificationChannelId: { type: String, default: null, trim: true },
+    notificationMessageId: { type: String, default: null, trim: true },
   },
   {
     collection: "queue_activation_states",

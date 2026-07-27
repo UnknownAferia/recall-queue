@@ -17,5 +17,6 @@ export const QueueActivationConfig = Object.freeze({
   minimumSessionDurationMinutes: 30,
   maximumSessionDurationMinutes: 360,
   maximumUpcomingSessions: 10,
+  notificationCleanupDelayMs: 15 * 60 * 1_000,
   activityWindowDays: 7,
 });

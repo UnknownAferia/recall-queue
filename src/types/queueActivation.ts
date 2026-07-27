@@ -5,6 +5,8 @@ export interface QueueActivationState {
   lastObservedPlayers: number;
   lastNotifiedMilestone: number;
   lastNotifiedAt: Date | null;
+  notificationChannelId: string | null;
+  notificationMessageId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +22,10 @@ export interface QueueSession {
   cancelledAt: Date | null;
   notificationClaimedAt: Date | null;
   notifiedAt: Date | null;
+  notificationChannelId: string | null;
+  notificationMessageId: string | null;
+  notificationFinalizedAt: Date | null;
+  notificationDeletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,6 +36,9 @@ export interface QueueSessionSummary {
   readonly startsAt: Date;
   readonly endsAt: Date;
   readonly status: QueueSessionStatus;
+  readonly notificationChannelId?: string | null;
+  readonly notificationMessageId?: string | null;
+  readonly notificationFinalizedAt?: Date | null;
 }
 
 export interface QueueActivationMetrics {

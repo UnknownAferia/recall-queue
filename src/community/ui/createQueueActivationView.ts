@@ -128,6 +128,40 @@ export function createQueueSessionReminderView(
     .addTextDisplayComponents(ViewFactory.footer("One reminder per session."));
 }
 
+export function createQueueSessionClosedView(
+  session: QueueSessionSummary,
+  closedAt: Date,
+): ContainerBuilder {
+  const closed = Math.floor(closedAt.getTime() / 1_000);
+  const cancelled = session.status === "cancelled";
+
+  return ViewFactory.createContainer(BrandColors.slate)
+    .addTextDisplayComponents(
+      ViewFactory.heading(
+        cancelled ? "Session Cancelled" : "Session Complete",
+        session.title,
+        cancelled
+          ? "This community queue session is no longer scheduled."
+          : "This community queue session has ended.",
+      ),
+    )
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
+      ViewFactory.text(
+        [
+          `**Closed:** <t:${closed}:R>`,
+          "",
+          "Use **Upcoming Sessions** in matchmaking status to see the next planned queue time.",
+        ].join("\n"),
+      ),
+    )
+    .addTextDisplayComponents(
+      ViewFactory.footer(
+        "This completed notice will be removed automatically.",
+      ),
+    );
+}
+
 export function createActivationDashboardView(
   onboarding: OnboardingSnapshot,
   metrics: QueueActivationMetrics,

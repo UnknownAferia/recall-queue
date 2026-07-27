@@ -30,6 +30,10 @@ const queueSessionSchema = new Schema<QueueSession>(
     cancelledAt: { type: Date, default: null },
     notificationClaimedAt: { type: Date, default: null },
     notifiedAt: { type: Date, default: null },
+    notificationChannelId: { type: String, default: null, trim: true },
+    notificationMessageId: { type: String, default: null, trim: true },
+    notificationFinalizedAt: { type: Date, default: null },
+    notificationDeletedAt: { type: Date, default: null },
   },
   {
     collection: "queue_sessions",
@@ -51,6 +55,14 @@ queueSessionSchema.index(
 queueSessionSchema.index(
   { status: 1, notificationClaimedAt: 1, startsAt: 1 },
   { name: "queue_session_notification_due" },
+);
+queueSessionSchema.index(
+  { guildId: 1, status: 1, notificationFinalizedAt: 1 },
+  { name: "queue_session_notification_finalization" },
+);
+queueSessionSchema.index(
+  { guildId: 1, notificationFinalizedAt: 1, notificationDeletedAt: 1 },
+  { name: "queue_session_notification_cleanup" },
 );
 
 export const QueueSessionModel: mongoose.Model<QueueSession> =

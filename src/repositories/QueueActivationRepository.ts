@@ -19,6 +19,11 @@ function toSummary(session: QueueSessionDocument): QueueSessionSummary {
     startsAt: new Date(session.startsAt),
     endsAt: new Date(session.endsAt),
     status: session.status,
+    notificationChannelId: session.notificationChannelId ?? null,
+    notificationMessageId: session.notificationMessageId ?? null,
+    notificationFinalizedAt: session.notificationFinalizedAt
+      ? new Date(session.notificationFinalizedAt)
+      : null,
   };
 }
 
@@ -41,6 +46,8 @@ export class QueueActivationRepository {
         $setOnInsert: {
           guildId,
           lastNotifiedAt: null,
+          notificationChannelId: null,
+          notificationMessageId: null,
         },
       },
       { upsert: true, setDefaultsOnInsert: true },
@@ -52,6 +59,8 @@ export class QueueActivationRepository {
     queuedPlayers: number,
     milestone: number,
     notifiedAt: Date,
+    channelId: string,
+    messageId: string,
   ): Promise<void> {
     await QueueActivationStateModel.updateOne(
       { guildId },
@@ -60,10 +69,24 @@ export class QueueActivationRepository {
           lastObservedPlayers: queuedPlayers,
           lastNotifiedMilestone: milestone,
           lastNotifiedAt: notifiedAt,
+          notificationChannelId: channelId,
+          notificationMessageId: messageId,
         },
         $setOnInsert: { guildId },
       },
       { upsert: true, setDefaultsOnInsert: true },
+    ).exec();
+  }
+
+  public async clearQueueNotification(guildId: string): Promise<void> {
+    await QueueActivationStateModel.updateOne(
+      { guildId },
+      {
+        $set: {
+          notificationChannelId: null,
+          notificationMessageId: null,
+        },
+      },
     ).exec();
   }
 
@@ -93,6 +116,10 @@ export class QueueActivationRepository {
         cancelledAt: null,
         notificationClaimedAt: null,
         notifiedAt: null,
+        notificationChannelId: null,
+        notificationMessageId: null,
+        notificationFinalizedAt: null,
+        notificationDeletedAt: null,
       }),
     );
   }
@@ -188,11 +215,17 @@ export class QueueActivationRepository {
   public async finishNotification(
     sessionId: string,
     notifiedAt: Date,
+    channelId: string,
+    messageId: string,
   ): Promise<void> {
     await QueueSessionModel.updateOne(
       { _id: sessionId, notifiedAt: null },
       {
-        $set: { notifiedAt },
+        $set: {
+          notifiedAt,
+          notificationChannelId: channelId,
+          notificationMessageId: messageId,
+        },
         $unset: { notificationClaimedAt: 1 },
       },
     ).exec();
@@ -225,6 +258,67 @@ export class QueueActivationRepository {
         { $set: { status: "completed" } },
       ).exec(),
     ]);
+  }
+
+  public async findNotificationsAwaitingFinalization(
+    guildId: string,
+    limit: number,
+  ): Promise<QueueSessionSummary[]> {
+    const sessions = await QueueSessionModel.find({
+      guildId,
+      status: { $in: ["cancelled", "completed"] },
+      notificationMessageId: { $ne: null },
+      notificationFinalizedAt: null,
+    })
+      .sort({ endsAt: 1 })
+      .limit(limit)
+      .exec();
+
+    return sessions.map(toSummary);
+  }
+
+  public async recordNotificationFinalized(
+    sessionId: string,
+    finalizedAt: Date,
+  ): Promise<void> {
+    await QueueSessionModel.updateOne(
+      { _id: sessionId, notificationFinalizedAt: null },
+      { $set: { notificationFinalizedAt: finalizedAt } },
+    ).exec();
+  }
+
+  public async findNotificationsAwaitingCleanup(
+    guildId: string,
+    finalizedBefore: Date,
+    limit: number,
+  ): Promise<QueueSessionSummary[]> {
+    const sessions = await QueueSessionModel.find({
+      guildId,
+      notificationMessageId: { $ne: null },
+      notificationFinalizedAt: { $lte: finalizedBefore },
+      notificationDeletedAt: null,
+    })
+      .sort({ notificationFinalizedAt: 1 })
+      .limit(limit)
+      .exec();
+
+    return sessions.map(toSummary);
+  }
+
+  public async recordNotificationDeleted(
+    sessionId: string,
+    deletedAt: Date,
+  ): Promise<void> {
+    await QueueSessionModel.updateOne(
+      { _id: sessionId, notificationDeletedAt: null },
+      {
+        $set: {
+          notificationChannelId: null,
+          notificationMessageId: null,
+          notificationDeletedAt: deletedAt,
+        },
+      },
+    ).exec();
   }
 
   public async getMetrics(

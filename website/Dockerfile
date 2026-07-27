@@ -21,8 +21,10 @@ ENV PORT=3000
 
 WORKDIR /app
 
-RUN groupadd --system --gid 1001 nodejs \
-  && useradd --system --uid 1001 --gid nodejs nextjs
+RUN usermod --login nextjs node \
+  && groupmod --new-name nodejs node \
+  && mkdir -p /app/website-analytics \
+  && chown nextjs:nodejs /app/website-analytics
 
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static

@@ -116,7 +116,7 @@ export default function SeasonsPage() {
         </div>
       </section>
 
-      <DiscordCta />
+      <DiscordCta source="seasons-final" />
       <SiteFooter />
     </main>
   );

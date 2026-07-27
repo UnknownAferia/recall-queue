@@ -1,4 +1,13 @@
-export function DiscordCta() {
+import {
+  discordCtaHref,
+  type DiscordCtaSource,
+} from "../lib/websiteAnalytics";
+
+interface DiscordCtaProps {
+  readonly source: DiscordCtaSource;
+}
+
+export function DiscordCta({ source }: DiscordCtaProps) {
   return (
     <section className="final-cta compact-cta">
       <div className="final-glow" aria-hidden="true" />
@@ -8,7 +17,7 @@ export function DiscordCta() {
         <p>Register once, verify your identity and tell Vora how you play.</p>
         <a
           className="button button-primary"
-          href="https://discord.gg/voramlbb"
+          href={discordCtaHref(source)}
           target="_blank"
           rel="noreferrer"
         >

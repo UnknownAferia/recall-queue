@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { PageViewTracker } from "./components/PageViewTracker";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://voramlbb.com"),
@@ -63,7 +64,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <PageViewTracker />
+        {children}
+      </body>
     </html>
   );
 }

@@ -36,6 +36,12 @@ describe("Production deployment", () => {
     assert.match(compose, /vora-public-data:\/app\/public-data/);
     assert.match(compose, /vora-public-data:\/app\/public-data:ro/);
     assert.match(compose, /VORA_PUBLIC_DATA_DIRECTORY/);
+    assert.match(
+      compose,
+      /vora-website-analytics:\/app\/website-analytics:ro/,
+    );
+    assert.match(compose, /vora-website-analytics:\/app\/website-analytics/);
+    assert.match(compose, /VORA_WEBSITE_ANALYTICS_FILE/);
   });
 
   it("provides verified backup, rollback and recurring health operations", () => {
@@ -71,6 +77,7 @@ describe("Production deployment", () => {
 
     assert.match(websiteDockerfile, /output.*standalone|server\.js/s);
     assert.match(websiteDockerfile, /USER nextjs/);
+    assert.match(websiteDockerfile, /\/app\/website-analytics/);
     assert.match(caddyfile, /voramlbb\.com/);
     assert.match(caddyfile, /www\.voramlbb\.com/);
     assert.match(caddyfile, /reverse_proxy vora-website:3000/);

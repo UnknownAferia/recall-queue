@@ -1,3 +1,5 @@
+import { discordCtaHref } from "../lib/websiteAnalytics";
+
 const footerGroups = [
   {
     title: "Product",
@@ -14,7 +16,7 @@ const footerGroups = [
       { href: "/get-started", label: "Get started" },
       { href: "/faq", label: "FAQ" },
       { href: "/support", label: "Support" },
-      { href: "https://discord.gg/voramlbb", label: "Discord" },
+      { href: discordCtaHref("footer"), label: "Discord" },
     ],
   },
   {

@@ -115,7 +115,7 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      <DiscordCta />
+      <DiscordCta source="how-it-works-final" />
       <SiteFooter />
     </main>
   );

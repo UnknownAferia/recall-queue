@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "../components/PageHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { discordCtaHref } from "../lib/websiteAnalytics";
 
 export const metadata: Metadata = {
   title: "Support",
@@ -53,7 +54,7 @@ export default function SupportPage() {
       >
         <a
           className="button button-primary"
-          href="https://discord.gg/voramlbb"
+          href={discordCtaHref("support")}
           target="_blank"
           rel="noreferrer"
         >

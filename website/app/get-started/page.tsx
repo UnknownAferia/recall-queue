@@ -3,14 +3,13 @@ import type { Metadata } from "next";
 import { PageHero } from "../components/PageHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { discordCtaHref } from "../lib/websiteAnalytics";
 
 export const metadata: Metadata = {
   title: "Get Started",
   description:
     "Register, verify your Mobile Legends account, choose your roles and become queue-ready in Vora.",
 };
-
-const discordInvite = "https://discord.gg/voramlbb";
 
 const preparation = [
   {
@@ -86,7 +85,7 @@ export default function GetStartedPage() {
       >
         <a
           className="button button-primary"
-          href={discordInvite}
+          href={discordCtaHref("get-started-hero")}
           target="_blank"
           rel="noreferrer"
         >
@@ -255,7 +254,7 @@ export default function GetStartedPage() {
           </p>
           <a
             className="button button-primary"
-            href={discordInvite}
+            href={discordCtaHref("get-started-final")}
             target="_blank"
             rel="noreferrer"
           >

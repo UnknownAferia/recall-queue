@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const discordInvite = "https://discord.gg/voramlbb";
+import { discordCtaHref } from "../lib/websiteAnalytics";
 
 function formatDateTime(value: string): string {
   const date = new Date(value);
@@ -237,7 +237,7 @@ export default async function LiveCompetitionPage() {
 
           <a
             className="button button-primary live-join"
-            href={discordInvite}
+            href={discordCtaHref("live-status")}
             target="_blank"
             rel="noreferrer"
           >
@@ -247,7 +247,7 @@ export default async function LiveCompetitionPage() {
         </div>
       </section>
 
-      <DiscordCta />
+      <DiscordCta source="live-final" />
       <SiteFooter />
     </main>
   );

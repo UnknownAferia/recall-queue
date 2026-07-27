@@ -51,9 +51,14 @@ export async function executeOnboardingCommand(
     flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
   });
 
-  const snapshot = await client.onboarding.getSnapshot(interaction.guild);
+  const [snapshot, websiteAnalytics] = await Promise.all([
+    client.onboarding.getSnapshot(interaction.guild),
+    client.websiteAnalytics?.getSnapshot() ?? Promise.resolve(null),
+  ]);
 
   await interaction.editReply({
-    components: [createOnboardingDashboardView(snapshot)],
+    components: [
+      createOnboardingDashboardView(snapshot, undefined, websiteAnalytics),
+    ],
   });
 }

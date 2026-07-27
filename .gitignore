@@ -4,6 +4,7 @@ dist/
 logs/
 backups/
 *.tsbuildinfo
+website/.data/
 .env
 .env.*
 !.env.example

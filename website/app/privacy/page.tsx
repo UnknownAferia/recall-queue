@@ -39,12 +39,29 @@ export default function PrivacyPage() {
             <li>Reported outcomes, confirmations and match-result screenshots.</li>
             <li>Behavior, cooldowns, integrity incidents and moderation records.</li>
             <li>Support tickets, reports, attachments and staff audit actions.</li>
+            <li>
+              Anonymous daily counts for website page views and Discord button
+              clicks.
+            </li>
             <li>Basic operational logs needed to secure and maintain the service.</li>
           </ul>
         </section>
 
         <section>
-          <h2>3. Why the information is used</h2>
+          <h2>3. Cookie-free website measurement</h2>
+          <p>
+            The Vora website measures aggregate page views and Discord button
+            clicks so Operations can understand where the onboarding journey
+            needs improvement. It does not create visitor profiles, set
+            analytics cookies or store IP addresses, referrers, device details
+            or account identifiers with these counters. Do Not Track is
+            respected for page-view measurement. Daily counters are retained
+            for up to 90 days.
+          </p>
+        </section>
+
+        <section>
+          <h2>4. Why the information is used</h2>
           <p>
             Vora uses this information to verify player identities, form
             compatible squads, operate ready checks and private voice rooms,
@@ -54,7 +71,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>4. Visibility</h2>
+          <h2>5. Visibility</h2>
           <p>
             Public Vora surfaces may display player names, ratings, divisions,
             match records, seasonal standing and achievements. Verification
@@ -65,7 +82,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>5. Retention</h2>
+          <h2>6. Retention</h2>
           <p>
             Closed ticket channels may remain available for up to 7 days.
             Staff-only ticket transcripts, Community reports and moderation
@@ -77,7 +94,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>6. Service providers</h2>
+          <h2>7. Service providers</h2>
           <p>
             Vora relies on Discord for community interaction, MongoDB for
             application data, OVHcloud for production infrastructure and the
@@ -87,7 +104,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>7. Your choices and requests</h2>
+          <h2>8. Your choices and requests</h2>
           <p>
             You can leave the Discord server or stop using Vora at any time.
             For access, correction, deletion or privacy questions, open a
@@ -98,7 +115,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>8. Security</h2>
+          <h2>9. Security</h2>
           <p>
             Vora uses access controls, private staff channels, audited
             operations and production backups. No online service can guarantee
@@ -108,7 +125,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2>9. Contact</h2>
+          <h2>10. Contact</h2>
           <p>
             Privacy requests are handled through the private ticket system in
             the official Vora Discord server. This keeps the request connected

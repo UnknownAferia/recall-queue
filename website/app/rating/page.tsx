@@ -109,7 +109,7 @@ export default function RatingPage() {
         </div>
       </section>
 
-      <DiscordCta />
+      <DiscordCta source="rating-final" />
       <SiteFooter />
     </main>
   );

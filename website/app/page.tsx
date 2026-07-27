@@ -1,7 +1,6 @@
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
-
-const discordInvite = "https://discord.gg/voramlbb";
+import { discordCtaHref } from "./lib/websiteAnalytics";
 
 const roles = [
   {
@@ -192,7 +191,7 @@ export default function Home() {
             </p>
             <a
               className="text-link text-link-bright"
-              href={discordInvite}
+              href={discordCtaHref("home-role-identity")}
               target="_blank"
               rel="noreferrer"
             >
@@ -319,7 +318,7 @@ export default function Home() {
           <p>Register once. Choose your roles. Let Vora find the five.</p>
           <a
             className="button button-primary"
-            href={discordInvite}
+            href={discordCtaHref("home-final")}
             target="_blank"
             rel="noreferrer"
           >

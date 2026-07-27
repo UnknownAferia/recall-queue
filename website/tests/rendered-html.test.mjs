@@ -19,6 +19,9 @@ test("builds the complete Vora launch page", async () => {
     liveSource,
     liveDataSource,
     getStartedSource,
+    analyticsSource,
+    pageTrackerSource,
+    discordRedirectSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -38,6 +41,18 @@ test("builds the complete Vora launch page", async () => {
       "utf8",
     ),
     readFile(new URL("../app/get-started/page.tsx", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/lib/websiteAnalytics.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/components/PageViewTracker.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/go/discord/route.ts", import.meta.url),
+      "utf8",
+    ),
   ]);
 
   assert.match(layoutSource, /Vora — Find Your Five/);
@@ -48,7 +63,7 @@ test("builds the complete Vora launch page", async () => {
   );
   assert.match(pageSource, /Find your five/);
   assert.match(pageSource, /Play as one/);
-  assert.match(pageSource, /https:\/\/discord\.gg\/voramlbb/);
+  assert.match(pageSource, /discordCtaHref\("home-final"\)/);
   assert.match(pageSource, /A lineup with intention/);
   assert.match(pageSource, /Real results\. Clear rules\. Human review/);
   for (const assetPath of [
@@ -89,5 +104,14 @@ test("builds the complete Vora launch page", async () => {
   assert.match(getStartedSource, /no larger than 10 MB/);
   assert.match(getStartedSource, /No password, login code/);
   assert.match(sitemapSource, /\/get-started/);
+  assert.match(layoutSource, /PageViewTracker/);
+  assert.match(analyticsSource, /retentionDays = 90/);
+  assert.match(analyticsSource, /website-conversions\.json/);
+  assert.match(pageTrackerSource, /navigator\.doNotTrack === "1"/);
+  assert.match(pageTrackerSource, /\/api\/analytics\/event/);
+  assert.match(discordRedirectSource, /https:\/\/discord\.gg\/voramlbb/);
+  assert.match(discordRedirectSource, /recordDiscordClick/);
+  assert.match(privacySource, /does not create visitor profiles/);
+  assert.match(privacySource, /retained\s+for up to 90 days/);
   assert.doesNotMatch(pageSource, /codex-preview|react-loading-skeleton/i);
 });

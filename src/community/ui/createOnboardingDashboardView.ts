@@ -8,6 +8,7 @@ import {
 import { BrandColors } from "../../config/brand.js";
 import { CommunityCustomIds } from "../../constants/community.js";
 import { ViewFactory } from "../../ui/ViewFactory.js";
+import type { WebsiteAnalyticsSnapshot } from "../services/WebsiteAnalyticsService.js";
 
 export interface OnboardingSnapshot {
   readonly members: number;
@@ -24,6 +25,7 @@ export interface OnboardingSnapshot {
 export function createOnboardingDashboardView(
   snapshot: OnboardingSnapshot,
   resultMessage?: string,
+  websiteAnalytics?: WebsiteAnalyticsSnapshot | null,
 ): ContainerBuilder {
   const registrationRate =
     snapshot.eligibleMembers === 0
@@ -74,6 +76,35 @@ export function createOnboardingDashboardView(
         ]
           .filter((entry): entry is string => entry !== null)
           .join("\n"),
+      ),
+    )
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
+      ViewFactory.text(
+        websiteAnalytics
+          ? [
+              `### Website journey · last ${websiteAnalytics.periodDays} days`,
+              `**All measured page views:** ${websiteAnalytics.pageViews}`,
+              `**Landing page views:** ${websiteAnalytics.landingPageViews}`,
+              `**Get Started views:** ${websiteAnalytics.getStartedViews}`,
+              `**Discord exits:** ${websiteAnalytics.discordClicks}`,
+              `**Discord exits from Get Started:** ${websiteAnalytics.getStartedDiscordClicks}`,
+              `**Page-to-Discord rate:** ${websiteAnalytics.pageToDiscordRate}%`,
+              `**Get Started-to-Discord rate:** ${websiteAnalytics.onboardingToDiscordRate}%`,
+              websiteAnalytics.topSources.length > 0
+                ? `**Top CTA sources:** ${websiteAnalytics.topSources
+                    .map((entry) => `${entry.source} (${entry.clicks})`)
+                    .join(" · ")}`
+                : "**Top CTA sources:** No clicks measured yet",
+              "",
+              "-# Aggregate events only · not unique people · no cookies or visitor profiles",
+            ].join("\n")
+          : [
+              "### Website journey",
+              "Anonymous website measurement has not recorded an event yet.",
+              "",
+              "-# Metrics appear after the website deployment receives its first eligible page view.",
+            ].join("\n"),
       ),
     )
     .addActionRowComponents(actions)

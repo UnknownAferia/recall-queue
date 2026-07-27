@@ -499,13 +499,22 @@ export async function handleCommunityOnboardingInteraction(
     const result = sendsReminders
       ? await client.onboarding.remindEligible(interaction.guild)
       : null;
-    const snapshot = await client.onboarding.getSnapshot(interaction.guild);
+    const [snapshot, websiteAnalytics] = await Promise.all([
+      client.onboarding.getSnapshot(interaction.guild),
+      client.websiteAnalytics?.getSnapshot() ?? Promise.resolve(null),
+    ]);
     const resultMessage = result
       ? `${result.delivered} reminder(s) delivered, ${result.failed} failed. ${Math.max(0, result.eligible - result.attempted)} remain eligible for a later batch.`
       : undefined;
 
     await interaction.editReply({
-      components: [createOnboardingDashboardView(snapshot, resultMessage)],
+      components: [
+        createOnboardingDashboardView(
+          snapshot,
+          resultMessage,
+          websiteAnalytics,
+        ),
+      ],
     });
     return true;
   }

@@ -46,8 +46,10 @@ services:
     volumes:
       - vora-community-logs:/app/logs
       - vora-public-data:/app/public-data
+      - vora-website-analytics:/app/website-analytics:ro
     environment:
       VORA_PUBLIC_DATA_DIRECTORY: /app/public-data
+      VORA_WEBSITE_ANALYTICS_FILE: /app/website-analytics/website-conversions.json
 
   vora-website:
     image: vora-website:${VORA_IMAGE_TAG:-latest}
@@ -65,6 +67,9 @@ services:
       - ALL
     volumes:
       - vora-public-data:/app/public-data:ro
+      - vora-website-analytics:/app/website-analytics
+    environment:
+      VORA_WEBSITE_ANALYTICS_FILE: /app/website-analytics/website-conversions.json
     healthcheck:
       test:
         [
@@ -151,3 +156,4 @@ volumes:
   vora-caddy-data:
   vora-caddy-config:
   vora-public-data:
+  vora-website-analytics:

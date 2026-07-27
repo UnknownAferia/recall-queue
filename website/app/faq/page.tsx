@@ -94,7 +94,7 @@ export default function FaqPage() {
         </div>
       </section>
 
-      <DiscordCta />
+      <DiscordCta source="faq-final" />
       <SiteFooter />
     </main>
   );

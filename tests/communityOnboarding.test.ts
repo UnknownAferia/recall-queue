@@ -172,23 +172,42 @@ describe("Community onboarding", () => {
       ).toJSON(),
     );
     const dashboard = JSON.stringify(
-      createOnboardingDashboardView({
-        members: 10,
-        excluded: 0,
-        eligibleMembers: 10,
-        registered: 4,
-        verified: 2,
-        unregistered: 6,
-        verificationRequired: 1,
-        awaitingOperationsReview: 1,
-        reminderEligible: 6,
-      }).toJSON(),
+      createOnboardingDashboardView(
+        {
+          members: 10,
+          excluded: 0,
+          eligibleMembers: 10,
+          registered: 4,
+          verified: 2,
+          unregistered: 6,
+          verificationRequired: 1,
+          awaitingOperationsReview: 1,
+          reminderEligible: 6,
+        },
+        undefined,
+        {
+          periodDays: 30,
+          pageViews: 100,
+          landingPageViews: 60,
+          getStartedViews: 30,
+          discordClicks: 12,
+          getStartedDiscordClicks: 9,
+          pageToDiscordRate: 12,
+          onboardingToDiscordRate: 30,
+          topSources: [{ source: "get-started-hero", clicks: 7 }],
+          updatedAt: new Date("2026-07-27T12:00:00.000Z"),
+        },
+      ).toJSON(),
     );
 
     assert.match(prompt, /Your Team Starts Here/);
     assert.match(prompt, new RegExp(CommunityCustomIds.onboarding.register));
     assert.match(prompt, /https:\/\/discord\.com\/channels\/guild\/register/);
     assert.match(dashboard, /Player Onboarding/);
+    assert.match(dashboard, /Website journey/);
+    assert.match(dashboard, /Get Started-to-Discord rate:\*\* 30%/);
+    assert.match(dashboard, /get-started-hero \(7\)/);
+    assert.match(dashboard, /no cookies or visitor profiles/);
     assert.match(dashboard, /Registered:\*\* 4 · 40%/);
     assert.match(dashboard, new RegExp(CommunityCustomIds.onboarding.nudge));
   });

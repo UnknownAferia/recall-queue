@@ -28,6 +28,7 @@ import { GuildAccessService } from "../services/GuildAccessService.js";
 import { CommunityOnboardingService } from "./services/CommunityOnboardingService.js";
 import { QueueActivationRepository } from "../repositories/QueueActivationRepository.js";
 import { QueueActivationService } from "./services/QueueActivationService.js";
+import { PublicCompetitionSnapshotService } from "./services/PublicCompetitionSnapshotService.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -41,6 +42,7 @@ export class CommunityClient extends Client {
   public readonly guildAccess: GuildAccessService;
   public readonly onboarding: CommunityOnboardingService;
   public readonly activation: QueueActivationService;
+  public readonly publicCompetition: PublicCompetitionSnapshotService;
 
   public constructor() {
     super({
@@ -61,6 +63,13 @@ export class CommunityClient extends Client {
     const playerVerificationRepository = new PlayerVerificationRepository();
     const playerVerificationEvidence = new PlayerVerificationEvidenceService();
     const transactionRunner = new MongoTransactionRunner();
+    const communityDataRepository = new CommunityDataRepository({
+      coreOfflineAfterMs: CommunityConfig.heartbeatOfflineAfterMs,
+    });
+    const seasonService = new SeasonService(
+      new SeasonRepository(),
+      transactionRunner,
+    );
 
     this.player = new PlayerService(
       playerRepository,
@@ -87,12 +96,14 @@ export class CommunityClient extends Client {
     );
 
     this.panels = new CommunityPanelService(
-      new CommunityDataRepository({
-        coreOfflineAfterMs: CommunityConfig.heartbeatOfflineAfterMs,
-      }),
+      communityDataRepository,
       panelPublisher,
       channels,
-      new SeasonService(new SeasonRepository(), transactionRunner),
+      seasonService,
+    );
+    this.publicCompetition = new PublicCompetitionSnapshotService(
+      communityDataRepository,
+      seasonService,
     );
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.moderation = new CommunityModerationService(

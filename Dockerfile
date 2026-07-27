@@ -37,7 +37,8 @@ RUN mongodump --version >/dev/null \
     && mongorestore --version >/dev/null
 COPY scripts ./scripts
 COPY assets ./assets
-RUN mkdir -p /app/logs /app/backups && chown -R node:node /app/logs /app/backups
+RUN mkdir -p /app/logs /app/backups /app/public-data \
+    && chown -R node:node /app/logs /app/backups /app/public-data
 
 USER node
 CMD ["npm", "run", "start"]

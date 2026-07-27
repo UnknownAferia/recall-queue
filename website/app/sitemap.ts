@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 const routes = [
   "",
+  "/live",
   "/how-it-works",
   "/rating",
   "/seasons",

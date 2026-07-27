@@ -45,6 +45,9 @@ services:
       start_period: 30s
     volumes:
       - vora-community-logs:/app/logs
+      - vora-public-data:/app/public-data
+    environment:
+      VORA_PUBLIC_DATA_DIRECTORY: /app/public-data
 
   vora-website:
     image: vora-website:${VORA_IMAGE_TAG:-latest}
@@ -60,6 +63,8 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    volumes:
+      - vora-public-data:/app/public-data:ro
     healthcheck:
       test:
         [
@@ -145,3 +150,4 @@ volumes:
   vora-community-logs:
   vora-caddy-data:
   vora-caddy-config:
+  vora-public-data:

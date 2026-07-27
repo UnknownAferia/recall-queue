@@ -86,7 +86,10 @@ export class CommunityPanelJobs {
     try {
       await this.forEachGuild(async (guild) => {
         await this.client.activation.tick(guild);
-        await this.client.panels.synchronizeMatchmakingStatus(guild);
+        await Promise.all([
+          this.client.panels.synchronizeMatchmakingStatus(guild),
+          this.client.publicCompetition.publish(guild.id, guild.name),
+        ]);
       });
     } finally {
       this.statusRunning = false;

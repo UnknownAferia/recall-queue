@@ -16,6 +16,8 @@ test("builds the complete Vora launch page", async () => {
     termsSource,
     sitemapSource,
     robotsSource,
+    liveSource,
+    liveDataSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -29,6 +31,11 @@ test("builds the complete Vora launch page", async () => {
     readFile(new URL("../app/terms/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/robots.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/live/page.tsx", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/lib/publicCompetition.ts", import.meta.url),
+      "utf8",
+    ),
   ]);
 
   assert.match(layoutSource, /Vora — Find Your Five/);
@@ -71,5 +78,9 @@ test("builds the complete Vora launch page", async () => {
   assert.match(termsSource, /not affiliated with or endorsed by Moonton/);
   assert.match(sitemapSource, /\/privacy/);
   assert.match(robotsSource, /sitemap\.xml/);
+  assert.match(liveSource, /The state of Vora, right now/);
+  assert.match(liveSource, /Discord identities and Mobile Legends account identifiers stay/);
+  assert.match(liveDataSource, /\/app\/public-data\/competition\.json/);
+  assert.match(sitemapSource, /\/live/);
   assert.doesNotMatch(pageSource, /codex-preview|react-loading-skeleton/i);
 });

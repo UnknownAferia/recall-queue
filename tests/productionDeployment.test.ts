@@ -33,6 +33,9 @@ describe("Production deployment", () => {
     assert.match(compose, /"443:443"/);
     assert.match(compose, /"443:443\/udp"/);
     assert.equal((compose.match(/^\s+ports:/gm) ?? []).length, 1);
+    assert.match(compose, /vora-public-data:\/app\/public-data/);
+    assert.match(compose, /vora-public-data:\/app\/public-data:ro/);
+    assert.match(compose, /VORA_PUBLIC_DATA_DIRECTORY/);
   });
 
   it("provides verified backup, rollback and recurring health operations", () => {

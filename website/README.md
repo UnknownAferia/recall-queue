@@ -7,6 +7,17 @@ The site explains the complete player journey, Vora's role-aware formation
 model and its competitive-integrity principles. Its primary action leads
 players to the Vora Discord server.
 
+## Public routes
+
+- `/` — Vora launch landing page
+- `/how-it-works` — complete player and squad lifecycle
+- `/rating` — RSR, placements, confidence and divisions
+- `/seasons` — seasonal competition and achievements
+- `/faq` — player questions
+- `/support` — support and reporting routes
+- `/privacy` — plain-language privacy notice
+- `/terms` — platform terms of use
+
 ## Development
 
 Requires Node.js 22.13 or newer.

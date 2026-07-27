@@ -1,3 +1,6 @@
+import { SiteFooter } from "./components/SiteFooter";
+import { SiteHeader } from "./components/SiteHeader";
+
 const discordInvite = "https://discord.gg/voramlbb";
 
 const roles = [
@@ -87,27 +90,7 @@ const principles = [
 export default function Home() {
   return (
     <main>
-      <nav className="site-nav" aria-label="Primary navigation">
-        <a className="brand" href="#top" aria-label="Vora home">
-          <img src="/brand/vora-mark.png" alt="" width="42" height="42" />
-          <span>VORA</span>
-        </a>
-
-        <div className="nav-links">
-          <a href="#how-it-works">How it works</a>
-          <a href="#why-vora">Why Vora</a>
-          <a href="#faq">FAQ</a>
-        </div>
-
-        <a
-          className="button button-small button-outline"
-          href={discordInvite}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Join Discord
-        </a>
-      </nav>
+      <SiteHeader overlay />
 
       <section className="hero" id="top">
         <div className="hero-image" aria-hidden="true" />
@@ -193,6 +176,10 @@ export default function Home() {
             </li>
           ))}
         </ol>
+        <a className="section-link" href="/how-it-works">
+          Explore the complete player journey
+          <span aria-hidden="true">→</span>
+        </a>
       </section>
 
       <section className="roles-section">
@@ -319,6 +306,10 @@ export default function Home() {
               when assigning the final lineup.
             </p>
           </details>
+          <a className="faq-more" href="/faq">
+            Read all frequently asked questions
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
       </section>
 
@@ -340,16 +331,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="site-footer">
-        <div className="page-shell footer-content">
-          <a className="brand" href="#top" aria-label="Vora home">
-            <img src="/brand/vora-mark.png" alt="" width="36" height="36" />
-            <span>VORA</span>
-          </a>
-          <p>Built for better teams.</p>
-          <p>Discord-first teammate formation for Mobile Legends.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

@@ -3,6 +3,7 @@ node_modules/
 dist/
 logs/
 backups/
+*.tsbuildinfo
 .env
 .env.*
 !.env.example

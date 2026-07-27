@@ -3,7 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://voramlbb.com"),
-  title: "Vora — Find Your Five",
+  title: {
+    default: "Vora — Find Your Five",
+    template: "%s | Vora",
+  },
   description:
     "Discord-first teammate formation for Mobile Legends. Find compatible players, complete your five and queue together.",
   applicationName: "Vora",

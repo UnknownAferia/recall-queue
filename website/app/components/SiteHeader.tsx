@@ -1,5 +1,3 @@
-const discordInvite = "https://discord.gg/voramlbb";
-
 const navigation = [
   { href: "/live", label: "Live" },
   { href: "/how-it-works", label: "How it works" },
@@ -34,11 +32,9 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
       <div className="nav-actions">
         <a
           className="button button-small button-outline"
-          href={discordInvite}
-          target="_blank"
-          rel="noreferrer"
+          href="/get-started"
         >
-          Join Discord
+          Get started
         </a>
 
         <details className="mobile-menu">
@@ -49,6 +45,7 @@ export function SiteHeader({ overlay = false }: SiteHeaderProps) {
                 {item.label}
               </a>
             ))}
+            <a href="/get-started">Get started</a>
             <a href="/support">Support</a>
           </div>
         </details>

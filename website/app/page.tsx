@@ -116,11 +116,9 @@ export default function Home() {
           <div className="hero-actions">
             <a
               className="button button-primary"
-              href={discordInvite}
-              target="_blank"
-              rel="noreferrer"
+              href="/get-started"
             >
-              Find your squad
+              Get started
               <span aria-hidden="true">↗</span>
             </a>
             <a className="text-link" href="#how-it-works">

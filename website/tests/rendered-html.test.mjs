@@ -18,6 +18,7 @@ test("builds the complete Vora launch page", async () => {
     robotsSource,
     liveSource,
     liveDataSource,
+    getStartedSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -36,6 +37,7 @@ test("builds the complete Vora launch page", async () => {
       new URL("../app/lib/publicCompetition.ts", import.meta.url),
       "utf8",
     ),
+    readFile(new URL("../app/get-started/page.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(layoutSource, /Vora — Find Your Five/);
@@ -82,5 +84,10 @@ test("builds the complete Vora launch page", async () => {
   assert.match(liveSource, /Discord identities and Mobile Legends account identifiers stay/);
   assert.match(liveDataSource, /\/app\/public-data\/competition\.json/);
   assert.match(sitemapSource, /\/live/);
+  assert.match(getStartedSource, /From new member to queue-ready/);
+  assert.match(getStartedSource, /PNG, JPEG or WebP/);
+  assert.match(getStartedSource, /no larger than 10 MB/);
+  assert.match(getStartedSource, /No password, login code/);
+  assert.match(sitemapSource, /\/get-started/);
   assert.doesNotMatch(pageSource, /codex-preview|react-loading-skeleton/i);
 });

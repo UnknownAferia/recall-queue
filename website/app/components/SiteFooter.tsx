@@ -11,6 +11,7 @@ const footerGroups = [
   {
     title: "Resources",
     links: [
+      { href: "/get-started", label: "Get started" },
       { href: "/faq", label: "FAQ" },
       { href: "/support", label: "Support" },
       { href: "https://discord.gg/voramlbb", label: "Discord" },

@@ -18,7 +18,7 @@ export function createRegisterView(
     view,
     "Player Onboarding",
     "Register & Verify",
-    "Create your competitive Vora identity. Registration alone does not unlock matchmaking.",
+    "Create your player profile and submit account evidence through one private onboarding flow.",
     iconAttachmentName,
     "Vora account verification",
   );
@@ -41,24 +41,24 @@ export function createRegisterView(
     .addTextDisplayComponents(
       ViewFactory.text(
         [
-          "### 1 · Create your player profile",
-          "Click **Register & Submit** below. One private form collects:",
+          "### 1 · Register and submit evidence",
+          "Click **Register & Submit**. One private form collects:",
           "- In-game name (IGN)",
           "- Player ID",
           "- Server ID",
           "- One current MLBB profile screenshot",
           "",
-          "Your profile and verification request are created together. Your Discord account can be connected to one MLBB account.",
+          "Your player profile and verification request are created together. One Discord account can be connected to one MLBB account.",
           "",
           "### 2 · Operations review",
           "The screenshot must clearly show the **IGN, Player ID and Server ID** entered in the same form. Vora Operations reviews the evidence privately.",
           "",
-          "Already registered without a screenshot, or previously rejected? Click **Submit Verification** to send evidence without registering again.",
+          "Already registered without an open request, or previously rejected? Click **Submit Verification** to send corrected evidence without registering again.",
           "",
-          "> Matchmaking remains locked while your verification is pending.",
+          "> You can view your profile while pending, but matchmaking remains locked until approval.",
           "",
           "### 3 · Complete your role identity",
-          "Once approved, open `/vora` → **Preferences** and choose two different preferred roles before entering the teammate pool.",
+          "Once approved, open `/vora` → **Preferences** and choose two different preferred roles. Then join `queue-lobby` whenever you are ready to enter the teammate pool.",
         ].join("\n"),
       ),
     )
@@ -68,9 +68,9 @@ export function createRegisterView(
       ViewFactory.text(
         [
           "### Verification status",
-          "⏳ **Pending** — Operations is reviewing your evidence.",
-          "✅ **Verified** — Your account can access matchmaking after role setup.",
-          "❌ **Rejected** — Review the reason and submit corrected evidence with `/verify-account`.",
+          "⏳ **Pending** — Your evidence is waiting for Operations review.",
+          "✅ **Verified** — Your account is approved; finish role setup to access matchmaking.",
+          "❌ **Rejected** — Review the reason and click **Submit Verification** with corrected evidence.",
           "",
           "### Keep your account secure",
           "Only upload the requested profile screenshot. **Never share passwords, login codes or authentication details.**",
@@ -79,7 +79,7 @@ export function createRegisterView(
     )
     .addTextDisplayComponents(
       ViewFactory.footer(
-        "Need help with registration or verification? Open a private support ticket.",
+        "A stuck request or account mismatch requires a private support ticket—never create a second account.",
       ),
     );
 }

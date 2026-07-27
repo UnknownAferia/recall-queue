@@ -55,7 +55,7 @@ export function createMatchmakingStatusView(
     view,
     "Live Service Information",
     "Matchmaking Status",
-    "Current Vora Core health and teammate-pool activity.",
+    "Current Vora Core health, five-player pool activity and community sessions.",
     iconAttachmentName,
     "Live Vora matchmaking status",
   );
@@ -79,6 +79,9 @@ export function createMatchmakingStatusView(
           `**Results pending:** ${status.pendingResults}`,
           `**Disputes awaiting staff:** ${status.disputedResults}`,
           ...sessionLines,
+          "",
+          "### Player controls",
+          "Use **Toggle Squad Alerts** for voluntary pool and session notifications. Use **Upcoming Sessions** to view planned queue times in your local timezone.",
           "",
           status.coreOnline
             ? "-# Vora Core is reporting normally."

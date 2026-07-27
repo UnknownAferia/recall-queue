@@ -21,17 +21,22 @@ export function createAnnouncementsView(
     .addTextDisplayComponents(
       ViewFactory.text(
         [
-          "### What appears in this channel",
-          "- Major Vora releases and feature changes",
-          "- Scheduled maintenance and service incidents",
-          "- Matchmaking, rating and rule updates",
-          "- Community events and future season announcements",
+          "### Published here",
+          "- Product releases and important feature changes",
+          "- Scheduled maintenance, incidents and recovery notices",
+          "- Matchmaking, RSR, season and competitive-integrity updates",
+          "- Community queue sessions, events and policy changes",
           "",
-          "Official operational status is always available in `matchmaking-status`. Questions belong in `help` or a private ticket, so this channel can remain a clean announcement archive.",
+          "### Live information",
+          "Use `matchmaking-status` for current service health, pool activity, upcoming sessions and voluntary Squad Alerts. Use `leaderboard` for live season and lifetime rankings.",
+          "",
+          "Questions belong in `help`; account-specific or sensitive matters belong in a private ticket. This channel remains a read-only archive of official Vora updates.",
         ].join("\n"),
       ),
     )
     .addTextDisplayComponents(
-      ViewFactory.footer("Only announcements from Vora staff are official."),
+      ViewFactory.footer(
+        "Official website: voramlbb.com · Only Vora staff announcements are authoritative.",
+      ),
     );
 }

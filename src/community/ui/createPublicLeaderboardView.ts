@@ -72,6 +72,17 @@ export function createPublicLeaderboardView(
     .addTextDisplayComponents(ViewFactory.text(lifetimeSection(players)))
     .addSeparatorComponents(ViewFactory.separator())
     .addTextDisplayComponents(
+      ViewFactory.text(
+        [
+          "### How rankings work",
+          "Season rankings unlock after the configured placement matches. Lifetime RSR continues across seasons, while seasonal RSR can receive a controlled soft reset.",
+          "",
+          "> Only verified match outcomes update RSR. Division and season-achievement Discord roles are cosmetic reflections of recorded progression.",
+        ].join("\n"),
+      ),
+    )
+    .addSeparatorComponents(ViewFactory.separator())
+    .addTextDisplayComponents(
       ViewFactory.footer(
         `Automatically refreshed · Last update <t:${Math.floor(updatedAt.getTime() / 1_000)}:R>`,
       ),

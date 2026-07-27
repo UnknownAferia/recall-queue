@@ -25,7 +25,7 @@ export function createTicketLauncherView(
     view,
     "Private Support",
     "Open a Ticket",
-    "Create a private channel shared only with you and the Vora staff team.",
+    "Create a private support channel shared only with you and Vora Operations.",
     iconAttachmentName,
     "Private Vora support ticket",
   );
@@ -35,17 +35,25 @@ export function createTicketLauncherView(
     .addTextDisplayComponents(
       ViewFactory.text(
         [
-          "Use a ticket for account problems, sanctions, disputed results or sensitive reports.",
+          "### Use a ticket for",
+          "- Registration, verification or account-identity problems",
+          "- A stuck queue, squad or result workflow",
+          "- Result disputes and missing or incorrect evidence",
+          "- Moderation questions, sanctions and appeals",
+          "- Sensitive reports that should not appear publicly",
           "",
-          "- Describe the issue clearly.",
-          "- Include the relevant squad reference when available.",
-          "- Do not open multiple tickets for the same issue.",
-          "- Never submit passwords or authentication codes.",
+          "### Help Operations resolve it",
+          "- Use a clear subject and explain what happened.",
+          "- Include relevant player, verification, squad or `VORA-######` references.",
+          "- Keep one open ticket per issue and reply in the created channel.",
+          "- Never submit passwords, login codes, bot tokens or unrelated personal data.",
         ].join("\n"),
       ),
     )
     .addActionRowComponents(actions)
     .addTextDisplayComponents(
-      ViewFactory.footer("One open ticket per member and server."),
+      ViewFactory.footer(
+        "One open ticket per member and server · Closed channels are retained for up to 7 days.",
+      ),
     );
 }

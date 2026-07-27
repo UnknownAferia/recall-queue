@@ -144,32 +144,46 @@ describe("Vora Community bot", () => {
     assert.match(leaderboard, /1,250 RSR/);
     assert.match(status, /Matchmaking Operational/);
     assert.match(status, /Waiting players/);
+    assert.match(status, /Toggle Squad Alerts/);
+    assert.match(status, /Upcoming Sessions/);
     assert.match(help, /Help Center/);
+    assert.match(help, /Submit Verification/);
+    assert.match(help, /Not enough players/);
     assert.match(help, new RegExp(CommunityCustomIds.ticket.open));
     assert.match(ticket, /Open a Ticket/);
+    assert.match(ticket, /Closed channels are retained for up to 7 days/);
     assert.match(illustratedRegister, /attachment:\/\/vora-verify\.png/);
     assert.match(illustratedRegister, /Vora account verification/);
-    assert.match(onboarding, /Find Better Teammates/);
+    assert.match(onboarding, /Find Your Five\. Play as One\./);
+    assert.match(onboarding, /Register & Submit/);
+    assert.match(onboarding, /Squad Alerts/);
+    assert.match(onboarding, /community sessions/i);
     assert.match(onboarding, /Vora Rules/);
     assert.match(onboarding, /retained for up to 7 days/);
     assert.match(onboarding, /retained for up to 365 days/);
     assert.match(onboarding, /competitive match record/);
     assert.match(onboarding, /Vora Announcements/);
     assert.match(onboarding, /How Vora Works/);
+    assert.match(onboarding, /Three squad confirmations/);
+    assert.match(onboarding, /Individual KDA does not directly change RSR/);
     assert.match(onboarding, /Register & Verify/);
-    assert.match(onboarding, /Registration alone does not unlock matchmaking/);
+    assert.match(onboarding, /one private onboarding flow/i);
     assert.match(
       onboarding,
       new RegExp(CommunityCustomIds.onboarding.register),
     );
     assert.match(onboarding, new RegExp(CommunityCustomIds.onboarding.verify));
-    assert.match(onboarding, /Matchmaking remains locked/);
+    assert.match(onboarding, /matchmaking remains locked/i);
     assert.match(onboarding, /Competitive Hub/);
     assert.match(onboarding, /attachment:\/\/Vora_Banner\.png/);
+    assert.doesNotMatch(onboarding, /Register Now/);
     assert.match(launchAnnouncement, /Vora Is Live/);
     assert.match(launchAnnouncement, /Five-player teammate matchmaking/);
     assert.match(launchAnnouncement, /Competitive integrity/);
     assert.match(launchAnnouncement, /Rating and progression/);
+    assert.match(launchAnnouncement, /Ranked Skill Rating/);
+    assert.match(launchAnnouncement, /voramlbb\.com/);
+    assert.doesNotMatch(launchAnnouncement, /Recall Skill Rating/);
     assert.match(
       launchAnnouncement,
       /attachment:\/\/Vora_Server_Banner_New\.png/,

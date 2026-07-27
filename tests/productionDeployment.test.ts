@@ -81,7 +81,13 @@ describe("Production deployment", () => {
     assert.match(caddyfile, /voramlbb\.com/);
     assert.match(caddyfile, /www\.voramlbb\.com/);
     assert.match(caddyfile, /reverse_proxy vora-website:3000/);
+    assert.match(caddyfile, /Content-Security-Policy/);
+    assert.match(caddyfile, /frame-ancestors 'none'/);
+    assert.match(caddyfile, /Cross-Origin-Opener-Policy "same-origin"/);
+    assert.match(caddyfile, /Cross-Origin-Resource-Policy "same-origin"/);
     assert.match(deploy, /vora-website:\$\{release\}/);
     assert.match(deploy, /https:\/\/voramlbb\.com\//);
+    assert.match(deploy, /https:\/\/voramlbb\.com\/api\/health/);
+    assert.match(deploy, /public_stack_ready/);
   });
 });

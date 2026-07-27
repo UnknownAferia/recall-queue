@@ -130,6 +130,29 @@ if [[ ${healthy} == true ]]; then
   fi
 fi
 
+if [[ ${healthy} == true ]]; then
+  public_stack_ready=false
+
+  for _ in {1..24}; do
+    if curl \
+      --fail \
+      --silent \
+      --show-error \
+      --max-time 15 \
+      https://voramlbb.com/api/health >/dev/null; then
+      public_stack_ready=true
+      break
+    fi
+
+    sleep 5
+  done
+
+  if [[ ${public_stack_ready} != true ]]; then
+    healthy=false
+    echo "The public health endpoint did not confirm Core and Community readiness." >&2
+  fi
+fi
+
 if [[ ${healthy} != true ]]; then
   compose "${release}" logs \
     --tail 100 \

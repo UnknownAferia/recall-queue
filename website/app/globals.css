@@ -74,6 +74,7 @@ summary {
 .site-nav-static {
   position: relative;
   left: auto;
+  margin-inline: auto;
   transform: none;
 }
 

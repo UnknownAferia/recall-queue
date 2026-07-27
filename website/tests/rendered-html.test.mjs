@@ -6,6 +6,7 @@ test("builds the complete Vora launch page", async () => {
   const [
     pageSource,
     layoutSource,
+    globalStyles,
     howItWorksSource,
     ratingSource,
     seasonsSource,
@@ -18,6 +19,7 @@ test("builds the complete Vora launch page", async () => {
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/how-it-works/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/rating/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/seasons/page.tsx", import.meta.url), "utf8"),
@@ -31,6 +33,10 @@ test("builds the complete Vora launch page", async () => {
 
   assert.match(layoutSource, /Vora — Find Your Five/);
   assert.match(layoutSource, /https:\/\/voramlbb\.com/);
+  assert.match(
+    globalStyles,
+    /\.site-nav-static\s*\{[^}]*margin-inline:\s*auto;/s,
+  );
   assert.match(pageSource, /Find your five/);
   assert.match(pageSource, /Play as one/);
   assert.match(pageSource, /https:\/\/discord\.gg\/voramlbb/);

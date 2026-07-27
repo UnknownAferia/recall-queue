@@ -18,6 +18,25 @@ players to the Vora Discord server.
 - `/privacy` — plain-language privacy notice
 - `/terms` — platform terms of use
 
+Additional production routes:
+
+- `/updates` — public release milestones
+- `/api/health` — machine-readable Website, Community and Core health
+
+## External monitoring
+
+`GET /api/health` returns HTTP `200` only while the website is reachable and
+recent Community data confirms that Vora Core is online. It returns HTTP `503`
+when the Community publisher becomes stale or Core reports unavailable.
+Planned matchmaking pauses remain healthy and are exposed separately as
+`matchmaking: "paused"`.
+
+The response intentionally excludes Discord identities, guild identifiers,
+database details and internal errors. External uptime monitors should check:
+
+- `https://voramlbb.com/` for website availability
+- `https://voramlbb.com/api/health` for combined Vora service health
+
 ## Development
 
 Requires Node.js 22.13 or newer.

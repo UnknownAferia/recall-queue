@@ -25,6 +25,8 @@ test("builds the complete Vora launch page", async () => {
     updatesSource,
     manifestSource,
     structuredDataSource,
+    healthRouteSource,
+    publicHealthSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -62,6 +64,8 @@ test("builds the complete Vora launch page", async () => {
       new URL("../app/components/StructuredData.tsx", import.meta.url),
       "utf8",
     ),
+    readFile(new URL("../app/api/health/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/publicHealth.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layoutSource, /Vora — Find Your Five/);
@@ -138,6 +142,15 @@ test("builds the complete Vora launch page", async () => {
   assert.match(structuredDataSource, /"@type": "WebSite"/);
   assert.match(structuredDataSource, /"@type": "SoftwareApplication"/);
   assert.match(structuredDataSource, /replace\(\/</);
+  assert.match(healthRouteSource, /X-Robots-Tag/);
+  assert.match(healthRouteSource, /Retry-After/);
+  assert.match(healthRouteSource, /Cache-Control/);
+  assert.match(publicHealthSource, /publicHealthMaximumAgeMs/);
+  assert.match(publicHealthSource, /services:\s*\{/);
+  assert.doesNotMatch(
+    publicHealthSource,
+    /discordId|guildId|MONGODB_URI|maintenanceReason/,
+  );
   for (const [source, canonical] of [
     [getStartedSource, "/get-started"],
     [liveSource, "/live"],

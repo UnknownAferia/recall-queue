@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Support",
   description:
     "Find the correct Vora support route for account, matchmaking, result and moderation issues.",
+  alternates: {
+    canonical: "/support",
+  },
 };
 
 const routes = [

@@ -7,6 +7,7 @@ const routes = [
   "/how-it-works",
   "/rating",
   "/seasons",
+  "/updates",
   "/faq",
   "/support",
   "/privacy",
@@ -19,7 +20,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((route, index) => ({
     url: `https://voramlbb.com${route}`,
     lastModified,
-    changeFrequency: index === 0 ? "weekly" : "monthly",
-    priority: index === 0 ? 1 : route === "/how-it-works" ? 0.9 : 0.7,
+    changeFrequency:
+      index === 0 || route === "/live" || route === "/updates"
+        ? "weekly"
+        : "monthly",
+    priority:
+      index === 0
+        ? 1
+        : route === "/how-it-works" || route === "/get-started"
+          ? 0.9
+          : route === "/live" || route === "/updates"
+            ? 0.8
+            : 0.7,
   }));
 }

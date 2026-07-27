@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Terms of Use",
   description:
     "The rules that apply when accessing Vora's website, Discord community and competitive systems.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 export default function TermsPage() {

@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Frequently Asked Questions",
   description:
     "Answers about Vora registration, matchmaking, roles, ratings, results, penalties and support.",
+  alternates: {
+    canonical: "/faq",
+  },
 };
 
 const questions = [

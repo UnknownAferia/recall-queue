@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Get Started",
   description:
     "Register, verify your Mobile Legends account, choose your roles and become queue-ready in Vora.",
+  alternates: {
+    canonical: "/get-started",
+  },
 };
 
 const preparation = [

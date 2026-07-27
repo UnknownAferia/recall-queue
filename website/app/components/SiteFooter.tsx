@@ -8,6 +8,7 @@ const footerGroups = [
       { href: "/how-it-works", label: "How Vora works" },
       { href: "/rating", label: "RSR & divisions" },
       { href: "/seasons", label: "Seasons" },
+      { href: "/updates", label: "Updates" },
     ],
   },
   {

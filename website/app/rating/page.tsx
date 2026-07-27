@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "RSR & Divisions",
   description:
     "Understand Vora's Ranked Skill Rating, placements, confidence and competitive divisions.",
+  alternates: {
+    canonical: "/rating",
+  },
 };
 
 const divisions = [

@@ -3,6 +3,7 @@ const navigation = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/rating", label: "Rating" },
   { href: "/seasons", label: "Seasons" },
+  { href: "/updates", label: "Updates" },
   { href: "/faq", label: "FAQ" },
 ] as const;
 

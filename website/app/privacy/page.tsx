@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Privacy Notice",
   description:
     "A plain-language overview of the information Vora processes and why it is needed.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPage() {

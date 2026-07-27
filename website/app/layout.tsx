@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PageViewTracker } from "./components/PageViewTracker";
+import { StructuredData } from "./components/StructuredData";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://voramlbb.com"),
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "Discord-first teammate formation for Mobile Legends. Find compatible players, complete your five and queue together.",
   applicationName: "Vora",
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
   },
@@ -65,8 +67,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
+        <StructuredData />
         <PageViewTracker />
-        {children}
+        <div id="main-content" tabIndex={-1}>
+          {children}
+        </div>
       </body>
     </html>
   );

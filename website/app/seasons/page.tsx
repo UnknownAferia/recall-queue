@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "Seasons & Progression",
   description:
     "Learn how Vora seasons, soft resets, seasonal rankings and achievements preserve long-term competitive progress.",
+  alternates: {
+    canonical: "/seasons",
+  },
 };
 
 const lifecycle = [

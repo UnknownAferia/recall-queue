@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "How Vora Works",
   description:
     "See how Vora turns verified Mobile Legends players into a complete five-player squad inside Discord.",
+  alternates: {
+    canonical: "/how-it-works",
+  },
 };
 
 const journey = [

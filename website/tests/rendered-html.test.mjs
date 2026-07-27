@@ -22,6 +22,9 @@ test("builds the complete Vora launch page", async () => {
     analyticsSource,
     pageTrackerSource,
     discordRedirectSource,
+    updatesSource,
+    manifestSource,
+    structuredDataSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -51,6 +54,12 @@ test("builds the complete Vora launch page", async () => {
     ),
     readFile(
       new URL("../app/go/discord/route.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(new URL("../app/updates/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/manifest.ts", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/components/StructuredData.tsx", import.meta.url),
       "utf8",
     ),
   ]);
@@ -105,6 +114,12 @@ test("builds the complete Vora launch page", async () => {
   assert.match(getStartedSource, /No password, login code/);
   assert.match(sitemapSource, /\/get-started/);
   assert.match(layoutSource, /PageViewTracker/);
+  assert.match(layoutSource, /StructuredData/);
+  assert.match(layoutSource, /skip-link/);
+  assert.match(layoutSource, /manifest\.webmanifest/);
+  assert.match(globalStyles, /\.skip-link/);
+  assert.match(globalStyles, /prefers-reduced-motion/);
+  assert.match(globalStyles, /animation-duration:\s*0\.01ms/);
   assert.match(analyticsSource, /retentionDays = 90/);
   assert.match(analyticsSource, /website-conversions\.json/);
   assert.match(pageTrackerSource, /navigator\.doNotTrack === "1"/);
@@ -113,5 +128,29 @@ test("builds the complete Vora launch page", async () => {
   assert.match(discordRedirectSource, /recordDiscordClick/);
   assert.match(privacySource, /does not create visitor profiles/);
   assert.match(privacySource, /retained\s+for up to 90 days/);
+  assert.match(updatesSource, /Vora is live/);
+  assert.match(updatesSource, /WHAT WE ARE IMPROVING NEXT/);
+  assert.match(updatesSource, /updates-final/);
+  assert.match(sitemapSource, /\/updates/);
+  assert.match(analyticsSource, /"\/updates"/);
+  assert.match(manifestSource, /Vora — Find Your Five/);
+  assert.match(manifestSource, /start_url:\s*"\/"/);
+  assert.match(structuredDataSource, /"@type": "WebSite"/);
+  assert.match(structuredDataSource, /"@type": "SoftwareApplication"/);
+  assert.match(structuredDataSource, /replace\(\/</);
+  for (const [source, canonical] of [
+    [getStartedSource, "/get-started"],
+    [liveSource, "/live"],
+    [howItWorksSource, "/how-it-works"],
+    [ratingSource, "/rating"],
+    [seasonsSource, "/seasons"],
+    [faqSource, "/faq"],
+    [supportSource, "/support"],
+    [privacySource, "/privacy"],
+    [termsSource, "/terms"],
+    [updatesSource, "/updates"],
+  ]) {
+    assert.match(source, new RegExp(`canonical:\\s*"${canonical}"`));
+  }
   assert.doesNotMatch(pageSource, /codex-preview|react-loading-skeleton/i);
 });

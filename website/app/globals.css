@@ -52,6 +52,29 @@ summary {
   outline-offset: 4px;
 }
 
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 14px;
+  left: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--cyan);
+  border-radius: 8px;
+  background: var(--midnight);
+  color: var(--white);
+  font-weight: 700;
+  transform: translateY(-160%);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
 .page-shell {
   width: min(1180px, calc(100% - 48px));
   margin-inline: auto;
@@ -1658,8 +1681,186 @@ summary {
   *,
   *::before,
   *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.updates-section {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.3fr);
+  gap: clamp(54px, 8vw, 120px);
+}
+
+.updates-intro {
+  align-self: start;
+  position: sticky;
+  top: 42px;
+}
+
+.updates-intro h2,
+.updates-next h2 {
+  margin: 10px 0 0;
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  letter-spacing: -0.055em;
+  line-height: 1.02;
+}
+
+.updates-intro > p:last-child,
+.updates-next > div:last-child > p {
+  margin: 24px 0 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.release-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.release-timeline > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.release-timeline > li:not(:last-child)::before {
+  position: absolute;
+  top: 42px;
+  bottom: -2px;
+  left: 20px;
+  width: 1px;
+  background: linear-gradient(var(--cyan), rgba(31, 200, 255, 0.08));
+  content: "";
+}
+
+.release-marker {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31, 200, 255, 0.42);
+  border-radius: 50%;
+  background: var(--deep);
+  color: var(--cyan);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+}
+
+.release-timeline article {
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(31, 200, 255, 0.09), transparent 42%),
+    rgba(13, 24, 40, 0.64);
+}
+
+.release-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: #70849b;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+}
+
+.release-meta span {
+  color: var(--cyan);
+}
+
+.release-timeline h3 {
+  margin: 30px 0 0;
+  font-size: clamp(1.6rem, 3vw, 2.45rem);
+  letter-spacing: -0.04em;
+}
+
+.release-timeline article > p {
+  margin: 16px 0 0;
+  color: var(--muted);
+  line-height: 1.72;
+}
+
+.release-timeline article ul {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.release-timeline article li {
+  position: relative;
+  padding-left: 22px;
+  color: #cfdae6;
+  line-height: 1.5;
+}
+
+.release-timeline article li::before {
+  position: absolute;
+  top: 0.6em;
+  left: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--emerald);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+  content: "";
+}
+
+.updates-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.78fr);
+  align-items: end;
+  gap: clamp(50px, 9vw, 130px);
+}
+
+.updates-next .text-link {
+  display: inline-flex;
+  margin-top: 28px;
+}
+
+@media (max-width: 920px) {
+  .updates-section,
+  .updates-next {
+    grid-template-columns: 1fr;
+  }
+
+  .updates-intro {
+    position: static;
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 600px) {
+  .release-timeline > li {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .release-timeline > li::before {
+    display: none;
+  }
+
+  .release-timeline article {
+    padding: 24px;
+  }
+
+  .release-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
   }
 }
 

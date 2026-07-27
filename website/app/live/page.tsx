@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Live Competition",
   description:
     "See Vora service availability, teammate-pool activity, the current season and public competitive leaderboards.",
+  alternates: {
+    canonical: "/live",
+  },
 };
 
 export const dynamic = "force-dynamic";

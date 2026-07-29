@@ -3519,6 +3519,63 @@ summary {
 .scrim-steps span { color: #1fc8ff; font: .75rem monospace; }
 .scrim-steps h3 { margin: 4rem 0 1rem; }
 .scrim-steps p { color: var(--muted); line-height: 1.65; }
+
+.squad-benefits h3 {
+  margin-top: 3rem;
+}
+
+.squad-program-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+}
+
+.squad-program-grid article {
+  min-height: 230px;
+  padding: 32px;
+  border-right: 1px solid var(--line);
+  background: rgba(13, 24, 40, 0.44);
+}
+
+.squad-program-grid article:last-child {
+  border-right: 0;
+}
+
+.squad-program-grid strong {
+  color: var(--cyan);
+  font-family: var(--font-geist-mono);
+  font-size: 1.25rem;
+}
+
+.squad-program-grid h3 {
+  margin: 3rem 0 0.75rem;
+  font-size: 1.35rem;
+}
+
+.squad-program-grid p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.squad-program-grid code {
+  color: var(--white);
+}
+
+@media (max-width: 760px) {
+  .squad-program-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-program-grid article {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .squad-program-grid article:last-child {
+    border-bottom: 0;
+  }
+}
 @media (max-width: 850px) {
   .scrim-steps { grid-template-columns: repeat(2, 1fr); }
 }

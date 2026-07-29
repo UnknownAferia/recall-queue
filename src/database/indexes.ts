@@ -20,6 +20,7 @@ import { OnboardingAudienceExclusionModel } from "../models/OnboardingAudienceEx
 import { QueueActivationStateModel } from "../models/QueueActivationStateModel.js";
 import { QueueSessionModel } from "../models/QueueSessionModel.js";
 import { ScrimListingModel } from "../models/ScrimListingModel.js";
+import { CommunitySquadModel } from "../models/CommunitySquadModel.js";
 
 const ManagedModels = [
   CommunityPanelModel,
@@ -43,6 +44,7 @@ const ManagedModels = [
   QueueActivationStateModel,
   QueueSessionModel,
   ScrimListingModel,
+  CommunitySquadModel,
 ] as const;
 
 export interface DatabaseIndexAudit {

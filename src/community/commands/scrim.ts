@@ -29,10 +29,9 @@ export const scrimCommandData = new SlashCommandBuilder()
       .addStringOption((option) =>
         option
           .setName("team")
-          .setDescription("Team name")
+          .setDescription("Team name (uses your Vora Squad when omitted)")
           .setMinLength(2)
-          .setMaxLength(40)
-          .setRequired(true),
+          .setMaxLength(40),
       )
       .addStringOption((option) =>
         option
@@ -90,10 +89,22 @@ export async function executeScrimCommand(
   const subcommand = interaction.options.getSubcommand(true);
   try {
     if (subcommand === "create") {
+      const suppliedTeamName = interaction.options.getString("team");
+      const persistentSquad = suppliedTeamName
+        ? null
+        : await client.communitySquads.getCaptainSquad(
+            interaction.guildId,
+            interaction.user.id,
+          );
+      if (!suppliedTeamName && !persistentSquad) {
+        throw new Error(
+          "Enter a team name or create a persistent Vora Squad with `/squad` first.",
+        );
+      }
       const listing = await client.scrims.create({
         guildId: interaction.guildId,
         captainDiscordId: interaction.user.id,
-        teamName: interaction.options.getString("team", true),
+        teamName: suppliedTeamName ?? persistentSquad!.name,
         region: interaction.options.getString("region", true) as ScrimRegion,
         availability: interaction.options.getString("availability", true),
         notes: interaction.options.getString("notes"),

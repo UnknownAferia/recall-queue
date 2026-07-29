@@ -171,6 +171,17 @@ they are not the primary matchmaking flow.
 - HMAC-authenticated private Website-to-Community operations API
 - Updated privacy, terms and production operations documentation
 
+## ✅ Persistent squads and captain onboarding
+
+- Guided `/squad` flow with create and short-code join actions
+- Persistent captain, roster, region and recruiting-role storage
+- Live role-coverage overview from verified player preferences
+- Safe leave, kick, captain transfer, invite rotation and archive controls
+- Founding Squad application and Operations review workflow
+- Existing squad identity reused automatically by `/scrim create`
+- Public captain-focused Vora Squads page
+- Automated service, permission and Discord component tests
+
 ## 🔭 Later exploration
 
 - Premade duo/trio support with party balancing

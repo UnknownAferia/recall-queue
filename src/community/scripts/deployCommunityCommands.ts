@@ -26,6 +26,10 @@ import { verificationInboxCommandData } from "../commands/verificationInbox.js";
 import { queueSessionCommandData } from "../commands/queueSession.js";
 import { activationDashboardCommandData } from "../commands/activationDashboard.js";
 import { scrimCommandData } from "../commands/scrim.js";
+import {
+  communitySquadAdminCommandData,
+  communitySquadCommandData,
+} from "../commands/squad.js";
 
 async function deployCommunityCommands(): Promise<void> {
   const commandData = [
@@ -46,6 +50,8 @@ async function deployCommunityCommands(): Promise<void> {
     queueSessionCommandData.toJSON(),
     activationDashboardCommandData.toJSON(),
     scrimCommandData.toJSON(),
+    communitySquadCommandData.toJSON(),
+    communitySquadAdminCommandData.toJSON(),
   ];
   const rest = new REST({ version: "10" }).setToken(communityEnv.discordToken);
 

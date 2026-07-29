@@ -32,6 +32,7 @@ import { TicketAlreadyOpenError } from "./errors/TicketAlreadyOpenError.js";
 import { TicketOperationError } from "./errors/TicketOperationError.js";
 import { CommunityModerationError } from "./errors/CommunityModerationError.js";
 import { CommunityReportError } from "./errors/CommunityReportError.js";
+import { CommunitySquadError } from "./errors/CommunitySquadError.js";
 import {
   parseCommunityCaseButtonId,
   parseCommunityReportModalId,
@@ -81,6 +82,13 @@ import {
   executeScrimCommand,
   ScrimCommandName,
 } from "./commands/scrim.js";
+import {
+  CommunitySquadAdminCommandName,
+  CommunitySquadCommandName,
+  executeCommunitySquadAdminCommand,
+  executeCommunitySquadCommand,
+} from "./commands/squad.js";
+import { handleCommunitySquadInteraction } from "./handleCommunitySquadInteraction.js";
 
 function createErrorResponse(title: string, description: string) {
   return {
@@ -149,6 +157,10 @@ export function registerCommunityInteractionHandler(
         return;
       }
 
+      if (await handleCommunitySquadInteraction(client, interaction)) {
+        return;
+      }
+
       if (
         interaction.isMessageContextMenuCommand?.() &&
         interaction.commandName === ReportMessageCommandName
@@ -185,6 +197,9 @@ export function registerCommunityInteractionHandler(
           [QueueSessionCommandName]: executeQueueSessionCommand,
           [ActivationDashboardCommandName]: executeActivationDashboardCommand,
           [ScrimCommandName]: executeScrimCommand,
+          [CommunitySquadCommandName]: executeCommunitySquadCommand,
+          [CommunitySquadAdminCommandName]:
+            executeCommunitySquadAdminCommand,
         };
         const execute = commands[interaction.commandName];
         if (execute) {
@@ -465,13 +480,16 @@ export function registerCommunityInteractionHandler(
         error instanceof TicketOperationError ||
         error instanceof CommunityModerationError ||
         error instanceof CommunityReportError ||
-        error instanceof QueueActivationError
+        error instanceof QueueActivationError ||
+        error instanceof CommunitySquadError
       ) {
         await respondWithError(
           interaction,
           error instanceof QueueActivationError
             ? "Squad Alerts Unavailable"
-            : "Ticket Unavailable",
+            : error instanceof CommunitySquadError
+              ? "Squad Action Unavailable"
+              : "Ticket Unavailable",
           error.message,
         );
         return;

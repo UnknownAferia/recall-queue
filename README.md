@@ -55,6 +55,8 @@ automatically.
 ### Matchmaking and squad lifecycle
 
 - Persistent five-player teammate queues per Discord server
+- Persistent captain-led Vora Squads with short invite codes and live role coverage
+- Founding Squad applications and safe roster/captain management
 - Deterministic role allocation for EXP, Gold, Mid, Jungle and Roam
 - Compatibility scoring using RSR, role fit and behavior
 - Ready checks with automatic expiration and escalating cooldowns
@@ -233,12 +235,13 @@ npm run dev:community
 The Community bot registers its own administrative and moderation commands as
 well as the **Report Message** and **Report User** context-menu actions. Its
 persistent help, ticket and information panels are published in managed
-channels. `/scrim create`, `/scrim browse` and `/scrim close` provide a
-lightweight opponent-finder for existing five-player teams.
+channels. `/squad` provides a guided private dashboard for permanent rosters,
+while `/scrim create`, `/scrim browse` and `/scrim close` provide a lightweight
+opponent-finder for existing five-player teams.
 
 The public website additionally includes Vora Status, privacy-safe Wrapped
-cards, a browser-only Draft planner and a Scrims guide. None of these tools
-requires a separate player account outside Discord.
+cards, a browser-only Draft planner, a Squads guide and a Scrims guide. None of
+these tools requires a separate player account outside Discord.
 
 For a production-style start after building:
 

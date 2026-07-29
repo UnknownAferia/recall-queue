@@ -12,6 +12,7 @@ const footerGroups = [
       { href: "/updates", label: "Updates" },
       { href: "/wrapped", label: "Vora Wrapped" },
       { href: "/draft", label: "Vora Draft" },
+      { href: "/squads", label: "Vora Squads" },
       { href: "/scrims", label: "Vora Scrims" },
     ],
   },

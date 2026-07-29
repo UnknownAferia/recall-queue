@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("ships Vora Status, Wrapped, Draft, Scrims and Control actions", async () => {
+test("ships Vora Status, Wrapped, Draft, Squads, Scrims and Control actions", async () => {
   const files = await Promise.all(
     [
       "../app/status/page.tsx",
@@ -10,6 +10,7 @@ test("ships Vora Status, Wrapped, Draft, Scrims and Control actions", async () =
       "../app/wrapped/page.tsx",
       "../app/api/wrapped/route.ts",
       "../app/draft/DraftPlanner.tsx",
+      "../app/squads/page.tsx",
       "../app/scrims/page.tsx",
       "../app/control/ControlActions.tsx",
       "../app/api/control/operations/route.ts",
@@ -22,6 +23,7 @@ test("ships Vora Status, Wrapped, Draft, Scrims and Control actions", async () =
     wrapped,
     wrappedApi,
     draft,
+    squads,
     scrims,
     control,
     controlApi,
@@ -34,11 +36,13 @@ test("ships Vora Status, Wrapped, Draft, Scrims and Control actions", async () =
   assert.match(wrappedApi, /image\/svg\+xml/);
   assert.match(draft, /Copy share link/);
   assert.match(draft, /does not\s+upload or store/s);
+  assert.match(squads, /Keep your squad/);
+  assert.match(squads, /Founding Captains/);
   assert.match(scrims, /Your five\. Their five/);
   assert.match(control, /window\.confirm/);
   assert.match(control, /verification\.review/);
   assert.match(controlApi, /getControlSession/);
-  for (const route of ["/status", "/wrapped", "/draft", "/scrims"]) {
+  for (const route of ["/status", "/wrapped", "/draft", "/squads", "/scrims"]) {
     assert.match(sitemap, new RegExp(route));
   }
 });

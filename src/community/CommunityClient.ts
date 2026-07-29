@@ -36,6 +36,8 @@ import { PublicStatusSnapshotService } from "./services/PublicStatusSnapshotServ
 import { ScrimListingRepository } from "../repositories/ScrimListingRepository.js";
 import { ScrimService } from "./services/ScrimService.js";
 import { ControlOperationsApi } from "./services/ControlOperationsApi.js";
+import { CommunitySquadRepository } from "../repositories/CommunitySquadRepository.js";
+import { CommunitySquadService } from "./services/CommunitySquadService.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -53,6 +55,7 @@ export class CommunityClient extends Client {
   public readonly controlSnapshot: ControlSnapshotService;
   public readonly publicStatus: PublicStatusSnapshotService;
   public readonly scrims: ScrimService;
+  public readonly communitySquads: CommunitySquadService;
   public readonly controlOperations: ControlOperationsApi;
   public readonly websiteAnalytics: WebsiteAnalyticsService;
 
@@ -125,6 +128,10 @@ export class CommunityClient extends Client {
     );
     this.publicStatus = new PublicStatusSnapshotService();
     this.scrims = new ScrimService(new ScrimListingRepository());
+    this.communitySquads = new CommunitySquadService(
+      new CommunitySquadRepository(),
+      playerRepository,
+    );
     this.controlOperations = new ControlOperationsApi(this);
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.moderation = new CommunityModerationService(

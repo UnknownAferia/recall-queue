@@ -1,6 +1,6 @@
 # Vora 2.0 Roadmap
 
-Last updated: 22 July 2026
+Last updated: 29 July 2026
 
 Vora is a Discord-first teammate formation platform for Mobile Legends. It
 builds compatible five-player squads that queue together against external MLBB
@@ -158,13 +158,27 @@ they are not the primary matchmaking flow.
 - Public upcoming-session visibility in matchmaking status
 - Seven-day onboarding, queue and squad conversion dashboard for Operations
 
+## ✅ Launch companion tools
+
+- Public Vora Status page with 90-day daily availability samples
+- Automatic degraded/outage incident creation and resolution
+- Privacy-safe Vora Wrapped cards generated from public standings
+- Browser-only Vora Draft planner with shareable URL state
+- Vora Scrims listings for existing five-player teams
+- Seven-day automatic scrim listing expiry and one-open-listing protection
+- Discord-authenticated Vora Control operations center
+- Audited maintenance, queue-session, verification and report actions
+- HMAC-authenticated private Website-to-Community operations API
+- Updated privacy, terms and production operations documentation
+
 ## 🔭 Later exploration
 
 - Premade duo/trio support with party balancing
 - Internal community 5v5 mode
-- Tournament and scrim tooling
+- Expanded tournament and scrim coordination
 - Language and playstyle preferences after sufficient player volume
 - Web-based read-only profiles if Discord presentation becomes limiting
+- Vora 3.0 product planning after sufficient production usage data
 
 ## Release status
 

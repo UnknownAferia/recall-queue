@@ -1,5 +1,6 @@
 const navigation = [
   { href: "/live", label: "Live" },
+  { href: "/status", label: "Status" },
   { href: "/how-it-works", label: "How it works" },
   { href: "/rating", label: "Rating" },
   { href: "/seasons", label: "Seasons" },

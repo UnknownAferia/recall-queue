@@ -10,6 +10,7 @@ export const OperationalAuditEventTypes = [
   "system_recovery_run",
   "launch_audit_run",
   "critical_alert_published",
+  "control_action",
 ] as const;
 
 export type OperationalAuditEventType =

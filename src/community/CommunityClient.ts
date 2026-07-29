@@ -32,6 +32,10 @@ import { PublicCompetitionSnapshotService } from "./services/PublicCompetitionSn
 import { WebsiteAnalyticsService } from "./services/WebsiteAnalyticsService.js";
 import { ControlDataRepository } from "../repositories/ControlDataRepository.js";
 import { ControlSnapshotService } from "./services/ControlSnapshotService.js";
+import { PublicStatusSnapshotService } from "./services/PublicStatusSnapshotService.js";
+import { ScrimListingRepository } from "../repositories/ScrimListingRepository.js";
+import { ScrimService } from "./services/ScrimService.js";
+import { ControlOperationsApi } from "./services/ControlOperationsApi.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -47,6 +51,9 @@ export class CommunityClient extends Client {
   public readonly activation: QueueActivationService;
   public readonly publicCompetition: PublicCompetitionSnapshotService;
   public readonly controlSnapshot: ControlSnapshotService;
+  public readonly publicStatus: PublicStatusSnapshotService;
+  public readonly scrims: ScrimService;
+  public readonly controlOperations: ControlOperationsApi;
   public readonly websiteAnalytics: WebsiteAnalyticsService;
 
   public constructor() {
@@ -116,6 +123,9 @@ export class CommunityClient extends Client {
       new ControlDataRepository(),
       this.websiteAnalytics,
     );
+    this.publicStatus = new PublicStatusSnapshotService();
+    this.scrims = new ScrimService(new ScrimListingRepository());
+    this.controlOperations = new ControlOperationsApi(this);
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.moderation = new CommunityModerationService(
       moderationRepository,

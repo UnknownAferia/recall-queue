@@ -25,6 +25,7 @@ export async function bootstrapCommunity(
     client.once(Events.ClientReady, async (readyClient) => {
       try {
         await client.heartbeat.start();
+        client.controlOperations.start();
         await jobs.start();
         logger.info(`Vora Community logged in as ${readyClient.user.tag}`);
       } catch (error: unknown) {

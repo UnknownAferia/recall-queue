@@ -5,10 +5,14 @@ const footerGroups = [
     title: "Product",
     links: [
       { href: "/live", label: "Live competition" },
+      { href: "/status", label: "Service status" },
       { href: "/how-it-works", label: "How Vora works" },
       { href: "/rating", label: "RSR & divisions" },
       { href: "/seasons", label: "Seasons" },
       { href: "/updates", label: "Updates" },
+      { href: "/wrapped", label: "Vora Wrapped" },
+      { href: "/draft", label: "Vora Draft" },
+      { href: "/scrims", label: "Vora Scrims" },
     ],
   },
   {

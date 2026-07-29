@@ -5,7 +5,7 @@ www.voramlbb.com {
 voramlbb.com {
 	encode zstd gzip
 
-	@control path /control /control/*
+	@control path /control /control/* /api/control/*
 	basic_auth @control {
 		{$VORA_CONTROL_USERNAME} {$VORA_CONTROL_PASSWORD_HASH}
 	}

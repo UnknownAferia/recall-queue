@@ -156,7 +156,7 @@ test("builds the complete Vora launch page", async () => {
     /discordId|guildId|MONGODB_URI|maintenanceReason/,
   );
   assert.match(controlSource, /Vora at a glance/);
-  assert.match(controlSource, /No player identifiers/);
+  assert.match(controlSource, /Authenticated operations center/);
   assert.match(controlSource, /Overview/);
   assert.match(controlSource, /Onboarding/);
   assert.match(controlSource, /Matchmaking/);

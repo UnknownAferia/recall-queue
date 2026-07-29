@@ -84,10 +84,13 @@ automatically.
 
 - Separate Vora Community bot process with an independent Discord identity
 - Persistent global leaderboard and live matchmaking-status panels
+- Public service status with incident history and availability tracking
 - Voluntary Squad Alerts with queue milestones and notification cooldowns
 - Persistently scheduled community queue sessions with local-time display
 - Operations activation dashboard for onboarding and squad conversion
-- Private read-only Vora Control dashboard for aggregate operational signals
+- Private Discord-authenticated Vora Control operations center
+- Audited maintenance, session, verification and report actions from Control
+- Seven-day opponent listings through the `/scrim` community command
 - Core-service heartbeat instead of inferred availability
 - Automated help panel and private support-ticket creation
 - One open ticket per member and server
@@ -195,6 +198,9 @@ DISCORD_GUILD_IDS=first_guild_id,second_guild_id
 VORA_COMMUNITY_DISCORD_TOKEN=your_community_bot_token
 VORA_COMMUNITY_DISCORD_CLIENT_ID=your_community_application_id
 
+# A separate random secret shared only by the Community and Website services.
+VORA_CONTROL_API_SECRET=replace_with_a_random_64_character_secret
+
 MONGODB_URI=mongodb+srv://username:password@cluster.example.mongodb.net/
 MONGODB_DATABASE=vora
 
@@ -227,7 +233,12 @@ npm run dev:community
 The Community bot registers its own administrative and moderation commands as
 well as the **Report Message** and **Report User** context-menu actions. Its
 persistent help, ticket and information panels are published in managed
-channels.
+channels. `/scrim create`, `/scrim browse` and `/scrim close` provide a
+lightweight opponent-finder for existing five-player teams.
+
+The public website additionally includes Vora Status, privacy-safe Wrapped
+cards, a browser-only Draft planner and a Scrims guide. None of these tools
+requires a separate player account outside Discord.
 
 For a production-style start after building:
 

@@ -17,7 +17,7 @@ export default function TermsPage() {
     <main className="interior-page">
       <SiteHeader />
       <PageHero
-        eyebrow="LAST UPDATED 27 JULY 2026"
+        eyebrow="LAST UPDATED 29 JULY 2026"
         title="Vora Terms of Use."
         description="These terms describe the basic conditions for accessing Vora's website, Discord community and competitive systems."
       />
@@ -84,7 +84,17 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2>7. Enforcement and appeals</h2>
+          <h2>7. Scrim listings</h2>
+          <p>
+            Scrim listings are for captains of existing five-player teams.
+            Availability and contact details must be accurate and may not be
+            used for spam, impersonation, commercial solicitation or evading
+            Vora sanctions. Close a listing once it is no longer needed.
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Enforcement and appeals</h2>
           <p>
             Vora may remove content, cancel sessions, correct competitive
             records, apply cooldowns, restrict matchmaking or suspend access.
@@ -95,7 +105,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2>8. Availability and changes</h2>
+          <h2>9. Availability and changes</h2>
           <p>
             Vora is provided on an as-available basis. Features may be changed,
             paused or discontinued for security, maintenance, fairness or
@@ -105,7 +115,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2>9. Responsibility</h2>
+          <h2>10. Responsibility</h2>
           <p>
             Players remain responsible for their Discord account, MLBB account,
             in-game conduct and compliance with applicable platform rules. Vora
@@ -115,7 +125,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2>10. Contact</h2>
+          <h2>11. Contact</h2>
           <p>
             Questions about these terms should be submitted through the private
             ticket system in the official Vora Discord server.

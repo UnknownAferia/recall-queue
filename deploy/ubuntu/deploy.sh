@@ -27,6 +27,7 @@ for variable in \
   VORA_CONTROL_PASSWORD_HASH \
   VORA_CONTROL_DISCORD_CLIENT_SECRET \
   VORA_CONTROL_DISCORD_GUILD_ID \
+  VORA_CONTROL_API_SECRET \
   VORA_CONTROL_SESSION_SECRET; do
   if ! grep -Eq "^${variable}=.+" "${VORA_ENVIRONMENT}"; then
     echo "Missing required Vora Control setting: ${variable}" >&2

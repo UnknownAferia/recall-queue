@@ -84,7 +84,7 @@ transcripts to a public monitoring service.
 
 ## Vora Control
 
-The read-only Operations dashboard is available at
+The private Operations dashboard is available at
 `https://voramlbb.com/control`. It uses two independent access checks:
 
 1. Caddy Basic Auth blocks requests before they reach the website.
@@ -131,6 +131,7 @@ VORA_CONTROL_DISCORD_GUILD_ID=replace_with_the_production_guild_id
 VORA_CONTROL_ALLOWED_ROLE_IDS=replace_with_core_role_id,replace_with_operations_role_id
 VORA_CONTROL_DISCORD_REDIRECT_URI=https://voramlbb.com/control/auth/callback
 VORA_CONTROL_SESSION_SECRET=replace_with_the_generated_64_character_value
+VORA_CONTROL_API_SECRET=replace_with_a_second_independent_64_character_value
 ```
 
 `VORA_CONTROL_ALLOWED_ROLE_IDS` may be empty because the guild owner and
@@ -139,13 +140,25 @@ recommended so staff access does not require the Discord Administrator
 permission. The signed session lasts eight hours. OAuth access tokens are used
 only during the callback and are never persisted in Vora's cookie or database.
 
-Vora Community publishes only aggregate registration, verification, queue,
-moderation, ticket, conversion and service health counters. The dashboard file
-contains no Discord IDs, MLBB account IDs, player names or evidence.
+Generate `VORA_CONTROL_API_SECRET` separately from the session secret. It signs
+every private request between the Website and Community containers and is
+never sent to a browser. Requests expire after 30 seconds and are bound to the
+operator, production guild and exact request body. The internal API port is
+available only on the Compose network and is not published by the VPS.
 
-This first Control release is deliberately read-only. Administrative mutations
-remain in Discord. The Discord-backed Control session establishes the operator
-identity that future audited Control actions will use.
+Vora Community publishes aggregate registration, verification, queue,
+moderation, ticket, conversion and service-health counters. After Discord
+authentication, authorized Operations members can also:
+
+- pause or reopen registration and matchmaking;
+- schedule or cancel community queue sessions;
+- approve or reject pending account verifications;
+- dismiss reviewed Community reports.
+
+Each mutation requires browser confirmation, rechecks the operator's live
+Discord membership and permission, and writes an immutable `control_action`
+audit event. Evidence and identifiers remain behind both Caddy Basic Auth and
+Discord OAuth.
 
 ## Ticket retention
 

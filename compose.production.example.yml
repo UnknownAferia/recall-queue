@@ -50,6 +50,7 @@ services:
     environment:
       VORA_PUBLIC_DATA_DIRECTORY: /app/public-data
       VORA_WEBSITE_ANALYTICS_FILE: /app/website-analytics/website-conversions.json
+      VORA_CONTROL_API_SECRET: "${VORA_CONTROL_API_SECRET:?Set VORA_CONTROL_API_SECRET}"
 
   vora-website:
     image: vora-website:${VORA_IMAGE_TAG:-latest}
@@ -76,6 +77,8 @@ services:
       VORA_CONTROL_ALLOWED_ROLE_IDS: "${VORA_CONTROL_ALLOWED_ROLE_IDS:-}"
       VORA_CONTROL_DISCORD_REDIRECT_URI: "${VORA_CONTROL_DISCORD_REDIRECT_URI:-https://voramlbb.com/control/auth/callback}"
       VORA_CONTROL_SESSION_SECRET: "${VORA_CONTROL_SESSION_SECRET:?Set VORA_CONTROL_SESSION_SECRET}"
+      VORA_CONTROL_API_SECRET: "${VORA_CONTROL_API_SECRET:?Set VORA_CONTROL_API_SECRET}"
+      VORA_CONTROL_API_URL: "http://vora-community:3100/v1/operations"
     healthcheck:
       test:
         [

@@ -46,6 +46,8 @@ describe("Production deployment", () => {
     assert.match(compose, /VORA_CONTROL_DISCORD_GUILD_ID/);
     assert.match(compose, /VORA_CONTROL_ALLOWED_ROLE_IDS/);
     assert.match(compose, /VORA_CONTROL_SESSION_SECRET/);
+    assert.match(compose, /VORA_CONTROL_API_SECRET/);
+    assert.match(compose, /http:\/\/vora-community:3100\/v1\/operations/);
   });
 
   it("provides verified backup, rollback and recurring health operations", () => {
@@ -64,6 +66,7 @@ describe("Production deployment", () => {
     assert.match(deploy, /Missing required Vora Control setting/);
     assert.match(deploy, /VORA_CONTROL_DISCORD_CLIENT_SECRET/);
     assert.match(deploy, /VORA_CONTROL_DISCORD_GUILD_ID/);
+    assert.match(deploy, /VORA_CONTROL_API_SECRET/);
     assert.match(deploy, /VORA_CONTROL_SESSION_SECRET/);
     assert.match(deploy, /replace_with_/);
     assert.match(backupTimer, /Persistent=true/);
@@ -93,7 +96,10 @@ describe("Production deployment", () => {
     assert.match(caddyfile, /reverse_proxy vora-website:3000/);
     assert.match(caddyfile, /homewallet\.ch/);
     assert.match(caddyfile, /reverse_proxy homewallet:3000/);
-    assert.match(caddyfile, /@control path \/control \/control\/\*/);
+    assert.match(
+      caddyfile,
+      /@control path \/control \/control\/\* \/api\/control\/\*/,
+    );
     assert.match(caddyfile, /basic_auth @control/);
     assert.match(caddyfile, /\{\$VORA_CONTROL_USERNAME\}/);
     assert.match(caddyfile, /\{\$VORA_CONTROL_PASSWORD_HASH\}/);

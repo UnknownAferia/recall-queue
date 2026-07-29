@@ -77,6 +77,10 @@ import {
 import { isPlayerVerificationApproved } from "../constants/playerVerification.js";
 import { QueueActivationError } from "./errors/QueueActivationError.js";
 import { createUpcomingQueueSessionsView } from "./ui/createQueueActivationView.js";
+import {
+  executeScrimCommand,
+  ScrimCommandName,
+} from "./commands/scrim.js";
 
 function createErrorResponse(title: string, description: string) {
   return {
@@ -180,6 +184,7 @@ export function registerCommunityInteractionHandler(
           [channelControlCommandData.name]: executeChannelControlCommand,
           [QueueSessionCommandName]: executeQueueSessionCommand,
           [ActivationDashboardCommandName]: executeActivationDashboardCommand,
+          [ScrimCommandName]: executeScrimCommand,
         };
         const execute = commands[interaction.commandName];
         if (execute) {

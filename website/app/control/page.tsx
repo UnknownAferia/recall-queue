@@ -10,6 +10,7 @@ import {
   getControlSession,
   type ControlSession,
 } from "../lib/controlAuth";
+import { ControlActions } from "./ControlActions";
 
 export const metadata: Metadata = {
   title: "Vora Control",
@@ -29,6 +30,7 @@ const controlViews = [
   "matchmaking",
   "integrity",
   "system",
+  "actions",
 ] as const;
 
 type ControlView = (typeof controlViews)[number];
@@ -40,6 +42,7 @@ const viewLabels: Readonly<Record<ControlView, string>> = {
   matchmaking: "Matchmaking",
   integrity: "Integrity",
   system: "System",
+  actions: "Actions",
 };
 
 function resolveView(value: string | undefined): ControlView {
@@ -806,7 +809,7 @@ function System({ snapshot }: { readonly snapshot: ControlSnapshot | null }) {
             </div>
             <div>
               <dt>Mode</dt>
-              <dd>Read-only</dd>
+              <dd>Authenticated operations</dd>
             </div>
           </dl>
         </div>
@@ -831,6 +834,8 @@ function ViewContent({
       return <Integrity snapshot={snapshot} />;
     case "system":
       return <System snapshot={snapshot} />;
+    case "actions":
+      return <ControlActions />;
     default:
       return <Overview snapshot={snapshot} />;
   }
@@ -912,8 +917,8 @@ export default async function ControlPage({
         </div>
 
         <footer className="control-footer">
-          Read-only operations center · No player identifiers are included in
-          this dashboard.
+          Authenticated operations center · Sensitive actions require an
+          explicit confirmation and are written to the audit trail.
         </footer>
       </section>
     </main>

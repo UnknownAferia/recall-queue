@@ -16,6 +16,17 @@ export const metadata: Metadata = {
 
 const releases = [
   {
+    date: "29 JUL 2026",
+    label: "LAUNCH COMPANIONS",
+    title: "More ways to plan, compete and operate.",
+    copy: "Vora Status, Wrapped, Draft and Scrims extend the live service without replacing its Discord-first player journey. Vora Control now provides authenticated, audited operational actions.",
+    highlights: [
+      "Public status history and privacy-safe Wrapped cards",
+      "Browser-only team drafting and seven-day scrim listings",
+      "Audited maintenance, session, verification and report controls",
+    ],
+  },
+  {
     date: "27 JUL 2026",
     label: "OFFICIAL RELEASE",
     title: "Vora is live.",

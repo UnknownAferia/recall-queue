@@ -15,6 +15,7 @@ async function shutdown(signal: string): Promise<void> {
 
   try {
     jobs.stop();
+    client.controlOperations.stop();
     client.heartbeat.stop();
     client.destroy();
     await disconnectFromMongoDB();

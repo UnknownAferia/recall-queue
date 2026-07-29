@@ -17,7 +17,7 @@ export default function PrivacyPage() {
     <main className="interior-page">
       <SiteHeader />
       <PageHero
-        eyebrow="LAST UPDATED 27 JULY 2026"
+        eyebrow="LAST UPDATED 29 JULY 2026"
         title="Privacy at Vora."
         description="This notice explains, in plain language, which information Vora processes to operate its Discord-first teammate formation service."
       />
@@ -42,6 +42,10 @@ export default function PrivacyPage() {
             <li>Reported outcomes, confirmations and match-result screenshots.</li>
             <li>Behavior, cooldowns, integrity incidents and moderation records.</li>
             <li>Support tickets, reports, attachments and staff audit actions.</li>
+            <li>
+              Optional scrim listings containing a captain&apos;s Discord
+              identity, team name, region and stated availability.
+            </li>
             <li>
               Anonymous daily counts for website page views and Discord button
               clicks.
@@ -91,8 +95,10 @@ export default function PrivacyPage() {
             Staff-only ticket transcripts, Community reports and moderation
             cases may be retained for up to 365 days. Match-result evidence and
             related audit records may remain with the competitive match record
-            for integrity reviews and appeals. Operational logs are kept only
-            as long as reasonably necessary for security and reliability.
+            for integrity reviews and appeals. Open scrim listings expire
+            automatically after 7 days. Draft plans remain in the browser and
+            share URL and are not uploaded to Vora. Operational logs are kept
+            only as long as reasonably necessary for security and reliability.
           </p>
         </section>
 

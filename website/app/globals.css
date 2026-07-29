@@ -317,6 +317,140 @@
   text-align: center;
 }
 
+.control-header-status,
+.control-operator {
+  display: flex;
+  align-items: center;
+}
+
+.control-header-status {
+  gap: 24px;
+}
+
+.control-operator {
+  gap: 14px;
+  padding-left: 24px;
+  border-left: 1px solid var(--line);
+}
+
+.control-operator > div {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+}
+
+.control-operator span {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+}
+
+.control-operator strong {
+  font-size: 0.82rem;
+}
+
+.control-operator > a {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-decoration: none;
+}
+
+.control-operator > a:hover {
+  border-color: rgba(31, 200, 255, 0.45);
+  color: var(--white);
+}
+
+.control-login-shell {
+  width: min(100% - 32px, 640px);
+  min-height: calc(100vh - 73px);
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 64px 0;
+}
+
+.control-login-card {
+  width: 100%;
+  padding: clamp(28px, 6vw, 52px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(31, 200, 255, 0.1),
+      transparent 22rem
+    ),
+    rgba(13, 24, 40, 0.86);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+}
+
+.control-login-card h1 {
+  margin: 12px 0 18px;
+  font-size: clamp(2.6rem, 8vw, 4.7rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.control-login-card > p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.control-auth-message {
+  margin: 26px 0 16px;
+  padding: 13px 15px;
+  border-left: 2px solid var(--cyan);
+  color: var(--muted);
+  background: rgba(31, 200, 255, 0.05);
+}
+
+.control-auth-message.attention {
+  border-color: var(--gold);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.control-discord-login {
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+  background: #5865f2;
+  font-weight: 750;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.control-discord-login:hover {
+  background: #6875f5;
+  transform: translateY(-1px);
+}
+
+.control-auth-unavailable {
+  margin: 16px 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  border-radius: 8px;
+  color: #fda4af !important;
+  background: rgba(244, 63, 94, 0.06);
+}
+
+.control-login-card small {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 @media (max-width: 820px) {
   .control-header {
     padding: 0 18px;
@@ -324,6 +458,18 @@
 
   .control-sync {
     font-size: 0;
+  }
+
+  .control-header-status {
+    gap: 12px;
+  }
+
+  .control-operator {
+    padding-left: 12px;
+  }
+
+  .control-operator > div {
+    display: none;
   }
 
   .control-shell {

@@ -41,6 +41,11 @@ describe("Production deployment", () => {
     assert.match(compose, /VORA_WEBSITE_ANALYTICS_FILE/);
     assert.match(compose, /VORA_CONTROL_USERNAME/);
     assert.match(compose, /VORA_CONTROL_PASSWORD_HASH/);
+    assert.match(compose, /VORA_CONTROL_DISCORD_CLIENT_ID/);
+    assert.match(compose, /VORA_CONTROL_DISCORD_CLIENT_SECRET/);
+    assert.match(compose, /VORA_CONTROL_DISCORD_GUILD_ID/);
+    assert.match(compose, /VORA_CONTROL_ALLOWED_ROLE_IDS/);
+    assert.match(compose, /VORA_CONTROL_SESSION_SECRET/);
   });
 
   it("provides verified backup, rollback and recurring health operations", () => {
@@ -57,6 +62,10 @@ describe("Production deployment", () => {
     assert.match(deploy, /\/etc\/vora\/vora\.env/);
     assert.match(deploy, /--env-file "\$\{VORA_ENVIRONMENT\}"/);
     assert.match(deploy, /Missing required Vora Control setting/);
+    assert.match(deploy, /VORA_CONTROL_DISCORD_CLIENT_SECRET/);
+    assert.match(deploy, /VORA_CONTROL_DISCORD_GUILD_ID/);
+    assert.match(deploy, /VORA_CONTROL_SESSION_SECRET/);
+    assert.match(deploy, /replace_with_/);
     assert.match(backupTimer, /Persistent=true/);
     assert.match(healthTimer, /OnUnitActiveSec=2min/);
   });
@@ -86,6 +95,7 @@ describe("Production deployment", () => {
     assert.match(caddyfile, /basic_auth @control/);
     assert.match(caddyfile, /\{\$VORA_CONTROL_USERNAME\}/);
     assert.match(caddyfile, /\{\$VORA_CONTROL_PASSWORD_HASH\}/);
+    assert.match(caddyfile, /Cache-Control "private, no-store"/);
     assert.match(caddyfile, /Content-Security-Policy/);
     assert.match(caddyfile, /frame-ancestors 'none'/);
     assert.match(caddyfile, /Cross-Origin-Opener-Policy "same-origin"/);

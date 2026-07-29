@@ -17,12 +17,17 @@ if [[ ! -f "${VORA_ENVIRONMENT}" ]]; then
   exit 1
 fi
 
-if grep -Eq '(^|=)(your_|username:password|cluster\.example)' "${VORA_ENVIRONMENT}"; then
+if grep -Eq '(^|=)(your_|replace_with_|username:password|cluster\.example)' "${VORA_ENVIRONMENT}"; then
   echo "The production environment still contains example values." >&2
   exit 1
 fi
 
-for variable in VORA_CONTROL_USERNAME VORA_CONTROL_PASSWORD_HASH; do
+for variable in \
+  VORA_CONTROL_USERNAME \
+  VORA_CONTROL_PASSWORD_HASH \
+  VORA_CONTROL_DISCORD_CLIENT_SECRET \
+  VORA_CONTROL_DISCORD_GUILD_ID \
+  VORA_CONTROL_SESSION_SECRET; do
   if ! grep -Eq "^${variable}=.+" "${VORA_ENVIRONMENT}"; then
     echo "Missing required Vora Control setting: ${variable}" >&2
     exit 1

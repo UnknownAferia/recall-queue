@@ -26,11 +26,14 @@ Additional production routes:
 Private production route:
 
 - `/control` — read-only aggregate Operations dashboard, protected by Caddy
-  Basic Auth and excluded from robots and the sitemap
+  Basic Auth plus Discord staff authorization and excluded from robots and the
+  sitemap
 
 The Control snapshot contains operational counters only. Player names, Discord
 IDs, MLBB IDs, evidence and private support content never enter the website
-container.
+container. The Discord OAuth callback accepts only the production guild owner,
+administrators and explicitly configured Core or Operations roles. Signed
+sessions expire after eight hours; Discord OAuth tokens are not persisted.
 
 ## External monitoring
 

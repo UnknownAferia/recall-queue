@@ -85,9 +85,15 @@ transcripts to a public monitoring service.
 ## Vora Control
 
 The read-only Operations dashboard is available at
-`https://voramlbb.com/control`. Caddy protects the route before a request
-reaches the website. Configure a dedicated username and a Caddy-compatible
-bcrypt hash in `/etc/vora/vora.env`:
+`https://voramlbb.com/control`. It uses two independent access checks:
+
+1. Caddy Basic Auth blocks requests before they reach the website.
+2. Discord OAuth identifies the individual operator and verifies that they are
+   the production guild owner, an administrator or a member of an explicitly
+   allowed staff role.
+
+Configure a dedicated Basic Auth username and a Caddy-compatible bcrypt hash in
+`/etc/vora/vora.env`:
 
 ```dotenv
 VORA_CONTROL_USERNAME=operations
@@ -102,14 +108,44 @@ sudo docker run --rm -it caddy:2.11.4-alpine caddy hash-password
 ```
 
 Keep the single quotes around the hash in the environment file. Never reuse a
-Discord, VPS or database password. Vora Community publishes only aggregate
-registration, verification, queue, moderation, ticket, conversion and service
-health counters. The dashboard file contains no Discord IDs, MLBB account IDs,
-player names or evidence.
+Discord, VPS or database password.
+
+In the Discord Developer Portal, open the **Vora Community** application and
+add this exact OAuth2 redirect:
+
+```text
+https://voramlbb.com/control/auth/callback
+```
+
+Copy the Community application client secret directly to the VPS environment;
+never commit or paste it into chat. Generate a separate signing secret and add
+the production guild and authorized staff role IDs:
+
+```bash
+openssl rand -hex 32
+```
+
+```dotenv
+VORA_CONTROL_DISCORD_CLIENT_SECRET=replace_with_the_community_client_secret
+VORA_CONTROL_DISCORD_GUILD_ID=replace_with_the_production_guild_id
+VORA_CONTROL_ALLOWED_ROLE_IDS=replace_with_core_role_id,replace_with_operations_role_id
+VORA_CONTROL_DISCORD_REDIRECT_URI=https://voramlbb.com/control/auth/callback
+VORA_CONTROL_SESSION_SECRET=replace_with_the_generated_64_character_value
+```
+
+`VORA_CONTROL_ALLOWED_ROLE_IDS` may be empty because the guild owner and
+administrators are always accepted. Explicit Core and Operations IDs are
+recommended so staff access does not require the Discord Administrator
+permission. The signed session lasts eight hours. OAuth access tokens are used
+only during the callback and are never persisted in Vora's cookie or database.
+
+Vora Community publishes only aggregate registration, verification, queue,
+moderation, ticket, conversion and service health counters. The dashboard file
+contains no Discord IDs, MLBB account IDs, player names or evidence.
 
 This first Control release is deliberately read-only. Administrative mutations
-remain in Discord, where established permission checks, confirmations and audit
-events identify the acting staff member.
+remain in Discord. The Discord-backed Control session establishes the operator
+identity that future audited Control actions will use.
 
 ## Ticket retention
 

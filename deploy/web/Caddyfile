@@ -9,6 +9,7 @@ voramlbb.com {
 	basic_auth @control {
 		{$VORA_CONTROL_USERNAME} {$VORA_CONTROL_PASSWORD_HASH}
 	}
+	header @control Cache-Control "private, no-store"
 
 	reverse_proxy vora-website:3000
 

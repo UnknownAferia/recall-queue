@@ -5,6 +5,11 @@ import {
   readControlSnapshot,
   type ControlSnapshot,
 } from "../lib/controlSnapshot";
+import {
+  getControlAuthConfig,
+  getControlSession,
+  type ControlSession,
+} from "../lib/controlAuth";
 
 export const metadata: Metadata = {
   title: "Vora Control",
@@ -76,27 +81,133 @@ function ServiceCard({
   );
 }
 
-export default async function ControlPage() {
+function ControlBrand() {
+  return (
+    <a href="/" className="control-brand" aria-label="Return to Vora">
+      <Image
+        src="/brand/vora-mark.png"
+        alt=""
+        width={36}
+        height={36}
+        priority
+      />
+      <span>VORA</span>
+      <b>CONTROL</b>
+    </a>
+  );
+}
+
+function authenticationMessage(status: string | undefined): string {
+  switch (status) {
+    case "forbidden":
+      return "Your Discord account does not have an authorized Vora staff role.";
+    case "invalid":
+      return "The sign-in request expired or could not be validated. Please try again.";
+    case "failed":
+      return "Discord sign-in could not be completed. Please try again.";
+    case "unavailable":
+      return "Discord sign-in is not configured for this deployment.";
+    default:
+      return "Continue with Discord to verify your Vora staff access.";
+  }
+}
+
+function ControlLogin({
+  configured,
+  status,
+}: {
+  readonly configured: boolean;
+  readonly status?: string;
+}) {
+  return (
+    <main className="control-page">
+      <header className="control-header">
+        <ControlBrand />
+        <div className="control-sync stale">
+          <span aria-hidden="true" />
+          Staff identity required
+        </div>
+      </header>
+      <section className="control-login-shell">
+        <article className="control-login-card">
+          <p className="eyebrow">PRIVATE OPERATIONS</p>
+          <h1>Identify before entering.</h1>
+          <p>
+            Vora Control is restricted to the server owner and authorized Core
+            or Operations staff.
+          </p>
+          <div
+            className={
+              status && status !== "unavailable"
+                ? "control-auth-message attention"
+                : "control-auth-message"
+            }
+            role={status ? "alert" : undefined}
+          >
+            {authenticationMessage(status)}
+          </div>
+          {configured ? (
+            <a className="control-discord-login" href="/control/auth/login">
+              Continue with Discord
+              <span aria-hidden="true">→</span>
+            </a>
+          ) : (
+            <p className="control-auth-unavailable">
+              Contact the Vora administrator to complete authentication setup.
+            </p>
+          )}
+          <small>
+            Discord is used only to confirm your identity, server membership and
+            staff authorization.
+          </small>
+        </article>
+      </section>
+    </main>
+  );
+}
+
+function ControlOperator({ session }: { readonly session: ControlSession }) {
+  return (
+    <div className="control-operator">
+      <div>
+        <span>AUTHORIZED OPERATOR</span>
+        <strong>{session.displayName}</strong>
+      </div>
+      <a href="/control/auth/logout">Sign out</a>
+    </div>
+  );
+}
+
+export default async function ControlPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ readonly auth?: string }>;
+}) {
+  const session = await getControlSession();
+  const { auth } = await searchParams;
+
+  if (!session) {
+    return (
+      <ControlLogin
+        configured={getControlAuthConfig() !== null}
+        status={auth}
+      />
+    );
+  }
+
   const { snapshot, stale } = await readControlSnapshot();
   const unavailable = !snapshot || stale;
 
   return (
     <main className="control-page">
       <header className="control-header">
-        <a href="/" className="control-brand" aria-label="Return to Vora">
-          <Image
-            src="/brand/vora-mark.png"
-            alt=""
-            width={36}
-            height={36}
-            priority
-          />
-          <span>VORA</span>
-          <b>CONTROL</b>
-        </a>
-        <div className={unavailable ? "control-sync stale" : "control-sync"}>
-          <span aria-hidden="true" />
-          {unavailable ? "Snapshot unavailable" : "Live operational snapshot"}
+        <ControlBrand />
+        <div className="control-header-status">
+          <div className={unavailable ? "control-sync stale" : "control-sync"}>
+            <span aria-hidden="true" />
+            {unavailable ? "Snapshot unavailable" : "Live operational snapshot"}
+          </div>
+          <ControlOperator session={session} />
         </div>
       </header>
 

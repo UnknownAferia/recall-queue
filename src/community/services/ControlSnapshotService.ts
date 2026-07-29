@@ -98,7 +98,7 @@ export class ControlSnapshotService {
   ): Promise<ControlSnapshot> {
     const [status, data, analytics] = await Promise.all([
       this.communityData.getMatchmakingStatus(guildId, now),
-      this.controlData.getSnapshot(guildId),
+      this.controlData.getSnapshot(guildId, now),
       this.analytics.getSnapshot(now),
     ]);
 
@@ -115,7 +115,7 @@ export class ControlSnapshotService {
     analytics: WebsiteAnalyticsSnapshot | null,
   ): ControlSnapshot {
     return {
-      schemaVersion: 1,
+      schemaVersion: 2,
       generatedAt: now.toISOString(),
       communityName: guildName.trim() || "Vora",
       services: {
@@ -132,6 +132,7 @@ export class ControlSnapshotService {
         verified: data.verifiedPlayers,
         pendingVerification: data.pendingVerification,
         rejectedVerification: data.rejectedVerification,
+        pendingOlderThan48Hours: data.pendingOlderThan48Hours,
         verificationRate: percentage(
           data.verifiedPlayers,
           data.registeredPlayers,
@@ -143,11 +144,26 @@ export class ControlSnapshotService {
         activeSquads: status.activeSquads,
         pendingResults: status.pendingResults,
         disputedResults: status.disputedResults,
+        nextSession: status.nextQueueSession
+          ? {
+              title: status.nextQueueSession.title,
+              startsAt: status.nextQueueSession.startsAt.toISOString(),
+              endsAt: status.nextQueueSession.endsAt.toISOString(),
+              status:
+                status.nextQueueSession.status === "live"
+                  ? "live"
+                  : "scheduled",
+            }
+          : null,
       },
       moderation: {
         openReports: data.openReports,
         pendingCases: data.pendingCases,
         openTickets: data.openTickets,
+      },
+      trends: {
+        periodDays: 7,
+        ...data.trends,
       },
       website: websiteSnapshot(analytics),
     };

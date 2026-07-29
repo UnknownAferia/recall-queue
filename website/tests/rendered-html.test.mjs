@@ -157,8 +157,17 @@ test("builds the complete Vora launch page", async () => {
   );
   assert.match(controlSource, /Vora at a glance/);
   assert.match(controlSource, /No player identifiers/);
+  assert.match(controlSource, /Overview/);
+  assert.match(controlSource, /Onboarding/);
+  assert.match(controlSource, /Matchmaking/);
+  assert.match(controlSource, /Integrity/);
+  assert.match(controlSource, /System/);
+  assert.match(controlSource, /SEVEN-DAY SIGNAL/);
   assert.match(controlSource, /index:\s*false/);
   assert.match(controlDataSource, /\/app\/public-data\/control\.json/);
+  assert.match(controlDataSource, /snapshot\.schemaVersion !== 2/);
+  assert.match(controlDataSource, /pendingOlderThan48Hours/);
+  assert.match(controlDataSource, /isTrendComparison/);
   assert.match(robotsSource, /disallow:\s*"\/control"/);
   assert.doesNotMatch(sitemapSource, /\/control/);
   for (const [source, canonical] of [

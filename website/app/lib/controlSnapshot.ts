@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 export interface ControlSnapshot {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly generatedAt: string;
   readonly communityName: string;
   readonly services: {
@@ -24,6 +24,7 @@ export interface ControlSnapshot {
     readonly verified: number;
     readonly pendingVerification: number;
     readonly rejectedVerification: number;
+    readonly pendingOlderThan48Hours: number;
     readonly verificationRate: number;
   };
   readonly queue: {
@@ -32,11 +33,27 @@ export interface ControlSnapshot {
     readonly activeSquads: number;
     readonly pendingResults: number;
     readonly disputedResults: number;
+    readonly nextSession: {
+      readonly title: string;
+      readonly startsAt: string;
+      readonly endsAt: string;
+      readonly status: "scheduled" | "live";
+    } | null;
   };
   readonly moderation: {
     readonly openReports: number;
     readonly pendingCases: number;
     readonly openTickets: number;
+  };
+  readonly trends: {
+    readonly periodDays: 7;
+    readonly registrations: TrendComparison;
+    readonly verificationSubmissions: TrendComparison;
+    readonly verificationApprovals: TrendComparison;
+    readonly squadsFormed: TrendComparison;
+    readonly verifiedResults: TrendComparison;
+    readonly reportsOpened: TrendComparison;
+    readonly ticketsOpened: TrendComparison;
   };
   readonly website: {
     readonly periodDays: number;
@@ -45,6 +62,11 @@ export interface ControlSnapshot {
     readonly pageToDiscordRate: number;
     readonly onboardingToDiscordRate: number;
   } | null;
+}
+
+interface TrendComparison {
+  readonly current: number;
+  readonly previous: number;
 }
 
 export interface ControlSnapshotState {
@@ -80,6 +102,33 @@ function isServiceState(value: unknown): boolean {
   );
 }
 
+function isTrendComparison(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const comparison = value as Record<string, unknown>;
+  return isCount(comparison.current) && isCount(comparison.previous);
+}
+
+function isNextSession(value: unknown): boolean {
+  if (value === null) {
+    return true;
+  }
+
+  if (typeof value !== "object") {
+    return false;
+  }
+
+  const session = value as Record<string, unknown>;
+  return (
+    typeof session.title === "string" &&
+    isDateString(session.startsAt) &&
+    isDateString(session.endsAt) &&
+    ["scheduled", "live"].includes(String(session.status))
+  );
+}
+
 export function parseControlSnapshot(value: unknown): ControlSnapshot | null {
   if (typeof value !== "object" || value === null) {
     return null;
@@ -91,11 +140,12 @@ export function parseControlSnapshot(value: unknown): ControlSnapshot | null {
   const players = snapshot.players as Record<string, unknown> | undefined;
   const queue = snapshot.queue as Record<string, unknown> | undefined;
   const moderation = snapshot.moderation as Record<string, unknown> | undefined;
+  const trends = snapshot.trends as Record<string, unknown> | undefined;
   const website = snapshot.website as
     Record<string, unknown> | null | undefined;
 
   if (
-    snapshot.schemaVersion !== 1 ||
+    snapshot.schemaVersion !== 2 ||
     !isDateString(snapshot.generatedAt) ||
     typeof snapshot.communityName !== "string" ||
     !services ||
@@ -111,6 +161,7 @@ export function parseControlSnapshot(value: unknown): ControlSnapshot | null {
     !isCount(players.verified) ||
     !isCount(players.pendingVerification) ||
     !isCount(players.rejectedVerification) ||
+    !isCount(players.pendingOlderThan48Hours) ||
     !isPercentage(players.verificationRate) ||
     !queue ||
     !isCount(queue.waitingPlayers) ||
@@ -118,10 +169,20 @@ export function parseControlSnapshot(value: unknown): ControlSnapshot | null {
     !isCount(queue.activeSquads) ||
     !isCount(queue.pendingResults) ||
     !isCount(queue.disputedResults) ||
+    !isNextSession(queue.nextSession) ||
     !moderation ||
     !isCount(moderation.openReports) ||
     !isCount(moderation.pendingCases) ||
     !isCount(moderation.openTickets) ||
+    !trends ||
+    trends.periodDays !== 7 ||
+    !isTrendComparison(trends.registrations) ||
+    !isTrendComparison(trends.verificationSubmissions) ||
+    !isTrendComparison(trends.verificationApprovals) ||
+    !isTrendComparison(trends.squadsFormed) ||
+    !isTrendComparison(trends.verifiedResults) ||
+    !isTrendComparison(trends.reportsOpened) ||
+    !isTrendComparison(trends.ticketsOpened) ||
     (website !== null &&
       (typeof website !== "object" ||
         website === undefined ||

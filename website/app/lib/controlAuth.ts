@@ -10,6 +10,7 @@ export const controlStateDurationSeconds = 10 * 60;
 const discordApiBaseUrl = "https://discord.com/api/v10";
 const discordAuthorizeUrl = "https://discord.com/oauth2/authorize";
 const defaultRedirectUri = "https://voramlbb.com/control/auth/callback";
+const defaultControlOrigin = new URL(defaultRedirectUri).origin;
 const administratorPermission = BigInt(8);
 
 export interface ControlAuthConfig {
@@ -70,6 +71,18 @@ export function getControlAuthConfig(): ControlAuthConfig | null {
     return null;
   }
 
+  const redirectUri =
+    environmentValue("VORA_CONTROL_DISCORD_REDIRECT_URI") ?? defaultRedirectUri;
+
+  try {
+    const parsedRedirectUri = new URL(redirectUri);
+    if (parsedRedirectUri.protocol !== "https:") {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
   return {
     clientId,
     clientSecret,
@@ -80,11 +93,25 @@ export function getControlAuthConfig(): ControlAuthConfig | null {
         .map((roleId) => roleId.trim())
         .filter(Boolean),
     ),
-    redirectUri:
-      environmentValue("VORA_CONTROL_DISCORD_REDIRECT_URI") ??
-      defaultRedirectUri,
+    redirectUri,
     sessionSecret,
   };
+}
+
+export function buildControlUrl(
+  config: ControlAuthConfig | null,
+  status?: string,
+): URL {
+  const origin = config
+    ? new URL(config.redirectUri).origin
+    : defaultControlOrigin;
+  const destination = new URL("/control", origin);
+
+  if (status) {
+    destination.searchParams.set("auth", status);
+  }
+
+  return destination;
 }
 
 function sign(value: string, secret: string): string {

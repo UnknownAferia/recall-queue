@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 
 import {
+  buildControlUrl,
   controlSessionCookieName,
   controlStateCookieName,
+  getControlAuthConfig,
 } from "../../../lib/controlAuth";
 
-export function GET(request: Request): NextResponse {
-  const response = NextResponse.redirect(new URL("/control", request.url));
+export function GET(): NextResponse {
+  const response = NextResponse.redirect(
+    buildControlUrl(getControlAuthConfig()),
+  );
   response.cookies.set(controlSessionCookieName, "", {
     httpOnly: true,
     secure: true,

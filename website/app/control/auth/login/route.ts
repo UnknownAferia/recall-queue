@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import {
+  buildControlUrl,
   buildDiscordAuthorizationUrl,
   controlStateCookieName,
   controlStateDurationSeconds,
@@ -10,12 +11,10 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export function GET(request: Request): NextResponse {
+export function GET(): NextResponse {
   const config = getControlAuthConfig();
   if (!config) {
-    return NextResponse.redirect(
-      new URL("/control?auth=unavailable", request.url),
-    );
+    return NextResponse.redirect(buildControlUrl(null, "unavailable"));
   }
 
   const state = createControlState();

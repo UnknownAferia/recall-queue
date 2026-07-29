@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import {
   authorizeDiscordOperator,
+  buildControlUrl,
+  type ControlAuthConfig,
   controlSessionCookieName,
   controlSessionDurationSeconds,
   controlStateCookieName,
@@ -12,13 +14,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function controlRedirect(request: NextRequest, status?: string): NextResponse {
-  const destination = new URL("/control", request.url);
-  if (status) {
-    destination.searchParams.set("auth", status);
-  }
-
-  const response = NextResponse.redirect(destination);
+function controlRedirect(
+  config: ControlAuthConfig | null,
+  status?: string,
+): NextResponse {
+  const response = NextResponse.redirect(buildControlUrl(config, status));
   response.cookies.set(controlStateCookieName, "", {
     httpOnly: true,
     secure: true,
@@ -36,17 +36,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const expectedState = request.cookies.get(controlStateCookieName)?.value;
 
   if (!config || !code || !state || !expectedState || state !== expectedState) {
-    return controlRedirect(request, "invalid");
+    return controlRedirect(config, "invalid");
   }
 
   try {
     const accessToken = await exchangeDiscordCode(config, code);
     const session = await authorizeDiscordOperator(config, accessToken);
     if (!session) {
-      return controlRedirect(request, "forbidden");
+      return controlRedirect(config, "forbidden");
     }
 
-    const response = controlRedirect(request);
+    const response = controlRedirect(config);
     response.cookies.set(
       controlSessionCookieName,
       createControlSessionToken(session, config.sessionSecret),
@@ -59,7 +59,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     );
     return response;
-  } catch {
-    return controlRedirect(request, "failed");
+  } catch (error: unknown) {
+    console.error("Vora Control Discord authorization failed.", error);
+    return controlRedirect(config, "failed");
   }
 }

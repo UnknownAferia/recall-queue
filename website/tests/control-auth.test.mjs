@@ -29,6 +29,8 @@ test("protects Vora Control with Discord staff identity", async () => {
   assert.match(auth, /timingSafeEqual/);
   assert.match(auth, /randomBytes\(32\)/);
   assert.match(auth, /controlSessionDurationSeconds = 8 \* 60 \* 60/);
+  assert.match(auth, /new URL\(config\.redirectUri\)\.origin/);
+  assert.match(auth, /new URL\("\/control", origin\)/);
   assert.match(login, /httpOnly:\s*true/);
   assert.match(login, /secure:\s*true/);
   assert.match(login, /sameSite:\s*"lax"/);
@@ -36,6 +38,10 @@ test("protects Vora Control with Discord staff identity", async () => {
   assert.match(callback, /authorizeDiscordOperator/);
   assert.match(callback, /createControlSessionToken/);
   assert.match(callback, /path:\s*"\/control"/);
+  assert.match(callback, /Discord authorization failed/);
+  assert.doesNotMatch(callback, /request\.url/);
+  assert.doesNotMatch(login, /request\.url/);
+  assert.doesNotMatch(logout, /request\.url/);
   assert.match(logout, /maxAge:\s*0/);
   assert.match(page, /Continue with Discord/);
   assert.match(page, /getControlSession/);

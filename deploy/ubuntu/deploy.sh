@@ -22,6 +22,13 @@ if grep -Eq '(^|=)(your_|username:password|cluster\.example)' "${VORA_ENVIRONMEN
   exit 1
 fi
 
+for variable in VORA_CONTROL_USERNAME VORA_CONTROL_PASSWORD_HASH; do
+  if ! grep -Eq "^${variable}=.+" "${VORA_ENVIRONMENT}"; then
+    echo "Missing required Vora Control setting: ${variable}" >&2
+    exit 1
+  fi
+done
+
 if [[ -n $(git -C "${VORA_REPOSITORY}" status --porcelain) ]]; then
   echo "The production checkout contains local changes. Deployment stopped." >&2
   exit 1
@@ -44,7 +51,11 @@ compose() {
     VORA_ENV_FILE="${VORA_ENVIRONMENT}" \
     VORA_BACKUP_DIRECTORY="${VORA_BACKUPS}" \
     VORA_IMAGE_TAG="$1" \
-    docker compose --project-name vora --file "${VORA_COMPOSE_FILE}" "${@:2}"
+    docker compose \
+      --env-file "${VORA_ENVIRONMENT}" \
+      --project-name vora \
+      --file "${VORA_COMPOSE_FILE}" \
+      "${@:2}"
 }
 
 echo "Validating release ${release}..."

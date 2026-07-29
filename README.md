@@ -87,6 +87,7 @@ automatically.
 - Voluntary Squad Alerts with queue milestones and notification cooldowns
 - Persistently scheduled community queue sessions with local-time display
 - Operations activation dashboard for onboarding and squad conversion
+- Private read-only Vora Control dashboard for aggregate operational signals
 - Core-service heartbeat instead of inferred availability
 - Automated help panel and private support-ticket creation
 - One open ticket per member and server

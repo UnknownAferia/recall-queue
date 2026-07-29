@@ -89,6 +89,7 @@ export class CommunityPanelJobs {
         await Promise.all([
           this.client.panels.synchronizeMatchmakingStatus(guild),
           this.client.publicCompetition.publish(guild.id, guild.name),
+          this.client.controlSnapshot.publish(guild.id, guild.name),
         ]);
       });
     } finally {

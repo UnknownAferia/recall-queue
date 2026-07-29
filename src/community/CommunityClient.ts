@@ -30,6 +30,8 @@ import { QueueActivationRepository } from "../repositories/QueueActivationReposi
 import { QueueActivationService } from "./services/QueueActivationService.js";
 import { PublicCompetitionSnapshotService } from "./services/PublicCompetitionSnapshotService.js";
 import { WebsiteAnalyticsService } from "./services/WebsiteAnalyticsService.js";
+import { ControlDataRepository } from "../repositories/ControlDataRepository.js";
+import { ControlSnapshotService } from "./services/ControlSnapshotService.js";
 
 export class CommunityClient extends Client {
   public readonly panels: CommunityPanelService;
@@ -44,6 +46,7 @@ export class CommunityClient extends Client {
   public readonly onboarding: CommunityOnboardingService;
   public readonly activation: QueueActivationService;
   public readonly publicCompetition: PublicCompetitionSnapshotService;
+  public readonly controlSnapshot: ControlSnapshotService;
   public readonly websiteAnalytics: WebsiteAnalyticsService;
 
   public constructor() {
@@ -103,11 +106,16 @@ export class CommunityClient extends Client {
       channels,
       seasonService,
     );
+    this.websiteAnalytics = new WebsiteAnalyticsService();
     this.publicCompetition = new PublicCompetitionSnapshotService(
       communityDataRepository,
       seasonService,
     );
-    this.websiteAnalytics = new WebsiteAnalyticsService();
+    this.controlSnapshot = new ControlSnapshotService(
+      communityDataRepository,
+      new ControlDataRepository(),
+      this.websiteAnalytics,
+    );
     this.tickets = new TicketService(new SupportTicketRepository(), channels);
     this.moderation = new CommunityModerationService(
       moderationRepository,

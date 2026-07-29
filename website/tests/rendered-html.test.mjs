@@ -27,6 +27,8 @@ test("builds the complete Vora launch page", async () => {
     structuredDataSource,
     healthRouteSource,
     publicHealthSource,
+    controlSource,
+    controlDataSource,
   ] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
@@ -54,10 +56,7 @@ test("builds the complete Vora launch page", async () => {
       new URL("../app/components/PageViewTracker.tsx", import.meta.url),
       "utf8",
     ),
-    readFile(
-      new URL("../app/go/discord/route.ts", import.meta.url),
-      "utf8",
-    ),
+    readFile(new URL("../app/go/discord/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/updates/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/manifest.ts", import.meta.url), "utf8"),
     readFile(
@@ -66,6 +65,8 @@ test("builds the complete Vora launch page", async () => {
     ),
     readFile(new URL("../app/api/health/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/lib/publicHealth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/control/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/controlSnapshot.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layoutSource, /Vora — Find Your Five/);
@@ -109,7 +110,10 @@ test("builds the complete Vora launch page", async () => {
   assert.match(sitemapSource, /\/privacy/);
   assert.match(robotsSource, /sitemap\.xml/);
   assert.match(liveSource, /The state of Vora, right now/);
-  assert.match(liveSource, /Discord identities and Mobile Legends account identifiers stay/);
+  assert.match(
+    liveSource,
+    /Discord identities and Mobile Legends account identifiers stay/,
+  );
   assert.match(liveDataSource, /\/app\/public-data\/competition\.json/);
   assert.match(sitemapSource, /\/live/);
   assert.match(getStartedSource, /From new member to queue-ready/);
@@ -151,6 +155,12 @@ test("builds the complete Vora launch page", async () => {
     publicHealthSource,
     /discordId|guildId|MONGODB_URI|maintenanceReason/,
   );
+  assert.match(controlSource, /Vora at a glance/);
+  assert.match(controlSource, /No player identifiers/);
+  assert.match(controlSource, /index:\s*false/);
+  assert.match(controlDataSource, /\/app\/public-data\/control\.json/);
+  assert.match(robotsSource, /disallow:\s*"\/control"/);
+  assert.doesNotMatch(sitemapSource, /\/control/);
   for (const [source, canonical] of [
     [getStartedSource, "/get-started"],
     [liveSource, "/live"],

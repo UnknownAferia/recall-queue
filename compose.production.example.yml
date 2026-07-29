@@ -110,6 +110,9 @@ services:
       - ./deploy/web/Caddyfile:/etc/caddy/Caddyfile:ro
       - vora-caddy-data:/data
       - vora-caddy-config:/config
+    environment:
+      VORA_CONTROL_USERNAME: "${VORA_CONTROL_USERNAME:?Set VORA_CONTROL_USERNAME}"
+      VORA_CONTROL_PASSWORD_HASH: "${VORA_CONTROL_PASSWORD_HASH:?Set VORA_CONTROL_PASSWORD_HASH}"
     depends_on:
       vora-website:
         condition: service_healthy

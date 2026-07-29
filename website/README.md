@@ -23,6 +23,15 @@ Additional production routes:
 - `/updates` — public release milestones
 - `/api/health` — machine-readable Website, Community and Core health
 
+Private production route:
+
+- `/control` — read-only aggregate Operations dashboard, protected by Caddy
+  Basic Auth and excluded from robots and the sitemap
+
+The Control snapshot contains operational counters only. Player names, Discord
+IDs, MLBB IDs, evidence and private support content never enter the website
+container.
+
 ## External monitoring
 
 `GET /api/health` returns HTTP `200` only while the website is reachable and

@@ -82,6 +82,35 @@ Monitor these signals:
 Never send `.env`, connection strings, bot tokens or raw private ticket
 transcripts to a public monitoring service.
 
+## Vora Control
+
+The read-only Operations dashboard is available at
+`https://voramlbb.com/control`. Caddy protects the route before a request
+reaches the website. Configure a dedicated username and a Caddy-compatible
+bcrypt hash in `/etc/vora/vora.env`:
+
+```dotenv
+VORA_CONTROL_USERNAME=operations
+VORA_CONTROL_PASSWORD_HASH='$2a$14$replace_with_a_real_hash'
+```
+
+Create the hash interactively so the plaintext password is not stored in shell
+history:
+
+```bash
+sudo docker run --rm -it caddy:2.11.4-alpine caddy hash-password
+```
+
+Keep the single quotes around the hash in the environment file. Never reuse a
+Discord, VPS or database password. Vora Community publishes only aggregate
+registration, verification, queue, moderation, ticket, conversion and service
+health counters. The dashboard file contains no Discord IDs, MLBB account IDs,
+player names or evidence.
+
+This first Control release is deliberately read-only. Administrative mutations
+remain in Discord, where established permission checks, confirmations and audit
+events identify the acting staff member.
+
 ## Ticket retention
 
 Support tickets follow this fixed policy:

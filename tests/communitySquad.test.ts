@@ -6,6 +6,7 @@ import type {
   CommunitySquadRegion,
 } from "../src/constants/communitySquad.js";
 import type { PlayerRole } from "../src/constants/playerRoles.js";
+import { scrimCommandData } from "../src/community/commands/scrim.js";
 import { communitySquadCommandData } from "../src/community/commands/squad.js";
 import { CommunitySquadService } from "../src/community/services/CommunitySquadService.js";
 import { createCommunitySquadProfileModal } from "../src/community/ui/createCommunitySquadModal.js";
@@ -462,6 +463,25 @@ describe("Community squad Discord UI", () => {
     const modal = JSON.stringify(createCommunitySquadProfileModal().toJSON());
     assert.match(modal, /Squad name/);
     assert.match(modal, /community:squad:input:region/);
+  });
+
+  it("keeps required scrim inputs before the optional squad name", () => {
+    const create = scrimCommandData
+      .toJSON()
+      .options?.find((option) => option.name === "create");
+    assert.ok(create && "options" in create);
+    assert.deepEqual(
+      create.options?.map((option) => [
+        option.name,
+        "required" in option ? option.required ?? false : false,
+      ]),
+      [
+        ["region", true],
+        ["availability", true],
+        ["team", false],
+        ["notes", false],
+      ],
+    );
   });
 
   it("keeps captain controls, invite code and roster in one dashboard", () => {

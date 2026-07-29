@@ -28,13 +28,6 @@ export const scrimCommandData = new SlashCommandBuilder()
       .setDescription("Publish your team's scrim availability for seven days")
       .addStringOption((option) =>
         option
-          .setName("team")
-          .setDescription("Team name (uses your Vora Squad when omitted)")
-          .setMinLength(2)
-          .setMaxLength(40),
-      )
-      .addStringOption((option) =>
-        option
           .setName("region")
           .setDescription("Match region")
           .addChoices(...regions)
@@ -47,6 +40,13 @@ export const scrimCommandData = new SlashCommandBuilder()
           .setMinLength(3)
           .setMaxLength(80)
           .setRequired(true),
+      )
+      .addStringOption((option) =>
+        option
+          .setName("team")
+          .setDescription("Team name (uses your Vora Squad when omitted)")
+          .setMinLength(2)
+          .setMaxLength(40),
       )
       .addStringOption((option) =>
         option

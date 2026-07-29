@@ -91,6 +91,8 @@ describe("Production deployment", () => {
     assert.match(caddyfile, /voramlbb\.com/);
     assert.match(caddyfile, /www\.voramlbb\.com/);
     assert.match(caddyfile, /reverse_proxy vora-website:3000/);
+    assert.match(caddyfile, /homewallet\.ch/);
+    assert.match(caddyfile, /reverse_proxy homewallet:3000/);
     assert.match(caddyfile, /@control path \/control \/control\/\*/);
     assert.match(caddyfile, /basic_auth @control/);
     assert.match(caddyfile, /\{\$VORA_CONTROL_USERNAME\}/);

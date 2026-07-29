@@ -26,3 +26,26 @@ voramlbb.com {
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
 	}
 }
+
+www.homewallet.ch {
+	redir https://homewallet.ch{uri} permanent
+}
+
+homewallet.ch {
+	encode zstd gzip
+
+	reverse_proxy homewallet:3000
+
+	header {
+		-Server
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; connect-src 'self' https://accounts.google.com/gsi/; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src https://accounts.google.com/gsi/; img-src 'self' data: https://*.googleusercontent.com; object-src 'none'; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style; upgrade-insecure-requests"
+		Cross-Origin-Opener-Policy "same-origin-allow-popups"
+		Cross-Origin-Resource-Policy "same-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-DNS-Prefetch-Control "off"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+}
